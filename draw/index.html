@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pixi.js basic example</title>
+        <script src="js/vptree.js"></script>
+       <script src="js/vpTreeString.js"></script>  
+        <script src="js/smallData.js"></script>       
+        <script src="js/dataInfo.js"></script>       <!-- heavy ! -->
+        <script src="js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
+        <script src="js/Polyline.js"></script>  <!-- smoothy dmoney -->
+        <script src="js/Utils.js"></script>  <!-- smoothy dmoney -->
+        <script src="js/smallestEnclosingCircle.js"></script>  <!-- circle -->
+        <script src="js/vpTreeString.js"></script>  <!-- circle -->
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+        }
+    </style>
+ 
+ 
+ 
+</head>
+<body>
+    <script src="pixi.js"></script>
+    <script>
+
+
+    var loadedJson = false;
+
+    function readTextFile(file, callback) {
+        loadedJson = false;
+        console.log("start loading text");
+        var rawFile = new XMLHttpRequest();
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4 && rawFile.status == "200") {
+                callback(rawFile.responseText);
+            }
+        }
+        rawFile.send(null);
+    }
+
+    
+
+
+
+    //-------------------------------------------------------------------
+    //------------------------------------------------------------------- drawing related stuff
+    var drawnCircle;
+    var angleMatch = 0;
+    var infoobj = JSON.parse(info);
+    var dataobj = JSON.parse(data);
+
+    function returnPathForCircle(simpleArray){
+        canvasPoints = [];
+         for (var i = 0; i < simpleArray.length/2; i++){
+            var tempX = simpleArray[i*2];
+            var tempY = simpleArray[i*2+1];
+           canvasPoints.push({
+                x: tempX,
+                y: tempY
+            });
+        }
+        return canvasPoints;
+    }
+
+    function returnPathForArray(simpleArray){
+        var path = [];
+        for (var i = 0; i < simpleArray.length/2; i++){
+            path[i] = {
+                 x: simpleArray[i*2],
+                y: simpleArray[i*2+1]
+            };
+        }
+        return path;
+    }
+
+    function createPolyline(points) {
+        ratio1D =  0.9;
+        rotationInvariance =  Math.PI*2;
+        normalPointCount =  80;
+        normalSize = 200;
+        var polyline = new Polyline(points);
+        polyline.ratio1D = this.ratio1D;
+        polyline.rotationInvariance = this.rotationInvariance;
+        polyline.normalPointCount = this.normalPointCount;
+        polyline.normalSize = this.normalSize;
+        return polyline;
+    }
+
+    function returnNestedArray(simpleArray){
+        var path = [];
+        for (var i = 0; i < simpleArray.length/2; i++){
+            input = [];
+            input[0] = simpleArray[i*2];
+            input[1] = simpleArray[i*2+1];
+            path.push(input);
+        }
+        return path;
+    }
+
+
+    // make data obj non relative: 
+    console.log("start");
+
+    for (i = 0; i < dataobj.length; i++){
+        var x = 0;
+        var y = 0;
+        for (j = 0; j < dataobj[i].length/2; j++){
+             x += dataobj[i][j*2];                      // converted to be relative...
+             y += dataobj[i][j*2+1];
+             dataobj[i][j*2] = x;
+             dataobj[i][j*2+1] = y; 
+        }
+    }
+
+    console.log("end");
+    
+
+    // convert to Polyline :) 
+    var polylines = [];
+    for (i = 0; i < dataobj.length; i++){
+        ptsTemp = [];
+        var x = 0;
+        var y = 0;
+        for (j = 0; j < dataobj[i].length/2; j++){
+            x = dataobj[i][j*2];                      // converted to be relative...
+            y = dataobj[i][j*2+1];
+            pt = [];
+            pt[0] = x;
+            pt[1] = y;
+            ptsTemp.push(pt);
+        }
+        var p = createPolyline(ptsTemp);
+        p.init(true);
+        polylines.push(p);
+        //console.log(p);
+    }
+
+    function dist(a, b) {
+        return Utils.cosDistance(a.vector, b.vector);
+    }
+
+
+     function   rotate(vector1, radians) {
+        var cos = Math.cos(radians);
+        var sin = Math.sin(radians);
+        for (var i = 0; i < vector1.length/2; i++) {
+                x = vector1[i*2];
+                y = vector1[i*2+1];
+                //var p = this.points[i];
+                var qx = x * cos - y * sin;
+                var qy = x * sin + y * cos;
+                vector1[i*2] = qx;
+                vector1[i*2+1] = qy;
+         }
+    }
+
+
+    function distNormalizedLines(vector1, vector2) {
+        var a = vector1;
+        var b = vector2;
+        var distance = 0;
+        for (var i = 0; i < a.length/2; i++){
+            distance +=    Math.sqrt((b[i*2] - a[i*2])*(b[i*2] - a[i*2]) +  (b[i*2+1] - a[i*2+1])*(b[i*2+1] - a[i*2+1])); 
+        }
+        return distance / 60.0;
+    }
+
+    var vptree;
+    //vptree = VPTreeFactory.build(polylines, dist);
+
+    //var newType = {};
+
+
+    vptree = VPTreeFactory.load(polylines,dist,vpTreeString );
+
+    //console.log(vptree.stringify());
+    
+    console.log("ending");    
+    //console.log(dataobj[0]);
+
+    var drawing = false;
+    var pts = [];
+    var results = [];
+    var ptsNew = [];
+
+
+
+
+
+    // create an new instance of a pixi stage
+    var stage = new PIXI.Stage(0xFFFFFF, true);
+    stage.interactive = true;
+    stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
+
+    pts = [];
+    var bAmDrawing = false;
+    var updateGraphics = false;
+
+
+    var sprite1 = new PIXI.Sprite();
+    stage.addChild(sprite1);
+   
+
+     var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x1099bb});
+    renderer.view.style.display = "block";
+    document.body.appendChild(renderer.view);
+    var drawing = new PIXI.Graphics();
+    stage.addChild(drawing);
+    drawing.position.x = 0;
+    drawing.position.y = 0;
+    
+    //------------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    stage.mousedown = stage.touchstart = function(moveData) {
+
+        console.log("start");
+        // var random = Math.floor(Math.random()*1000);
+        // texture = PIXI.Texture.fromImage('full/' + random + '.jpg');
+        // sprite1 = new PIXI.Sprite(texture);
+        // stage.removeChild(sprite1);
+        // stage.addChild(sprite1);
+
+
+        console.log(moveData.data.global.x); //renderer.plugins.interaction);
+
+        bAmDrawing = true;
+        pts = [];
+        pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
+        pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
+    };
+
+    stage.mousemove = stage.touchmove = function(moveData) {
+
+         console.log("move");
+        if (bAmDrawing === true){
+                 pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
+                 pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
+                
+                if (pts.length > 60*2){
+                        pts.shift();
+                        pts.shift();
+                 } 
+
+                updateGraphics = true;
+
+        }
+        
+    };
+
+    stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
+        bAmDrawing = false;
+
+        //-----------------------------------------------------
+
+        if (pts.length != 120){
+
+                    var xPts = [];
+                    var yPts = [];
+
+                    for (var i = 0; i < pts.length/2; i++){
+                        x = pts[i*2];
+                        y = pts[i*2+1];
+                        xPts[i] = x;
+                        yPts[i] = y;
+                    }
+
+                    pts = [];       
+
+                    var xSmooth = Smooth(xPts);
+                    var ySmooth = Smooth(yPts);
+
+                    for (var i = 0; i < 60; i++){
+                        pctMe = i / 59.0;
+                        var newX = xSmooth(pctMe * (xPts.length -1));
+                        var newY = ySmooth(pctMe * (yPts.length -1));
+
+                        pts[pts.length] = newX;
+                        pts[pts.length] = newY;
+                           
+                    }
+
+                }
+
+
+
+                ptsTemp = [];
+                for (j = 0; j < pts.length/2; j++){
+                    x = pts[j*2];
+                    y = pts[j*2+1];
+                    pt = [];
+                    pt[0] = x;
+                    pt[1] = y;
+                    ptsTemp.push(pt);
+                }
+
+
+                ptsTemp2 = [];
+                for (j = 0; j < pts.length/2; j++){
+                    x = pts[j*2];
+                    y = pts[j*2+1];
+                    pt = [];
+                    pt[0] = x;
+                    pt[1] = y;
+                    ptsTemp2.push(pt);
+                }
+
+                ptsTemp2.reverse();
+
+                // make a circle so we can scale this circle 
+                drawnCircle = makeCircle(returnPathForArray(pts));
+                var p = createPolyline(ptsTemp);
+                var p2 = createPolyline(ptsTemp2);
+                p.init(true);
+                p2.init(true);
+                resultsA = vptree.search(p, 1);
+
+                console.log(results[0]);
+
+                resultsB = vptree.search(p2, 1);
+
+                console.log(results[0]);
+
+                if (resultsB[0].d < resultsA[0].d){
+                    results = resultsB;
+                    //pts.reverse();
+                    // reverse pair of two
+                    for (j = 0; j < pts.length/2; j++){
+                        pts[j*2] = ptsTemp2[j][0];
+                        pts[j*2+1] = ptsTemp2[j][1];
+                    }      
+
+                } else {
+                    results = resultsA;
+                }
+
+
+                var ptsScaled = pts.slice();
+                var scaleMe = scale = 250.0 / drawnCircle.r;
+                for (j = 0; j < ptsScaled.length/2; j++){
+                    ptsScaled[j*2] -= drawnCircle.x;
+                    ptsScaled[j*2+1] -= drawnCircle.y;
+                    ptsScaled[j*2] *= scaleMe;
+                    ptsScaled[j*2+1] *= scaleMe;
+                         
+                }
+
+
+
+                var bestAngle = 0;
+                var smallestDiff = 10000000;
+                for (var i = 0; i < 300; i++){
+                    var angle = (i/300.0) * Math.PI * 2;
+                    var ptsRotated = dataobj[results[0].i].slice(0);
+
+                    rotate(ptsRotated, angle);
+                    rotatedDist = distNormalizedLines(ptsScaled, ptsRotated);
+
+                    if (rotatedDist < smallestDiff){
+                        smallestDiff = rotatedDist;
+                        bestAngle = angle;
+                    }
+                   
+                }
+
+                //console.log( infoobj[results[0].i] );
+
+                angleMatch = bestAngle;
+                updateGraphics = true;
+
+
+                console.log(PIXI.TextureCache);
+
+                var random = Math.floor(Math.random()*1000);
+                texture = PIXI.Texture.fromImage('full/' + infoobj[results[0].i][0] + '.jpg');
+
+                stage.removeChild(sprite1);
+                 sprite1 = new PIXI.Sprite(texture);
+                stage.addChild(sprite1);
+
+                stage.removeChild(drawing);
+                stage.addChild(drawing);
+
+                sprite1.position.x = drawnCircle.x;
+                sprite1.position.y = drawnCircle.y;
+                sprite1.rotation = angleMatch;
+                sprite1.scale.x =    drawnCircle.r / infoobj[results[0].i][3];
+                sprite1.scale.y =  drawnCircle.r / infoobj[results[0].i][3] ;
+
+                xPosOrig = infoobj[results[0].i][1];
+                yPosOrig = infoobj[results[0].i][2];
+
+                sprite1.anchor.x = xPosOrig / 1800.0;
+                sprite1.anchor.y = yPosOrig / 1200.0;
+
+                
+
+
+                
+                
+                //sprite1.scale.x =  1.0;
+
+            //----------------------------
+
+    }; 
+
+
+
+    //------------------------------------------------------------------------------------------------
+    
+    // stage.click = stage.tap = function()
+    // {
+    // }
+
+    requestAnimationFrame(animate);
+
+    //console.log(sprite1.texture);
+
+    var timef = 0;
+
+    function animate() {
+            
+
+        //------------------------------------------------------- drawing
+        if (updateGraphics === true){
+            drawing.clear();
+            drawing.lineStyle(4, 0xff0000, 5);
+
+            for (var i = 0; i < pts.length/2; i++){
+                if (i == 0){
+                    drawing.moveTo(pts[0], pts[1]);
+                } else {
+                    drawing.lineTo(pts[i*2], pts[i*2+1]);
+                }
+            }
+
+            for (var i = 0; i < Math.min(results.length,1); i++){
+                    var index = results[i].i;
+                    var tempMe = dataobj[index].slice(0);
+                     rotate(tempMe, angleMatch);
+
+                    for (var j = 0; j < tempMe.length; j++){
+                        if (j == 0) 
+                             drawing.moveTo(tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );
+                        else 
+                             drawing.lineTo( tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );                
+                    }
+                    //this.stroke();
+                   
+
+                }
+
+            for (var i = 0; i < pts.length; i++){
+                if (i == 0){
+                    drawing.moveTo(pts[0][0] + 100, pts[0][1]);
+                } else {
+                    drawing.lineTo(pts[i][0] + 100, pts[i][1]);
+                }
+            }
+            updateGraphics = false;
+         }
+        renderer.render(stage);
+        requestAnimationFrame( animate );
+    }
+    </script>
+
+</body>
+</html>

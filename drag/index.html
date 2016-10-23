@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pixi.js basic example</title>
+    
+    
+    <script src="js/angleLines.js"></script>       <!-- heavy ! -->
+    <script src="js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
+    <script src="js/point.min.js"></script> 
+    <script src="js/dat.gui.min.js"></script>
+ 
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+        }
+    </style>
+ 
+ 
+ 
+</head>
+<body>
+    <script src="pixi.js"></script>
+    <script>
+
+
+
+//------------------------------------------- 
+// load the data async 
+
+var loadedJson = false;
+var dataobj;
+
+function readTextFile(file, callback) {
+
+    console.log("start loading text");
+    
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
+//usage:
+readTextFile("dataobj.json", function(text){
+    
+
+    dataobj= JSON.parse(text);
+
+    // calc and sort the angle length
+    for (var i = 0; i < dataobj.length; i++){
+        var startAngle = 0;
+        for (var j = 0; j < dataobj[i].angleDiffs.length; j++){
+            startAngle += dataobj[i].angleDiffs[j];
+        }
+        dataobj[i].angleChange = startAngle;
+    }
+
+    dataobj.sort(function(a,b) {return (a.angleChange > b.angleChange) ? 1 : ((b.angleChange > a.angleChange) ? -1 : 0);} ); 
+
+    console.log("done loading text");
+
+    loadedJson = true;
+});
+
+
+
+//-------------------------------------------
+var Gui = function() {
+  this.dragSpeed = 1.0;
+  this.velSmoothRate = 0.8;
+  this.angleSmoothRate = 0.97;
+  this.centerSmoothRate = 0.95;
+  this.scale = 1.0;
+  this.variableSizes = false;
+  this.explode = function() { ; };
+};
+
+
+var myGui;
+
+window.onload = function() {
+  myGui = new Gui();
+  var gui = new dat.GUI();
+  
+  gui.add(myGui, 'dragSpeed', 0.1, 5);
+   gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
+    gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
+    gui.add(myGui, 'scale', 0.0, 10.0);
+    gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
+    gui.add(myGui, 'variableSizes');
+};
+//-------------------------------------------
+   
+
+    StopWatch = function(){
+        this.StartMilliseconds = 0;
+        this.ElapsedMilliseconds = 0;
+    }  
+
+    StopWatch.prototype.Start = function(){
+        this.StartMilliseconds = new Date().getTime();
+    }
+
+    StopWatch.prototype.Stop = function(){
+        this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
+    }
+
+
+    imageWithPts = function(){
+        this.startIndex = 0;
+        this.endIndex = 0;
+        this.alpha = 1.0;
+        this.bSetYet = false;
+        this.bLoaded = false;
+        this.index = -1;                // where am I in the dataObj
+        this.cacheIndex = -1;           // where am I in the cache array
+        this.loadedIndex = -1;          // where am I in the loaded array 
+        this.bin = -1;
+        this.position = 0;
+    }  
+
+    imageWithPts.prototype.loadImage = function(url){
+        this.sprite1 = PIXI.Sprite.fromImage(url, true);
+        //this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
+    }
+
+    imageWithPts.prototype.ready = function(url){
+        //console.log("ready");
+        //console.log(this);
+        this.sprite1.alpha = 1.0;
+        this.sprite1.anchor.x = 0;
+        this.sprite1.anchor.y = 0;
+        this.sprite1.position.x =-100;
+        this.sprite1.position.y =-100; 
+        this.sprite1.scale.x = 0.05;
+        this.sprite1.scale.y = 0.05;
+        this.bLoaded = true;
+         container.addChild(this.sprite1);
+    }
+
+    imageWithPts.prototype.update = function(){
+        if (this.bLoaded == false){
+            if (!this.sprite1.texture.baseTexture.hasLoaded) {
+                //this.sprite1.texture.baseTexture.on('loaded', this.ready);
+            } else {
+                this.ready();
+            }
+        }
+    }
+
+
+
+function simpleStringify (object){
+    var simpleObject = {};
+    for (var prop in object ){
+        if (!object.hasOwnProperty(prop)){
+            continue;
+        }
+        if (typeof(object[prop]) == 'object'){
+            continue;
+        }
+        if (typeof(object[prop]) == 'function'){
+            continue;
+        }
+        simpleObject[prop] = object[prop];
+    }
+    return JSON.stringify(simpleObject); // returns cleaned up JSON
+};
+
+
+// var sprite = Sprite.fromImage('...');
+// if (!sprite.texture.baseTexture.hasLoaded) {
+//     sprite.texture.baseTexture.on('loaded', ready);
+// } else {
+//     ready();
+// }
+
+
+
+
+    var nBins = 10;
+    //var noChange = [];
+
+
+    // for (var i = 0; i < dataobj.length; i++){
+    //     console.log(i + " " + dataobj[i].angleChange);
+    // }
+    //console.log(noChange.length);
+
+
+
+
+   // console.log(dataobj[0]['angleDiffs']);
+
+    // create an new instance of a pixi stage
+    var stage = new PIXI.Stage(0xFFFFFF, true);
+    stage.interactive = true;
+    stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
+
+    pts = [];
+
+    ptsSmooth = [];
+
+    iwp = [];
+    iwpCache = [];
+
+
+    var bAmDrawing = false;
+    var updateGraphics = false;
+    var lastFrameTime = 0;
+    var counter = 0;
+    var lastSecond = 0;
+
+    var watch = new StopWatch();
+    watch.Start();
+
+     var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x000000});
+    renderer.view.style.display = "block";
+    document.body.appendChild(renderer.view);
+    var drawing = new PIXI.Graphics();
+
+    var container = new PIXI.Container();
+    var overalContainer = new PIXI.Container();
+    
+    overalContainer.addChild(container);
+    overalContainer.addChild(drawing);
+    stage.addChild(overalContainer);
+   
+    drawing.position.x = 0;
+    drawing.position.y = 0;
+
+    //var targetAngle = 0;
+
+    var smoothPt = new Point(300,300);
+
+    var lastMouseX = 0;
+    var lastMouseY = 0;
+    var velThisFrame = 0;
+    var velSmooth = 0;
+
+    var lastDiff = new Point(0,0);
+    var angleSmooth = 0;
+    //var angle = 0;
+    var myAngle = 0;
+    var frameNum = 0;
+
+    // needed to sort on dataObj index angle..
+    function sortByAngle(dataToSortOn) {
+        return function(a, b) {
+            return (dataToSortOn[a.index].angleChange > dataToSortOn[b.index].angleChange) ? 1 : ((dataToSortOn[b.index].angleChange > dataToSortOn[a.index].angleChange) ? -1 : 0);
+        }
+    }
+
+
+
+
+    // 
+    //------------------------------------------------------------------------------------------------
+    function loadRandomIntoCache(useBins){
+
+       
+        var limitToBin = false;
+        var selectedBin = -1;
+
+        if (useBins === true ){
+            // calculate BINS 
+
+            //console.log("hi");
+            var bins = [];
+            for (var i = 0; i < nBins; i++){
+                bins[i] = 0;
+            }
+
+            for (var i = 0; i < iwpCache.length; i++){
+                bins[iwpCache[i].bin]++;
+            }   
+
+            var i,
+                l,
+                minVal, 
+                minIndex;
+            minVal = Number.MAX_VALUE;
+            for (i = 0, l = bins.length; i < l; i++) {
+                //console.log(i + "  bin list ? " + bins[i])
+                if (minVal > bins[i]){
+                    minVal = bins[i];
+                    minIndex = i;
+                }
+            }
+
+            limitToBin = true;
+            selectedBin = minIndex;
+
+            //console.log("using bins " + "selected bin " + selectedBin);
+        }
+
+
+        var goodToChooseFrom = [];
+        for (var i = 0; i < dataobj.length; i++){
+            var isok = true;
+            
+            // if we are in the cache, don't load again! 
+            for (var j = 0; j < iwpCache.length; j++){
+                if (iwpCache[j].index == i){
+                    isok = false;
+                }
+            }
+
+            // if we are on the screen, don't load again! 
+            for (var j = 0; j < iwp.length; j++){
+                if (iwp[j].index == i){
+                    isok = false;
+                }
+            }
+
+            if (limitToBin === true){
+                  var bin = Math.floor(i / ((dataobj.length / nBins)));  
+                  if (bin != selectedBin){
+                     isok = false;
+                  }
+            }
+
+            if (isok){
+
+
+
+                goodToChooseFrom.push(i);
+            }
+        }
+
+        var goodOne = goodToChooseFrom[Math.floor(Math.random() * goodToChooseFrom.length)];
+
+        var imageWithPtsTemp = new imageWithPts();
+
+        imageWithPtsTemp.index = goodOne;
+        imageWithPtsTemp.bin = Math.floor(goodOne / ((dataobj.length / nBins)));
+        imageWithPtsTemp.startIndex = -1;
+        imageWithPtsTemp.endIndex = -1;
+        //console.log('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+        //imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+        //imageWithPtsTemp.sprite1 = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/imgsQuarterRes/' + dataobj[goodOne]['fileName'], true);
+        imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+        iwpCache.push(imageWithPtsTemp);
+///100069.jpg
+
+        //imageWithPtsTemp.sprite1 = new PIXI.Sprite(imageWithPtsTemp.texture );
+       
+        // calc these things later
+        //imageWithPtsTemp.origLength = len;
+        //imageWithPtsTemp.origAngle = Math.atan2(diffy, diffx);
+        
+        //iwpCache.sort(sortByAngle(dataobj)); 
+
+    }
+
+
+    console.log("myAngle " + myAngle);
+
+    //------------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    stage.mousedown = stage.touchstart = function(moveData) {
+
+        bAmDrawing = true;
+        lastMouseX = moveData.data.global.x;
+        lastMouseY = moveData.data.global.y;
+    };
+
+    stage.mousemove = stage.touchmove = function(moveData) {
+
+        if (bAmDrawing === true){
+            var diffx = (moveData.data.global.x - lastMouseX);
+            var diffy = (moveData.data.global.y - lastMouseY);
+            velThisFrame = Math.sqrt(diffx * diffx + diffy*diffy);
+            lastDiff.x = diffx;
+            lastDiff.y = diffy;
+            //console.log(len);
+            lastMouseX = moveData.data.global.x;
+            lastMouseY = moveData.data.global.y;
+
+               
+        }
+    };
+
+    stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
+        console.log("up ");
+        bAmDrawing = false;
+
+    }; 
+
+
+    animate();
+
+
+    var timef = 0;
+
+
+
+    function addLineFromCache(lineToAddFromCache){
+
+       
+        console.log("in add line from cache loaded len : " + loadedCache.length + " " + lineToAddFromCache);
+
+        var lineToAdd = loadedCache[lineToAddFromCache].index;
+
+        var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
+        var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
+        var len = Math.sqrt(diffx*diffx + diffy*diffy);
+
+        if (pts.length == 0){
+            pts[0] = new Point(300,300);
+        }
+
+        var startPt = pts.length-1;
+
+        var scaleMe = 1.0;
+        if (myGui.variableSizes === true){
+            scaleMe = 1.0 + (Math.random() - 0.5) ;
+        }
+
+        for (var i = 0; i < dataobj[lineToAdd]['angleDiffs'].length; i++){
+            myAngle +=  dataobj[lineToAdd]['angleDiffs'][i];
+            var p = pts[pts.length - 1];
+            var newp = new Point(p.x + (300.0 / dataobj[lineToAdd]['angleDiffs'].length) * scaleMe * Math.cos(myAngle), p.y + (300.0 / dataobj[lineToAdd]['angleDiffs'].length) * scaleMe * Math.sin(myAngle));
+            pts.push(newp);
+       }
+
+       var endPt = pts.length-1;
+    
+       var imageWithPtsTemp = loadedCache[lineToAddFromCache];
+       imageWithPtsTemp.startIndex = startPt;
+       imageWithPtsTemp.endIndex = endPt;
+
+        /*
+        imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[lineToAdd]['fileName']);
+        imageWithPtsTemp.sprite1 = new PIXI.Sprite(imageWithPtsTemp.texture );
+        */
+        imageWithPtsTemp.sprite1.alpha = 1.0;
+
+        imageWithPtsTemp.sprite1.anchor.x = dataobj[lineToAdd]['startPt'].x / 2048.0;
+        imageWithPtsTemp.sprite1.anchor.y = dataobj[lineToAdd]['startPt'].y / 2020.0;
+        //console.log(imageWithPtsTemp.sprite1.anchor.x + " " + imageWithPtsTemp.sprite1.anchor.y);
+
+        
+        imageWithPtsTemp.origLength = len;
+        imageWithPtsTemp.origAngle = Math.atan2(diffy, diffx);
+
+
+        //console.log("sprite " + lineToAddFromCache + " width "  + imageWithPtsTemp.sprite1.width);
+                
+
+        //container.addChild(imageWithPtsTemp.sprite1);
+        //stage.removeChild(drawing);
+        //stage.addChild(drawing);
+        //stage.addChild(imageWithPtsTemp.texture);   
+
+       // IWP     
+       iwp.push(imageWithPtsTemp);
+       while (iwp.length > 15){
+            container.removeChild(iwp[0].sprite1); 
+            iwp[0].sprite1.destroy();
+            iwp.splice(0, 1);
+       }
+       
+
+       loadRandomIntoCache(true);
+
+       iwpCache.splice(loadedCache[lineToAddFromCache].cacheIndex, 1);              // we need to know where we are in the cache array (diff then loaded aray)
+
+       
+
+
+        
+    }
+
+
+    // function addLine(lineToAdd){
+
+    //     var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
+    //     var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
+    //     var len = Math.sqrt(diffx*diffx + diffy*diffy);
+
+    //     if (pts.length == 0){
+    //         pts[0] = new Point(300,300);
+    //     }
+
+    //     var startPt = pts.length-1;
+
+    //     for (var i = 0; i < dataobj[lineToAdd]['angleDiffs'].length; i++){
+    //         myAngle +=  dataobj[lineToAdd]['angleDiffs'][i];
+    //         var p = pts[pts.length - 1];
+    //         var newp = new Point(p.x + (300.0 / dataobj[lineToAdd]['angleDiffs'].length) * Math.cos(myAngle), p.y + (300.0 / dataobj[lineToAdd]['angleDiffs'].length) * Math.sin(myAngle));
+    //         pts.push(newp);
+    //    }
+
+    //    var endPt = pts.length-1;
+    
+    //    var imageWithPtsTemp = new imageWithPts();
+    //    imageWithPtsTemp.startIndex = startPt;
+    //    imageWithPtsTemp.endIndex = endPt;
+
+
+    //     imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[lineToAdd]['fileName']);
+    //     imageWithPtsTemp.sprite1 = new PIXI.Sprite(imageWithPtsTemp.texture );
+    //     imageWithPtsTemp.sprite1.alpha = 0;
+
+    //     imageWithPtsTemp.sprite1.anchor.x = dataobj[lineToAdd]['startPt'].x / 2048.0;
+    //     imageWithPtsTemp.sprite1.anchor.y = dataobj[lineToAdd]['startPt'].y / 2020.0;
+    //     //console.log(imageWithPtsTemp.sprite1.anchor.x + " " + imageWithPtsTemp.sprite1.anchor.y);
+
+        
+    //     imageWithPtsTemp.origLength = len;
+    //     imageWithPtsTemp.origAngle = Math.atan2(diffy, diffx);
+    //     container.addChild(imageWithPtsTemp.sprite1);
+    //     //stage.removeChild(drawing);
+    //     //stage.addChild(drawing);
+    //     //stage.addChild(imageWithPtsTemp.texture);   
+
+    //    // IWP     
+    //    iwp.push(imageWithPtsTemp);
+    //    if (iwp.length > 15){
+    //         container.removeChild(iwp[0].sprite1); 
+    //         iwp[0].sprite1.destroy();
+    //         iwp.splice(0, 1);
+    //    }
+    //    //console.log(dataobj[lineToAdd]['fileName']);
+
+
+        
+    // }
+
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+
+    var loadedCache = [];
+
+    function makeLoadedCache(){
+        loadedCache = [];
+        for (var i = 0; i < iwpCache.length; i++){
+            if (iwpCache[i].bLoaded === true){
+                loadedCache.push(iwpCache[i]);
+            }
+        }
+        for (var i = 0; i < loadedCache.length; i++){
+            loadedCache[i].loadedIndex = i;
+        }
+    }
+
+
+    //--------------------------------------------------------------------------------------------
+    function animate() {
+        requestAnimationFrame( animate );
+        //console.log("start animate");
+    
+
+        if (loadedJson === false){
+            console.log("skipping frame");
+            
+            
+            renderer.render(stage);
+            return;
+
+         // console.log(myGui.speed);
+        } else {
+            //console.log("good");
+        }
+        // check which iwpCaches have loaded: 
+
+        // for (var i = 0; i < iwpCache.length; i++){
+         
+        //         console.log("iwpCache " + i + "," + iwpCache[i].index + "," + iwpCache[i].texture.baseTexture.hasLoaded);
+            
+        // }
+
+
+        //------------------------------------------------------ load into cache: 
+        if (frameNum > 0){
+            if (iwpCache.length < 50 && frameNum % 100 == 0){
+                loadRandomIntoCache(false);
+            }
+        }
+        frameNum++;
+        
+        console.log("------- new frame --------- ");
+
+
+        for (var i = 0; i < iwpCache.length; i++){
+            iwpCache[i].update();
+            iwpCache[i].cacheIndex = i;
+        }
+
+        makeLoadedCache();
+        
+
+        for (var i = 0; i < loadedCache.length; i++){
+            
+                loadedCache[i].sprite1.alpha = 0.5;
+                loadedCache[i].sprite1.anchor.x = 0;
+                loadedCache[i].sprite1.anchor.y = 0;
+                loadedCache[i].sprite1.position.x = Math.floor(i  % 10) * 25;
+                loadedCache[i].sprite1.position.y = Math.floor(i / 10) * 25;; 
+                loadedCache[i].sprite1.scale.x = 0.05;
+                loadedCache[i].sprite1.scale.y = 0.05;
+            
+        }
+
+        console.log("at start loaded " + loadedCache.length );
+        if (loadedCache.length == 0){
+            console.log("skipping frame - no cache yet");
+            renderer.render(stage);
+        }
+
+        //var elapsedTime = new Date().getTime() - watch.StartMilliseconds;
+
+        if (bAmDrawing === false){
+            velThisFrame = 0;
+        }
+
+        velSmooth = (myGui.velSmoothRate) * velSmooth + (1.0 - myGui.velSmoothRate) * velThisFrame;
+        var angleDiff = Math.atan2(-lastDiff.y, -lastDiff.x);
+        
+        var diffAngle = angleDiff - angleSmooth;
+        while (diffAngle < -Math.PI) diffAngle += (2 * Math.PI);
+        while (diffAngle > Math.PI) diffAngle -= (2 * Math.PI);
+
+        angleSmooth +=  (1.0 - myGui.angleSmoothRate) * diffAngle;
+
+        var adder = velSmooth*myGui.dragSpeed;
+        
+        if (loadedCache.length > 0){
+            if ((ptsSmooth.length + adder) >= pts.length  && loadedCache.length > 0){
+            
+                 if (pts.length < 200){
+                    
+
+                    addLineFromCache( Math.floor(getRandomArbitrary(0, loadedCache.length)));  
+                    makeLoadedCache(); 
+                   
+                 } else {
+
+                     // find the best ANGLE 
+                    var target = angleSmooth;
+                    var angleToFind = target - myAngle;
+                    var minDist = 10000000;
+                    var minIndex = -1;
+                    for (var i = 0; i < loadedCache.length; i++){
+                        var index = loadedCache[i].index;
+                        var dist = Math.abs(dataobj[index].angleChange - angleToFind);
+                        if (dist < minDist){
+                            minDist = dist;
+                            minIndex = i;
+                        }
+                    }
+                    if (minIndex != -1 && Math.random() > 0.1){
+                        addLineFromCache( minIndex );  
+                        makeLoadedCache(); 
+                    } else {
+                        addLineFromCache( Math.floor(getRandomArbitrary(0, loadedCache.length)));  
+                        makeLoadedCache();
+                    }
+
+
+                 }
+            }
+        }
+
+       
+        var newLen = ptsSmooth.length + adder;
+        for (var i = ptsSmooth.length; i < newLen; i++){
+            if (i < pts.length){
+                ptsSmooth.push(pts[i]);
+            }
+        }
+
+
+       updateGraphics = true;
+
+        // if (ptsSmooth.length > 50){
+        //     var diffx = ptsSmooth[ptsSmooth.length-1].x - ptsSmooth[ptsSmooth.length-50].x;
+        //     var diffy = ptsSmooth[ptsSmooth.length-1].y - ptsSmooth[ptsSmooth.length-50].y;
+        //     var angle = Math.atan2(diffy, diffx);
+        //     var angleDiff = (targetAngle - angle);
+        //     while (angleDiff < -Math.PI) angleDiff += 2*Math.PI;
+        //     while (angleDiff > Math.PI) angleDiff -= 2*Math.PI;
+        //     targetAngle -= angleDiff*0.05;
+        // }
+
+        //console.log(pts.length);
+
+        //------------------------------------------------------- drawing
+        if (updateGraphics === true && ptsSmooth.length > 1){
+            drawing.clear();
+            drawing.lineColor = 0xffffff;
+            drawing.lineWidth = 3;
+            drawing.lineAlpha = 0.7;
+
+            if (pts.length > 0){
+                smoothPt.x = myGui.centerSmoothRate * smoothPt.x + (1.0 - myGui.centerSmoothRate) * ptsSmooth[ptsSmooth.length-1].x;
+                smoothPt.y = myGui.centerSmoothRate * smoothPt.y + (1.0 - myGui.centerSmoothRate) * ptsSmooth[ptsSmooth.length-1].y;  
+            }
+
+            if (ptsSmooth.length > 0){
+
+                var start = Math.max(ptsSmooth.length-1000, 0);
+                for (var i = start; i < ptsSmooth.length; i++){
+        
+                    var p = new Point(ptsSmooth[i].x - smoothPt.x, ptsSmooth[i].y - smoothPt.y).clone().rotate((0)* (180.0/Math.PI)).multiplyNum(myGui.scale).addX(400).addY(400);
+                        
+                    if (i == start){
+                        drawing.moveTo(p.x, p.y); //ptsSmooth[i].x - smoothPt.x + 400, ptsSmooth[i].y - smoothPt.y + 400);
+                    } else {
+                        drawing.lineTo(p.x, p.y); //ptsSmooth[i].x - smoothPt.x + 400, ptsSmooth[i].y - smoothPt.y + 400);
+                    }
+                }
+            }
+
+
+            console.log(iwp.length + " iwp "  +
+                        loadedCache.length + " loadedCache " + 
+                        iwpCache.length + "iwp cache" );
+
+            
+
+            for (var i = 0; i < iwp.length; i++){
+
+                console.log(pts.length + " " + iwp[i].startIndex + " "+ iwp[i].endIndex);
+
+            
+                //console.log("in here " + iwp[i].startIndex);
+                if (ptsSmooth.length > iwp[i].startIndex){
+                    iwp[i].alpha = 0.96 * iwp[i].alpha + 0.04 * 1.0;
+                    iwp[i].sprite1.alpha = iwp[i].alpha;
+                }
+                var startPt = new Point( pts[iwp[i].startIndex].x - smoothPt.x,  pts[iwp[i].startIndex].y - smoothPt.y).clone().rotate((0) * (180.0/Math.PI)).multiplyNum(myGui.scale).addX(400).addY(400);
+                var endPt = new Point( pts[iwp[i].endIndex].x - smoothPt.x,  pts[iwp[i].endIndex].y - smoothPt.y).clone().rotate((0) * (180.0/Math.PI)).multiplyNum(myGui.scale).addX(400).addY(400);
+                var curAngle = Math.atan2(endPt.y- startPt.y, endPt.x-startPt.x);
+                var dist = startPt.getDistance(endPt);
+                var scale = dist / iwp[i].origLength;
+
+                //console.log(i);
+                //console.log(iwp[i]);
+                //console.log(i + " " + iwp[i].sprite1);
+                iwp[i].sprite1.anchor.x = 0;
+                iwp[i].sprite1.anchor.y = 0;
+                
+                iwp[i].sprite1.scale.x =  0.05; //scale*4.0;
+                iwp[i].sprite1.scale.y =  0.05; ///scale*4.0;
+
+                iwp[i].sprite1.rotation = 0; //3.14 + (curAngle-iwp[i].origAngle);
+                iwp[i].sprite1.position.x = i * 25; //startPt.x;
+                iwp[i].sprite1.position.y = 400; //startPt.y;
+                   
+            }
+
+
+            updateGraphics = false;
+         }
+
+        renderer.render(stage);
+        
+    }
+    </script>
+
+</body>
+</html>
