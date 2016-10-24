@@ -203,13 +203,9 @@
     pts = [];
     var bAmDrawing = false;
     var updateGraphics = false;
+    var sprites = [];
 
-
-    var sprite1 = new PIXI.Sprite();
-    stage.addChild(sprite1);
-   
-
-     var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x1099bb});
+    var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x1099bb});
     renderer.view.style.display = "block";
     document.body.appendChild(renderer.view);
     var drawing = new PIXI.Graphics();
@@ -380,27 +376,32 @@
                 console.log(PIXI.TextureCache);
 
                 var random = Math.floor(Math.random()*1000);
-                texture = PIXI.Texture.fromImage('full/' + infoobj[results[0].i][0] + '.jpg');
 
-                stage.removeChild(sprite1);
-                sprite1 = new PIXI.Sprite(texture);
-                stage.addChild(sprite1);
+                // Create a new Texture and Sprite from the matched image
+                var texture = PIXI.Texture.fromImage('full/' + infoobj[results[0].i][0] + '.jpg');
+                var sprite = new PIXI.Sprite(texture);
 
+                // Add the new Sprite to the stage
+                // Old Sprits will fade out, calculated in animate()
+                sprites.push(sprite);
+                stage.addChild(sprite);
 
+                // Move drawn line on top of images
                 stage.removeChild(drawing);
                 stage.addChild(drawing);
 
-                sprite1.position.x = drawnCircle.x;
-                sprite1.position.y = drawnCircle.y;
-                sprite1.rotation = angleMatch;
-                sprite1.scale.x =    drawnCircle.r / infoobj[results[0].i][3];
-                sprite1.scale.y =  drawnCircle.r / infoobj[results[0].i][3] ;
+                // Positining for matched image
+                sprite.position.x = drawnCircle.x;
+                sprite.position.y = drawnCircle.y;
+                sprite.rotation = angleMatch;
+                sprite.scale.x =    drawnCircle.r / infoobj[results[0].i][3];
+                sprite.scale.y =  drawnCircle.r / infoobj[results[0].i][3] ;
 
                 xPosOrig = infoobj[results[0].i][1];
                 yPosOrig = infoobj[results[0].i][2];
 
-                sprite1.anchor.x = xPosOrig / 1800.0;
-                sprite1.anchor.y = yPosOrig / 1200.0;
+                sprite.anchor.x = xPosOrig / 1800.0;
+                sprite.anchor.y = yPosOrig / 1200.0;
 
                 matched = true;
                 
@@ -454,8 +455,8 @@
                     var x = pts[i*2] - drawnCircle.x;
                     var y = pts[i*2+1] - drawnCircle.y;
 
-                    x *= 2.0;
-                    y *= 2.0;
+                    // x *= 2.0;
+                    // y *= 2.0;
 
                     x += drawnCircle.x;
                     y += drawnCircle.y;
@@ -468,6 +469,25 @@
                     }
                 }
 
+            }
+
+            // Fade out old images
+            if (sprites.length) {
+                // If we're drawing then all images should get faded out
+                // If we're not drawing, then the last image should stay but
+                // everything else before it should get faded
+                var endingIndex = bAmDrawing ? sprites.length - 1 : sprites.length - 2;
+                for (var i = 0; i <= endingIndex; i++) {
+                    sprites[i].alpha -= 0.01;
+                }
+                // Remove invisible Sprites
+                // Work in reverse to avoid the delete-while-iterating problem
+                for (var i = sprites.length-1; i >= 0; i--) {
+                    if (sprites[i].alpha <= 0) {
+                        // Delete 1 element at this index
+                        sprites.splice(i, 1);
+                    }
+                }
             }
             
 
@@ -494,7 +514,10 @@
             //         drawing.lineTo(pts[i][0] + 100, pts[i][1]);
             //     }
             // }
-            updateGraphics = false;
+
+            // Only update graphics on next pass if there is more than
+            // one Sprite visible for opacity fade
+            updateGraphics = bAmDrawing ? (sprites.length > 0) : (sprites.length > 1);
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
