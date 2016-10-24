@@ -190,6 +190,8 @@
     var ptsNew = [];
 
 
+    var matched = false;
+
 
 
 
@@ -231,6 +233,7 @@
 
         bAmDrawing = true;
         pts = [];
+        matched = false;
         pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
         pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
     };
@@ -380,8 +383,9 @@
                 texture = PIXI.Texture.fromImage('full/' + infoobj[results[0].i][0] + '.jpg');
 
                 stage.removeChild(sprite1);
-                 sprite1 = new PIXI.Sprite(texture);
+                sprite1 = new PIXI.Sprite(texture);
                 stage.addChild(sprite1);
+
 
                 stage.removeChild(drawing);
                 stage.addChild(drawing);
@@ -398,10 +402,7 @@
                 sprite1.anchor.x = xPosOrig / 1800.0;
                 sprite1.anchor.y = yPosOrig / 1200.0;
 
-                
-
-
-                
+                matched = true;
                 
                 //sprite1.scale.x =  1.0;
 
@@ -417,7 +418,8 @@
     // {
     // }
 
-    requestAnimationFrame(animate);
+    animate();
+    //requestAnimationFrame(animate);
 
     //console.log(sprite1.texture);
 
@@ -425,43 +427,73 @@
 
     function animate() {
             
+        if (drawing === false && 
+            matched === true){
+            updateGraphics === true;
+        }
 
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
-            drawing.lineStyle(4, 0xff0000, 5);
+            drawing.lineStyle(4, 0xffffff, 5);
 
-            for (var i = 0; i < pts.length/2; i++){
-                if (i == 0){
-                    drawing.moveTo(pts[0], pts[1]);
-                } else {
-                    drawing.lineTo(pts[i*2], pts[i*2+1]);
-                }
-            }
-
-            for (var i = 0; i < Math.min(results.length,1); i++){
-                    var index = results[i].i;
-                    var tempMe = dataobj[index].slice(0);
-                     rotate(tempMe, angleMatch);
-
-                    for (var j = 0; j < tempMe.length; j++){
-                        if (j == 0) 
-                             drawing.moveTo(tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );
-                        else 
-                             drawing.lineTo( tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );                
+            if (!matched){
+                for (var i = 0; i < pts.length/2; i++){
+                    if (i == 0){
+                        drawing.moveTo(pts[0], pts[1]);
+                    } else {
+                        drawing.lineTo(pts[i*2], pts[i*2+1]);
                     }
-                    //this.stroke();
+                }
+            } else {
+                for (var i = 0; i < pts.length/2; i++){
+
+                    // this is how we could scale and change the offset of the line.  zooming in to center seems good
+                    // image can do the same thing since it's also set by drawn circle (above the end of mouse released)
+                    
+                    var x = pts[i*2] - drawnCircle.x;
+                    var y = pts[i*2+1] - drawnCircle.y;
+
+                    x *= 2.0;
+                    y *= 2.0;
+
+                    x += drawnCircle.x;
+                    y += drawnCircle.y;
+
+
+                    if (i == 0){
+                        drawing.moveTo(x,y);
+                    } else {
+                        drawing.lineTo(x,y);
+                    }
+                }
+
+            }
+            
+
+            // for (var i = 0; i < Math.min(results.length,1); i++){
+            //         var index = results[i].i;
+            //         var tempMe = dataobj[index].slice(0);
+            //          rotate(tempMe, angleMatch);
+
+            //         for (var j = 0; j < tempMe.length; j++){
+            //             if (j == 0) 
+            //                  drawing.moveTo(tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );
+            //             else 
+            //                  drawing.lineTo( tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );                
+            //         }
+            //         //this.stroke();
                    
 
-                }
+            //     }
 
-            for (var i = 0; i < pts.length; i++){
-                if (i == 0){
-                    drawing.moveTo(pts[0][0] + 100, pts[0][1]);
-                } else {
-                    drawing.lineTo(pts[i][0] + 100, pts[i][1]);
-                }
-            }
+            // for (var i = 0; i < pts.length; i++){
+            //     if (i == 0){
+            //         drawing.moveTo(pts[0][0] + 100, pts[0][1]);
+            //     } else {
+            //         drawing.lineTo(pts[i][0] + 100, pts[i][1]);
+            //     }
+            // }
             updateGraphics = false;
          }
         renderer.render(stage);
