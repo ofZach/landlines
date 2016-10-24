@@ -117,7 +117,7 @@ window.onload = function() {
     imageWithPts = function(){
         this.startIndex = 0;
         this.endIndex = 0;
-        this.alpha = 1.0;
+        this.alpha = 0.0;
         this.bSetYet = false;
         this.bLoaded = false;
         this.index = -1;                // where am I in the dataObj
@@ -135,7 +135,7 @@ window.onload = function() {
     imageWithPts.prototype.ready = function(url){
         //console.log("ready");
         //console.log(this);
-        this.sprite1.alpha = 1.0;
+        this.sprite1.alpha = 0.0;
         this.sprite1.anchor.x = 0;
         this.sprite1.anchor.y = 0;
         this.sprite1.position.x =-100;
@@ -442,7 +442,7 @@ function simpleStringify (object){
         imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[lineToAdd]['fileName']);
         imageWithPtsTemp.sprite1 = new PIXI.Sprite(imageWithPtsTemp.texture );
         */
-        imageWithPtsTemp.sprite1.alpha = 1.0;
+        imageWithPtsTemp.sprite1.alpha = 0.0;
 
         imageWithPtsTemp.sprite1.anchor.x = dataobj[lineToAdd]['startPt'].x / 2048.0;
         imageWithPtsTemp.sprite1.anchor.y = dataobj[lineToAdd]['startPt'].y / 2020.0;
@@ -603,11 +603,11 @@ function simpleStringify (object){
 
         for (var i = 0; i < loadedCache.length; i++){
             
-                loadedCache[i].sprite1.alpha = 0.5;
+                loadedCache[i].sprite1.alpha = 0.0;
                 loadedCache[i].sprite1.anchor.x = 0;
                 loadedCache[i].sprite1.anchor.y = 0;
-                loadedCache[i].sprite1.position.x = Math.floor(i  % 10) * 25;
-                loadedCache[i].sprite1.position.y = Math.floor(i / 10) * 25;; 
+                loadedCache[i].sprite1.position.x = -300; //Math.floor(i  % 10) * 25;
+                loadedCache[i].sprite1.position.y = -300; //Math.floor(i / 10) * 25;; 
                 loadedCache[i].sprite1.scale.x = 0.05;
                 loadedCache[i].sprite1.scale.y = 0.05;
             
@@ -749,15 +749,25 @@ function simpleStringify (object){
                 //console.log(i);
                 //console.log(iwp[i]);
                 //console.log(i + " " + iwp[i].sprite1);
-                iwp[i].sprite1.anchor.x = 0;
-                iwp[i].sprite1.anchor.y = 0;
-                
-                iwp[i].sprite1.scale.x =  0.05; //scale*4.0;
-                iwp[i].sprite1.scale.y =  0.05; ///scale*4.0;
 
-                iwp[i].sprite1.rotation = 0; //3.14 + (curAngle-iwp[i].origAngle);
-                iwp[i].sprite1.position.x = i * 25; //startPt.x;
-                iwp[i].sprite1.position.y = 400; //startPt.y;
+                // if you want to see the images lined up (to spot issues with caching) 
+                // iwp[i].sprite1.anchor.x = 0;
+                // iwp[i].sprite1.anchor.y = 0;
+                
+                // iwp[i].sprite1.scale.x =  0.05; //scale*4.0;
+                // iwp[i].sprite1.scale.y =  0.05; ///scale*4.0;
+
+                // iwp[i].sprite1.rotation = 0; //3.14 + (curAngle-iwp[i].origAngle);
+                // iwp[i].sprite1.position.x = i * 25; //startPt.x;
+                // iwp[i].sprite1.position.y = 400; //startPt.y;
+
+
+                iwp[i].sprite1.scale.x =  scale*4.0;
+                iwp[i].sprite1.scale.y =  scale*4.0;
+
+                iwp[i].sprite1.rotation = 3.14 + (curAngle-iwp[i].origAngle);
+                iwp[i].sprite1.position.x = startPt.x;
+                iwp[i].sprite1.position.y = startPt.y;
                    
             }
 
