@@ -55,6 +55,8 @@
     var infoobj = JSON.parse(info);
     var dataobj = JSON.parse(data);
 
+    var animatingCircle = {};
+
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
          for (var i = 0; i < simpleArray.length/2; i++){
@@ -212,6 +214,15 @@
     stage.addChild(drawing);
     drawing.position.x = 0;
     drawing.position.y = 0;
+
+    var lerpAmount = 0.02;
+    var targetX = renderer.view.width * 0.5;
+    var targetY = renderer.view.height * 0.5;
+    var targetR = renderer.view.height * 0.5;
+
+    var circleOffsetX;
+    var circleOffsetY;
+    var circleOffsetR;
     
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -390,7 +401,7 @@
                 stage.removeChild(drawing);
                 stage.addChild(drawing);
 
-                // Positining for matched image
+                // Positioning for matched image
                 sprite.position.x = drawnCircle.x;
                 sprite.position.y = drawnCircle.y;
                 sprite.rotation = angleMatch;
@@ -402,6 +413,14 @@
 
                 sprite.anchor.x = xPosOrig / 1800.0;
                 sprite.anchor.y = yPosOrig / 1200.0;
+
+                sprite.originalPosition = {};
+                sprite.originalPosition.x = drawnCircle.x;
+                sprite.originalPosition.y = drawnCircle.y;
+
+                animatingCircle.x = drawnCircle.x;
+                animatingCircle.y = drawnCircle.y;
+                animatingCircle.r = drawnCircle.r;
 
                 matched = true;
                 
@@ -436,7 +455,7 @@
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
-            drawing.lineStyle(4, 0xffffff, 5);
+            drawing.lineStyle(4, 0xffffff, 1);
 
             if (!matched){
                 for (var i = 0; i < pts.length/2; i++){
@@ -447,6 +466,14 @@
                     }
                 }
             } else {
+
+                animatingCircle.x = animatingCircle.x * (1 - lerpAmount) + targetX * lerpAmount;
+                animatingCircle.y = animatingCircle.y * (1 - lerpAmount) + targetY * lerpAmount;
+                animatingCircle.r = animatingCircle.r * (1 - lerpAmount) + targetR * lerpAmount;
+                circleOffsetX = animatingCircle.x - drawnCircle.x;
+                circleOffsetY = animatingCircle.y - drawnCircle.y;
+                circleOffsetR = animatingCircle.r / drawnCircle.r;
+
                 for (var i = 0; i < pts.length/2; i++){
 
                     // this is how we could scale and change the offset of the line.  zooming in to center seems good
@@ -461,6 +488,9 @@
                     x += drawnCircle.x;
                     y += drawnCircle.y;
 
+                    x += circleOffsetX;
+                    y += circleOffsetY;
+
 
                     if (i == 0){
                         drawing.moveTo(x,y);
@@ -469,6 +499,9 @@
                     }
                 }
 
+                // Draw enclosing circle
+                drawing.lineStyle(4, 0xff0000, 0.5);
+                drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
             }
 
             // Fade out old images
@@ -487,6 +520,12 @@
                         // Delete 1 element at this index
                         sprites.splice(i, 1);
                     }
+                }
+
+                if (!bAmDrawing) {
+                    var index = sprites.length - 1;
+                    sprites[index].position.x = sprites[index].originalPosition.x + circleOffsetX;
+                    sprites[index].position.y = sprites[index].originalPosition.y + circleOffsetY;
                 }
             }
             
@@ -515,9 +554,14 @@
             //     }
             // }
 
-            // Only update graphics on next pass if there is more than
-            // one Sprite visible for opacity fade
-            updateGraphics = bAmDrawing ? (sprites.length > 0) : (sprites.length > 1);
+            // Only update graphics on next pass if there is something
+            // to animate
+            updateGraphics = false;
+
+                 if (bAmDrawing && sprites.length > 0) updateGraphics = true;
+            else if (sprites.length > 1) updateGraphics = true;
+            else if (Math.floor(animatingCircle.x) != Math.floor(targetX)) updateGraphics = true;
+            else if (Math.floor(animatingCircle.y) != Math.floor(targetY)) updateGraphics = true;
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
