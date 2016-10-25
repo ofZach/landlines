@@ -12,6 +12,7 @@
         <script src="js/Utils.js"></script>  <!-- smoothy dmoney -->
         <script src="js/smallestEnclosingCircle.js"></script>  <!-- circle -->
         <script src="js/vpTreeString.js"></script>  <!-- circle -->
+        <script src="js/dat.gui.min.js"></script>
 <style>
         body {
             margin: 0;
@@ -44,7 +45,27 @@
         rawFile.send(null);
     }
 
-    
+
+    //-------------------------------------------------------------------
+    //------------------------------------------------------------------- GUI
+    var myGui;
+    var Gui = function() {
+        this.scaleSize = 0.4;
+        this.scaleSpeed = 0.05;
+        this.translateSpeed = 0.1;
+        this.fadeSpeed = 0.01;
+        this.showEnclosingCircle = false;
+    };
+
+    window.onload = function() {
+        myGui = new Gui();
+        var gui = new dat.GUI();
+        gui.add(myGui, 'scaleSize', 0.2, 0.5);
+        gui.add(myGui, 'scaleSpeed', 0, 0.5);
+        gui.add(myGui, 'translateSpeed', 0, 0.5);
+        gui.add(myGui, 'fadeSpeed', 0, 0.2);
+        gui.add(myGui, 'showEnclosingCircle');
+    };
 
 
 
@@ -214,11 +235,6 @@
     stage.addChild(drawing);
     drawing.position.x = 0;
     drawing.position.y = 0;
-
-    var lerpAmount = 0.02;
-    var targetX = renderer.view.width * 0.5;
-    var targetY = renderer.view.height * 0.5;
-    var targetR = renderer.view.height * 0.5;
 
     var circleOffsetX;
     var circleOffsetY;
@@ -468,9 +484,16 @@
                 }
             } else {
 
-                animatingCircle.x = animatingCircle.x * (1 - lerpAmount) + targetX * lerpAmount;
-                animatingCircle.y = animatingCircle.y * (1 - lerpAmount) + targetY * lerpAmount;
-                animatingCircle.r = animatingCircle.r * (1 - lerpAmount) + targetR * lerpAmount;
+                var translateSpeed = myGui.translateSpeed;
+                var scaleSpeed = myGui.scaleSpeed;
+
+                var targetX = renderer.view.width * 0.5;
+                var targetY = renderer.view.height * 0.5;
+                var targetR = renderer.view.height * myGui.scaleSize;
+
+                animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
+                animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
+                animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
                 circleOffsetX = animatingCircle.x - drawnCircle.x;
                 circleOffsetY = animatingCircle.y - drawnCircle.y;
                 circleScaleRatio = animatingCircle.r / drawnCircle.r;
@@ -501,8 +524,10 @@
                 }
 
                 // Draw enclosing circle
-                drawing.lineStyle(4, 0xff0000, 0.25);
-                drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
+                if (myGui.showEnclosingCircle) {
+                    drawing.lineStyle(4, 0xff0000, 0.5);
+                    drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
+                }
             }
 
             // Fade out old images
@@ -512,7 +537,7 @@
                 // everything else before it should get faded
                 var endingIndex = bAmDrawing ? sprites.length - 1 : sprites.length - 2;
                 for (var i = 0; i <= endingIndex; i++) {
-                    sprites[i].alpha -= 0.01;
+                    sprites[i].alpha -= myGui.fadeSpeed;
                 }
                 // Remove invisible Sprites
                 // Work in reverse to avoid the delete-while-iterating problem
@@ -567,6 +592,7 @@
             else if (sprites.length > 1) updateGraphics = true;
             else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
             else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
+            else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
