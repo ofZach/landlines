@@ -483,8 +483,8 @@
                     var x = pts[i*2] - drawnCircle.x;
                     var y = pts[i*2+1] - drawnCircle.y;
 
-                    // x *= 2.0;
-                    // y *= 2.0;
+                    x *= circleScaleRatio;
+                    y *= circleScaleRatio;
 
                     x += drawnCircle.x;
                     y += drawnCircle.y;
@@ -501,7 +501,7 @@
                 }
 
                 // Draw enclosing circle
-                drawing.lineStyle(4, 0xff0000, 0.5);
+                drawing.lineStyle(4, 0xff0000, 0.25);
                 drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
             }
 
