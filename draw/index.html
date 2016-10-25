@@ -207,7 +207,7 @@
     var updateGraphics = false;
     var sprites = [];
 
-    var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x1099bb});
+    var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x000000});
     renderer.view.style.display = "block";
     document.body.appendChild(renderer.view);
     var drawing = new PIXI.Graphics();
@@ -501,8 +501,8 @@
                 }
 
                 // Draw enclosing circle
-                drawing.lineStyle(4, 0xff0000, 0.25);
-                drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
+                //drawing.lineStyle(4, 0xff0000, 0.25);
+                //drawing.drawCircle(animatingCircle.x, animatingCircle.y, animatingCircle.r);
             }
 
             // Fade out old images
