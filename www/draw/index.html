@@ -491,9 +491,15 @@
                 var targetY = renderer.view.height * 0.5;
                 var targetR = renderer.view.height * myGui.scaleSize;
 
-                animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
-                animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
-                animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
+                // Make sure the most recent matched image has loaded
+                // Then begin calculating a lerped toward the target
+                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                    animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
+                    animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
+                    animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
+                }
+
+                // Update offsets/scale ratios to move drawing line & image toward center
                 circleOffsetX = animatingCircle.x - drawnCircle.x;
                 circleOffsetY = animatingCircle.y - drawnCircle.y;
                 circleScaleRatio = animatingCircle.r / drawnCircle.r;
@@ -590,6 +596,7 @@
 
                  if (bAmDrawing && sprites.length > 0) updateGraphics = true;
             else if (sprites.length > 1) updateGraphics = true;
+            else if (sprites.length && !sprites[sprites.length-1].texture.baseTexture.hasLoaded) updateGraphics = true;
             else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
             else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
             else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
