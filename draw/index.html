@@ -222,7 +222,7 @@
 
     var circleOffsetX;
     var circleOffsetY;
-    var circleOffsetR;
+    var circleScaleRatio;
     
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
@@ -405,8 +405,8 @@
                 sprite.position.x = drawnCircle.x;
                 sprite.position.y = drawnCircle.y;
                 sprite.rotation = angleMatch;
-                sprite.scale.x =    drawnCircle.r / infoobj[results[0].i][3];
-                sprite.scale.y =  drawnCircle.r / infoobj[results[0].i][3] ;
+                sprite.scale.x = drawnCircle.r / infoobj[results[0].i][3];
+                sprite.scale.y = drawnCircle.r / infoobj[results[0].i][3];
 
                 xPosOrig = infoobj[results[0].i][1];
                 yPosOrig = infoobj[results[0].i][2];
@@ -415,8 +415,9 @@
                 sprite.anchor.y = yPosOrig / 1200.0;
 
                 sprite.originalPosition = {};
-                sprite.originalPosition.x = drawnCircle.x;
-                sprite.originalPosition.y = drawnCircle.y;
+                sprite.originalPosition.x = sprite.position.x;
+                sprite.originalPosition.y = sprite.position.y;
+                sprite.originalScale = sprite.scale.x;
 
                 animatingCircle.x = drawnCircle.x;
                 animatingCircle.y = drawnCircle.y;
@@ -472,7 +473,7 @@
                 animatingCircle.r = animatingCircle.r * (1 - lerpAmount) + targetR * lerpAmount;
                 circleOffsetX = animatingCircle.x - drawnCircle.x;
                 circleOffsetY = animatingCircle.y - drawnCircle.y;
-                circleOffsetR = animatingCircle.r / drawnCircle.r;
+                circleScaleRatio = animatingCircle.r / drawnCircle.r;
 
                 for (var i = 0; i < pts.length/2; i++){
 
@@ -521,12 +522,16 @@
                         sprites.splice(i, 1);
                     }
                 }
+            }
 
-                if (!bAmDrawing) {
-                    var index = sprites.length - 1;
-                    sprites[index].position.x = sprites[index].originalPosition.x + circleOffsetX;
-                    sprites[index].position.y = sprites[index].originalPosition.y + circleOffsetY;
-                }
+            // Scale & translate most recent matched image toward center
+            if (sprites.length && !bAmDrawing) {
+                var index = sprites.length - 1;
+                sprites[index].position.x = sprites[index].originalPosition.x + circleOffsetX;
+                sprites[index].position.y = sprites[index].originalPosition.y + circleOffsetY;
+
+                var scale = sprites[index].originalScale * circleScaleRatio;
+                sprites[index].scale.set(scale, scale);
             }
             
 
@@ -560,8 +565,8 @@
 
                  if (bAmDrawing && sprites.length > 0) updateGraphics = true;
             else if (sprites.length > 1) updateGraphics = true;
-            else if (Math.floor(animatingCircle.x) != Math.floor(targetX)) updateGraphics = true;
-            else if (Math.floor(animatingCircle.y) != Math.floor(targetY)) updateGraphics = true;
+            else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
+            else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
