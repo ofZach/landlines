@@ -80,15 +80,49 @@ var Gui = function() {
   this.centerSmoothRate = 0.95;
   this.scale = 1.0;
   this.variableSizes = false;
+  this.reverseSwipe = false;
   this.explode = function() { ; };
 };
 
+
+var guiSettings = {
+  "preset": "Default",
+  "remembered": {
+    "Default": {
+      "0": {}
+    },
+    "Jeff": {
+      "0": {
+        "dragSpeed": 0.5680101608806096,
+        "velSmoothRate": 0.8,
+        "angleSmoothRate": 0,
+        "scale": 1.6054191363251482,
+        "centerSmoothRate": 0.8758679085520745,
+        "variableSizes": false,
+        "reverseSwipe": true
+      }
+    },
+    "Takashi": {
+      "0": {
+        "dragSpeed": 0.15,
+        "velSmoothRate": 0.55,
+        "angleSmoothRate": 0.01,
+        "scale": 2.5,
+        "centerSmoothRate": 0.83,
+        "variableSizes": false,
+        "reverseSwipe": true
+      }
+    }
+  },
+  "closed": false,
+  "folders": {}
+};
 
 var myGui;
 
 window.onload = function() {
   myGui = new Gui();
-  var gui = new dat.GUI();
+  var gui = new dat.GUI({load:guiSettings});
   
   gui.add(myGui, 'dragSpeed', 0.1, 5);
    gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
@@ -96,6 +130,9 @@ window.onload = function() {
     gui.add(myGui, 'scale', 0.0, 10.0);
     gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
     gui.add(myGui, 'variableSizes');
+    gui.add(myGui, 'reverseSwipe');
+
+    gui.remember(myGui);
 };
 //-------------------------------------------
    
@@ -378,6 +415,11 @@ function simpleStringify (object){
         if (bAmDrawing === true){
             var diffx = (moveData.data.global.x - lastMouseX);
             var diffy = (moveData.data.global.y - lastMouseY);
+            if (myGui.reverseSwipe) {
+                diffx *= -1;
+                diffy *= -1;
+            }
+
             velThisFrame = Math.sqrt(diffx * diffx + diffy*diffy);
             lastDiff.x = diffx;
             lastDiff.y = diffy;
