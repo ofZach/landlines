@@ -50,6 +50,7 @@
     //------------------------------------------------------------------- GUI
     var myGui;
     var Gui = function() {
+        this.pulseSpeed = 7;
         this.scaleSize = 0.4;
         this.scaleSpeed = 0.05;
         this.translateSpeed = 0.1;
@@ -61,6 +62,7 @@
     window.onload = function() {
         myGui = new Gui();
         var gui = new dat.GUI();
+        gui.add(myGui, 'pulseSpeed', 1, 10);
         gui.add(myGui, 'scaleSize', 0.2, 0.5);
         gui.add(myGui, 'scaleSpeed', 0, 0.5);
         gui.add(myGui, 'translateSpeed', 0, 0.5);
@@ -216,6 +218,7 @@
 
     var matched = false;
     pts = [];
+    var linePulseCounter = 0;
     var bAmDrawing = false;
     var updateGraphics = false;
     var sprites = [];
@@ -265,6 +268,7 @@
         console.log(moveData.data.global.x); //renderer.plugins.interaction);
 
         bAmDrawing = true;
+        linePulseCounter = 0;
         pts = [];
         matched = false;
         pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
@@ -487,9 +491,10 @@
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
-            drawing.lineStyle(4, 0xffffff, 1);
 
             if (!matched){
+                drawing.lineStyle(4, 0xffffff, 1);
+
                 for (var i = 0; i < pts.length/2; i++){
                     if (i == 0){
                         drawing.moveTo(pts[0], pts[1]);
@@ -498,6 +503,15 @@
                     }
                 }
             } else {
+
+                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded)
+                    drawing.lineStyle(4, 0xffffff, 1);
+                else {
+                    linePulseCounter += (0.01 * myGui.pulseSpeed);
+                    var sine = Math.sin(linePulseCounter);
+                    var thickness = (sine + 3) * 2;
+                    drawing.lineStyle(thickness, 0xffffff, 1);
+                }
 
                 var translateSpeed = myGui.translateSpeed;
                 var scaleSpeed = myGui.scaleSpeed;
