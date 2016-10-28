@@ -61,6 +61,7 @@
 
     window.onload = function() {
         myGui = new Gui();
+
         var gui = new dat.GUI();
         gui.add(myGui, 'pulseSpeed', 1, 10);
         gui.add(myGui, 'scaleSize', 0.2, 0.5);
@@ -69,6 +70,8 @@
         gui.add(myGui, 'fadeSpeed', 0, 0.2);
         gui.add(myGui, 'showEnclosingCircle');
         gui.add(myGui, 'loadFromCloud');
+        
+        gui.remember(myGui);
     };
 
 
