@@ -214,25 +214,33 @@
     var results = [];
     var ptsNew = [];
 
-
     var matched = false;
-
-
-
-
-    // create an new instance of a pixi stage
-    var stage = new PIXI.Stage(0xFFFFFF, true);
-    stage.interactive = true;
-    stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
-
     pts = [];
     var bAmDrawing = false;
     var updateGraphics = false;
     var sprites = [];
 
-    var renderer = PIXI.autoDetectRenderer(800, 800,{backgroundColor : 0x000000});
+    // Create the Renderer
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var renderer = PIXI.autoDetectRenderer(w, h, { backgroundColor : 0x000000 });
     renderer.view.style.display = "block";
     document.body.appendChild(renderer.view);
+
+    // Create the Stage, which is our root node of the scene
+    var stage = new PIXI.Stage(0xFFFFFF, true);
+    stage.interactive = true;
+    stage.hitArea = new PIXI.Rectangle(0, 0, w, h);
+
+    // Handle device orientation change
+    window.addEventListener("deviceorientation", function() {
+        console.log('orientation change!', window.orientation);
+        console.log('inner width:', window.innerWidth, 'inner height:', window.innerHeight);
+        renderer.resize(window.innerWidth, window.innerHeight);
+        stage.hitArea.set(window.innerWidth, window.innerHeight);
+    }, true);
+
+    // Line drawn out by the user
     var drawing = new PIXI.Graphics();
     stage.addChild(drawing);
     drawing.position.x = 0;

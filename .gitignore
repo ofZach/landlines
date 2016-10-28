@@ -66,3 +66,4 @@ Desktop.ini
 
 #avoid all the images for now...
 *.jpg 
+www/draw/full/*
