@@ -504,7 +504,10 @@
 
                 var targetX = renderer.view.width * 0.5;
                 var targetY = renderer.view.height * 0.5;
-                var targetR = renderer.view.height * myGui.scaleSize;
+                if (renderer.view.width > renderer.view.height)
+                    var targetR = renderer.view.height * myGui.scaleSize;
+                else
+                    var targetR = renderer.view.width * myGui.scaleSize;
 
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
