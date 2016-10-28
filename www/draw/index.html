@@ -55,6 +55,7 @@
         this.translateSpeed = 0.1;
         this.fadeSpeed = 0.01;
         this.showEnclosingCircle = false;
+        this.loadFromCloud = false;
     };
 
     window.onload = function() {
@@ -65,6 +66,7 @@
         gui.add(myGui, 'translateSpeed', 0, 0.5);
         gui.add(myGui, 'fadeSpeed', 0, 0.2);
         gui.add(myGui, 'showEnclosingCircle');
+        gui.add(myGui, 'loadFromCloud');
     };
 
 
@@ -405,7 +407,12 @@
                 var random = Math.floor(Math.random()*1000);
 
                 // Create a new Texture and Sprite from the matched image
-                var texture = PIXI.Texture.fromImage('full/' + infoobj[results[0].i][0] + '.jpg');
+                if (myGui.loadFromCloud)
+                    var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+                else
+                    var url = 'full/';
+                var texture = PIXI.Texture.fromImage(url + infoobj[results[0].i][0] + '.jpg');
+
                 var sprite = new PIXI.Sprite(texture);
 
                 // Add the new Sprite to the stage
