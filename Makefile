@@ -27,7 +27,7 @@ deps: $(GOAPP_CMD)
 ###
 
 dev: deps $(GOAPP_CMD)
-	$(GOAPP_CMD) serve
+	$(GOAPP_CMD) serve -host 0.0.0.0
 
 ###
 # AppEngine Deploy
