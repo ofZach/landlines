@@ -15,11 +15,29 @@
             margin: 0;
             padding: 0;
             background-color: #000;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .nav {
+            color: white;
+            position: absolute;
+            top: 0px;
+            padding: 5px 0 0 5px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0 5px;
+        }
+
+        .nav .inactive {
+            color: #ccc;
+            cursor: default;
         }
 
         .info {
             color: white;
-            font-family: 'Roboto', sans-serif;
             position: absolute;
             bottom: 0px;
             text-transform: uppercase;
@@ -34,6 +52,10 @@
  
 </head>
 <body>
+    <div class="nav">
+        <a href="draw">Draw</a> | <a href="drag" class="inactive">Swipe</a>
+    </div>
+
     <script src="pixi.js"></script>
     <script>
 
