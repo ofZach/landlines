@@ -118,6 +118,17 @@
         <div>Chrome</div>
         <div>Experiment</div>
     </div>
+
+    <script>
+    function updateBackground(e) {
+        var pct = e.clientX / this.offsetWidth;
+        pct -= 0.5;
+        pct *= 20;
+        this.style.backgroundPosition = (55 + pct) + '%';
+    }
+    document.getElementById('draw').onmousemove = updateBackground;
+    document.getElementById('drag').onmousemove = updateBackground;
+    </script>
 </body>
 
 </html>
