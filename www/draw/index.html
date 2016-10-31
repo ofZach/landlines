@@ -111,7 +111,7 @@
     //------------------------------------------------------------------- GUI
     var myGui;
     var Gui = function() {
-        this.pulseSpeed = 7;
+        this.pulseSpeed = 10;
         this.scaleSize = 0.4;
         this.scaleSpeed = 0.05;
         this.translateSpeed = 0.1;
@@ -124,7 +124,7 @@
         myGui = new Gui();
 
         var gui = new dat.GUI();
-        gui.add(myGui, 'pulseSpeed', 1, 10);
+        gui.add(myGui, 'pulseSpeed', 1, 15);
         gui.add(myGui, 'scaleSize', 0.2, 0.5);
         gui.add(myGui, 'scaleSpeed', 0, 0.5);
         gui.add(myGui, 'translateSpeed', 0, 0.5);
@@ -293,7 +293,7 @@
     // Create the Renderer
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var renderer = PIXI.autoDetectRenderer(w, h, { backgroundColor : 0x000000 });
+    var renderer = PIXI.autoDetectRenderer(w, h, { backgroundColor : 0x000000, antialias: true });
     renderer.view.style.display = "block";
     document.body.appendChild(renderer.view);
 
@@ -582,13 +582,12 @@
             } else {
 
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
-                        if (!textureJustLoaded) {
-                            console.log('Texture just finished loading!');
-                            textureJustLoaded = true;
-                            updateMetadata(matchedMetadata);
-                        }
+                    if (!textureJustLoaded) {
+                        console.log('Texture just finished loading!');
+                        textureJustLoaded = true;
+                        updateMetadata(matchedMetadata);
+                    }
                 }
-                
 
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded)
                     drawing.lineStyle(4, 0xffffff, 1);
@@ -596,7 +595,8 @@
                     linePulseCounter += (0.01 * myGui.pulseSpeed);
                     var sine = Math.sin(linePulseCounter);
                     var thickness = (sine + 3) * 2;
-                    drawing.lineStyle(thickness, 0xffffff, 1);
+                    var opacity = (sine + 2) / 2;
+                    drawing.lineStyle(thickness, 0xffffff, opacity);
                 }
 
                 var translateSpeed = myGui.translateSpeed;
