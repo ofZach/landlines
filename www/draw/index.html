@@ -4,14 +4,13 @@
     <meta charset="utf-8">
     <title>Pixi.js basic example</title>
         <script src="js/vptree.js"></script>
-       <script src="js/vpTreeString.js"></script>  
+        <script src="js/vpTreeString.js"></script>  
         <script src="js/smallData.js"></script>       
         <script src="js/dataInfo.js"></script>       <!-- heavy ! -->
         <script src="js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
         <script src="js/Polyline.js"></script>  <!-- smoothy dmoney -->
         <script src="js/Utils.js"></script>  <!-- smoothy dmoney -->
         <script src="js/smallestEnclosingCircle.js"></script>  <!-- circle -->
-        <script src="js/vpTreeString.js"></script>  <!-- circle -->
         <script src="js/dat.gui.min.js"></script>
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <style>
@@ -54,7 +53,7 @@
     // Generic function to load a file asynchronously
     function readTextFile(file, callback) {
         loadedJson = false;
-        console.log("start loading text");
+        console.log('Requesting file:', file);
         var rawFile = new XMLHttpRequest();
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
@@ -200,7 +199,7 @@
 
 
     // make data obj non relative: 
-    console.log("start");
+    console.log('Make data obj non relative:', 'starting...');
 
     for (i = 0; i < dataobj.length; i++){
         var x = 0;
@@ -213,7 +212,7 @@
         }
     }
 
-    console.log("end");
+    console.log('Make data obj non relative:', 'finished.');
     
 
     // convert to Polyline :) 
@@ -272,11 +271,12 @@
     //var newType = {};
 
 
+    console.log('VPTreeFactory.load():', 'starting...');
     vptree = VPTreeFactory.load(polylines,dist,vpTreeString );
 
     //console.log(vptree.stringify());
     
-    console.log("ending");    
+    console.log('VPTreeFactory.load():', 'finished.');
     //console.log(dataobj[0]);
 
     var drawing = false;
@@ -325,7 +325,7 @@
     //------------------------------------------------------------------------------------------------
     stage.mousedown = stage.touchstart = function(moveData) {
 
-        console.log("start");
+        console.log('mousedown/touchstart');
         // var random = Math.floor(Math.random()*1000);
         // texture = PIXI.Texture.fromImage('full/' + random + '.jpg');
         // sprite1 = new PIXI.Sprite(texture);
@@ -432,11 +432,11 @@
                 p2.init(true);
                 resultsA = vptree.search(p, 1);
 
-                console.log(results[0]);
+                console.log('resultsA:', resultsA[0]);
 
                 resultsB = vptree.search(p2, 1);
 
-                console.log(results[0]);
+                console.log('resultsB:', resultsB[0]);
 
                 if (resultsB[0].d < resultsA[0].d){
                     results = resultsB;
@@ -450,6 +450,8 @@
                 } else {
                     results = resultsA;
                 }
+
+                console.log('results:', results[0]);
 
 
                 var ptsScaled = pts.slice();
@@ -480,13 +482,17 @@
                    
                 }
 
+                var id = infoobj[results[0].i][0];
+                readTextFile('metadata/' + id + '.json', updateMetadataCallback);
+
+
                 //console.log( infoobj[results[0].i] );
 
                 angleMatch = bestAngle;
                 updateGraphics = true;
 
 
-                console.log(PIXI.utils.TextureCache);
+                console.log('TextureCache:', PIXI.utils.TextureCache);
 
                 var random = Math.floor(Math.random()*1000);
 
