@@ -16,6 +16,18 @@
             padding: 0;
             background-color: #000;
         }
+
+        .info {
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            position: absolute;
+            bottom: 0px;
+            text-transform: uppercase;
+            padding: 0 0 15px 15px;
+        }
+        #info-attribution {
+            text-transform: none;
+        }
     </style>
  
  
@@ -41,18 +53,17 @@ function readTextFile(file, callback) {
     rawFile.overrideMimeType("application/json");
     rawFile.open("GET", file, true);
     rawFile.onreadystatechange = function() {
-        if (rawFile.readyState === 4 && rawFile.status == "200") {
-            callback(rawFile.responseText);
+        if (rawFile.readyState === 4) {
+            callback(rawFile.status, rawFile.responseText);
         }
     }
     rawFile.send(null);
 }
 
 //usage:
-readTextFile("dataobj.json", function(text){
-    
+readTextFile("dataobj.json", function(code, data){
 
-    dataobj= JSON.parse(text);
+    dataobj= JSON.parse(data);
 
     // calc and sort the angle length
     for (var i = 0; i < dataobj.length; i++){
@@ -68,6 +79,46 @@ readTextFile("dataobj.json", function(text){
     console.log("done loading text");
 
     loadedJson = true;
+});
+
+// Update DOM elements with new data
+function updateMetadata(data) {
+    if (data.locality) var topLine = data.locality;
+    else if (data.admin3) var topLine = data.admin3;
+    else if (data.admin2) var topLine = data.admin2;
+    else if (data.admin1) var topLine = data.admin1;
+    else var topLine = '';
+
+    var attribution = data.attribution || '';
+    var country = data.country || '';
+
+    document.getElementById('info-attribution').innerText = attribution;
+    document.getElementById('info-line1').innerText = topLine;
+    document.getElementById('info-line2').innerText = country;
+}
+
+// Callback from AJAX request to get metadata for matched line
+// Because we don't have all the metadata yet, we sometimes get a 404
+// Therefore pull metadata from a random image from a list that we've built
+// that has known, existing filenames. The 404 section can eventually
+// be removed
+function updateMetadataCallback(code, data) {
+    if (code == 200) {
+        matchedMetadata = JSON.parse(data);
+        updateMetadata(matchedMetadata);
+    } else if (code == 404) {
+        var index = Math.floor(Math.random()*metadataIDList.length);
+        var id = metadataIDList[index];
+        readTextFile('../draw/metadata/' + id + '.json', updateMetadataCallback);
+    }
+};
+
+// Temporary!
+// Load a list of existing meta data ids in case we try to request one
+// that doesn't exist yet (because we're still waiting on real data)
+var metadataIDList = [];
+readTextFile('../draw/metadata-id-list.json', function(code, data) {
+    metadataIDList = JSON.parse(data);
 });
 
 
@@ -452,6 +503,9 @@ function simpleStringify (object){
 
         var lineToAdd = loadedCache[lineToAddFromCache].index;
 
+        var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
+        readTextFile('metadata/' + metaFilename, updateMetadataCallback);
+
         var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
         var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
         var len = Math.sqrt(diffx*diffx + diffy*diffy);
@@ -821,6 +875,12 @@ function simpleStringify (object){
         
     }
     </script>
+
+    <div class="info">
+        <div id="info-line1"></div>
+        <div id="info-line2"></div>
+        <div id="info-attribution"></div>
+    </div>
 
 </body>
 </html>
