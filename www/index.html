@@ -121,10 +121,16 @@
 
     <script>
     function updateBackground(e) {
-        var pct = e.clientX / this.offsetWidth;
-        pct -= 0.5;
-        pct *= 20;
-        this.style.backgroundPosition = (55 + pct) + '%';
+        var pctW = e.clientX / this.offsetWidth;
+        pctW -= 0.5;
+        pctW *= 20;
+
+        var pctH = e.clientY / this.offsetHeight;
+        pctH -= 0.5;
+        pctH *= 20;
+
+        this.style.backgroundPositionX = (50 + pctW) + '%';
+        this.style.backgroundPositionY = (50 + pctH) + '%';
     }
     document.getElementById('draw').onmousemove = updateBackground;
     document.getElementById('drag').onmousemove = updateBackground;
