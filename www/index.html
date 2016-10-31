@@ -39,7 +39,7 @@
         font-size: 12pt;
         text-align: center;
         background-position: center;
-        background-size: 125%;
+        background-size: 150%;
     }
 
     .app p {
@@ -120,7 +120,7 @@
     </div>
 
     <script>
-    function updateBackground(e) {
+    function updateBackgroundMouse(e) {
         var pctW = e.clientX / this.offsetWidth;
         pctW -= 0.5;
         pctW *= 20;
@@ -132,8 +132,18 @@
         this.style.backgroundPositionX = (50 + pctW) + '%';
         this.style.backgroundPositionY = (50 + pctH) + '%';
     }
-    document.getElementById('draw').onmousemove = updateBackground;
-    document.getElementById('drag').onmousemove = updateBackground;
+     
+    function updateBackgroundAccel(e) {
+        document.getElementById('draw').style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
+        document.getElementById('draw').style.backgroundPositionY = (50 + (e.beta/2)) + '%';
+        
+        document.getElementById('drag').style.backgroundPositionX = (50 + (e.gamma/2)) + '%';
+        document.getElementById('drag').style.backgroundPositionY = (50 + (e.beta/1.5)) + '%';
+    }
+
+    document.getElementById('draw').onmousemove = updateBackgroundMouse;
+    document.getElementById('drag').onmousemove = updateBackgroundMouse;
+    window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
 </body>
 
