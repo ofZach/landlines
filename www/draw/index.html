@@ -69,11 +69,10 @@
     // Update DOM elements with new data
     function updateMetadata(data) {
         if (data.locality) var topLine = data.locality;
-        else if (data.admin1) var topLine = data.admin1;
-        else if (data.admin2) var topLine = data.admin2;
         else if (data.admin3) var topLine = data.admin3;
+        else if (data.admin2) var topLine = data.admin2;
+        else if (data.admin1) var topLine = data.admin1;
         else var topLine = '';
-        
 
         var attribution = data.attribution || '';
         var country = data.country || '';
@@ -81,7 +80,6 @@
         document.getElementById('info-attribution').innerText = attribution;
         document.getElementById('info-line1').innerText = topLine;
         document.getElementById('info-line2').innerText = country;
-        
     }
 
     // Callback from AJAX request to get metadata for matched line
