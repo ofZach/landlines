@@ -13,11 +13,30 @@
         <script src="js/smallestEnclosingCircle.js"></script>  <!-- circle -->
         <script src="js/vpTreeString.js"></script>  <!-- circle -->
         <script src="js/dat.gui.min.js"></script>
-<style>
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
         body {
             margin: 0;
             padding: 0;
             background-color: #000;
+        }
+
+        .info {
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            position: absolute;
+            bottom: 0px;
+            text-transform: uppercase;
+            padding: 0 0 15px 15px;
+        }
+        #info-line1 {
+
+        }
+        #info-line2 {
+            
+        }
+        #info-attribution {
+            text-transform: none;
         }
     </style>
  
@@ -30,7 +49,9 @@
 
 
     var loadedJson = false;
+    
 
+    // Generic function to load a file asynchronously
     function readTextFile(file, callback) {
         loadedJson = false;
         console.log("start loading text");
@@ -38,12 +59,54 @@
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
         rawFile.onreadystatechange = function() {
-            if (rawFile.readyState === 4 && rawFile.status == "200") {
-                callback(rawFile.responseText);
+            if (rawFile.readyState === 4) {
+                callback(rawFile.status, rawFile.responseText);
             }
         }
         rawFile.send(null);
     }
+
+    // Update DOM elements with new data
+    function updateMetadata(data) {
+        if (data.locality) var topLine = data.locality;
+        else if (data.admin1) var topLine = data.admin1;
+        else if (data.admin2) var topLine = data.admin2;
+        else if (data.admin3) var topLine = data.admin3;
+        else var topLine = '';
+        
+
+        var attribution = data.attribution || '';
+        var country = data.country || '';
+
+        document.getElementById('info-attribution').innerText = attribution;
+        document.getElementById('info-line1').innerText = topLine;
+        document.getElementById('info-line2').innerText = country;
+        
+    }
+
+    // Callback from AJAX request to get metadata for matched line
+    // Because we don't have all the metadata yet, we sometimes get a 404
+    // Therefore pull metadata from a random image from a list that we've built
+    // that has known, existing filenames. The 404 section can eventually
+    // be removed
+    function updateMetadataCallback(code, data) {
+        if (code == 200) {
+            matchedMetadata = JSON.parse(data);
+        }
+        else if (code == 404) {
+            var index = Math.floor(Math.random()*metadataIDList.length);
+            var id = metadataIDList[index];
+            readTextFile('metadata/' + id + '.json', updateMetadataCallback);
+        }
+    };
+
+    // Temporary!
+    // Load a list of existing meta data ids in case we try to request one
+    // that doesn't exist yet (because we're still waiting on real data)
+    var metadataIDList = [];
+    readTextFile('metadata-id-list.json', function(code, data) {
+        metadataIDList = JSON.parse(data);
+    });
 
 
     //-------------------------------------------------------------------
@@ -84,6 +147,8 @@
     var dataobj = JSON.parse(data);
 
     var animatingCircle = {};
+    var matchedMetadata = {};
+    var textureJustLoaded = false;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -272,10 +337,14 @@
 
         bAmDrawing = true;
         linePulseCounter = 0;
+        textureJustLoaded = false;
         pts = [];
         matched = false;
         pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
         pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
+
+        // Clear metadata by updating it with an empty object
+        updateMetadata({});
     };
 
     stage.mousemove = stage.touchmove = function(moveData) {
@@ -417,7 +486,7 @@
                 updateGraphics = true;
 
 
-                console.log(PIXI.TextureCache);
+                console.log(PIXI.utils.TextureCache);
 
                 var random = Math.floor(Math.random()*1000);
 
@@ -506,6 +575,15 @@
                     }
                 }
             } else {
+
+                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                        if (!textureJustLoaded) {
+                            console.log('Texture just finished loading!');
+                            textureJustLoaded = true;
+                            updateMetadata(matchedMetadata);
+                        }
+                }
+                
 
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded)
                     drawing.lineStyle(4, 0xffffff, 1);
@@ -640,6 +718,12 @@
         requestAnimationFrame( animate );
     }
     </script>
+
+    <div class="info">
+        <div id="info-line1">Kane County</div>
+        <div id="info-line2">United States</div>
+        <div id="info-attribution">Imagery ©2016 , DigitalGlobe, USDA Farm Service Agency</div>
+    </div>
 
 </body>
 </html>
