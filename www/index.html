@@ -26,7 +26,7 @@
         padding-bottom: 4px;
     }
 
-    .container {
+    #container {
         display: table;
         table-layout: fixed;
         width: 100%;
@@ -52,10 +52,6 @@
         .app {
             display: table-cell;
             background-size: auto 115%;
-        }
-
-        .app p {
-            padding-top: 30%;
         }
     }
 
@@ -103,14 +99,14 @@
 
     <header>Land Lines</header>
 
-    <div class="container">
+    <div id="container">
 
         <div class="app" id="draw">
-            <p>Draw a line, let the planet complete the picture.</p>
+            <p id="draw-desc">Draw a line, let the planet complete the picture.</p>
             <a class="app-button" href="draw">Draw to explore</a>
         </div>
         <div class="app" id="drag">
-            <p>Swipe in any direction to create a connected landscape.</p>
+            <p id="drag-desc">Swipe in any direction to create a connected landscape.</p>
             <a class="app-button" href="drag">Swipe to explore</a>
         </div>
     </div>
@@ -122,6 +118,9 @@
     </div>
 
     <script>
+    updateAppDescriptionPosition();
+
+    // Layout / background image stuff
     function updateBackgroundMouse(e) {
         var pctW = e.clientX / this.offsetWidth;
         pctW -= 0.5;
@@ -143,9 +142,18 @@
         document.getElementById('drag').style.backgroundPositionY = (50 + (e.beta/1.5)) + '%';
     }
 
+    function updateAppDescriptionPosition() {
+        if (document.body.clientWidth < 1024) return;
+        var h = document.getElementById('container').clientHeight;
+        var padding = Math.floor(h * 0.38) + 'px';
+        document.getElementById('draw-desc').style.paddingTop = padding;
+        document.getElementById('drag-desc').style.paddingTop = padding;
+    }
+
     document.getElementById('draw').onmousemove = updateBackgroundMouse;
     document.getElementById('drag').onmousemove = updateBackgroundMouse;
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
+    window.addEventListener('resize', updateAppDescriptionPosition, false);
     </script>
 </body>
 
