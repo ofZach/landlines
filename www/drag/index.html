@@ -148,6 +148,9 @@ readTextFile('../draw/metadata-id-list.json', function(code, data) {
 
 //-------------------------------------------
 var Gui = function() {
+  this.lineColor = 0xffffff;
+  this.lineOpacity = 0.7;
+  this.lineWidth = 3;
   this.dragSpeed = 1.0;
   this.velSmoothRate = 0.8;
   this.angleSmoothRate = 0.97;
@@ -195,11 +198,14 @@ var guiSettings = {
 var myGui;
 
 window.onload = function() {
-  myGui = new Gui();
-  var gui = new dat.GUI({load:guiSettings});
-  
-  gui.add(myGui, 'dragSpeed', 0.1, 5);
-   gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
+    myGui = new Gui();
+    var gui = new dat.GUI({load:guiSettings});
+
+    gui.addColor(myGui, 'lineColor');
+    gui.add(myGui, 'lineOpacity', 0, 1);
+    gui.add(myGui, 'lineWidth', 1, 10);
+    gui.add(myGui, 'dragSpeed', 0.1, 5);
+    gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
     gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
     gui.add(myGui, 'scale', 0.0, 10.0);
     gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
@@ -818,9 +824,7 @@ function simpleStringify (object){
         //------------------------------------------------------- drawing
         if (updateGraphics === true && ptsSmooth.length > 1){
             drawing.clear();
-            drawing.lineColor = 0xffffff;
-            drawing.lineWidth = 3;
-            drawing.lineAlpha = 0.7;
+            drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
 
             if (pts.length > 0){
                 smoothPt.x = myGui.centerSmoothRate * smoothPt.x + (1.0 - myGui.centerSmoothRate) * ptsSmooth[ptsSmooth.length-1].x;
