@@ -6,7 +6,7 @@
     <title>Pixi.js basic example</title>
         <script src="js/vptree.js"></script>
         <script src="js/vpTreeString.js"></script>  
-        <script src="js/smallData.js"></script>       
+        <!-- <script src="js/smallData.js"></script>  -->      
         <script src="js/dataInfo.js"></script>       <!-- heavy ! -->
         <script src="js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
         <script src="js/Polyline.js"></script>  <!-- smoothy dmoney -->
@@ -67,6 +67,18 @@
     var loadedJson = false;
     
 
+    Object.defineProperty(Array.prototype, 'chunkArray', {
+    value: function(chunkSize) {
+        var array=this;
+        return [].concat.apply([],
+            array.map(function(elem,i) {
+                return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
+            })
+        );
+    }
+    });
+
+
     // Generic function to load a file asynchronously
     function readTextFile(file, callback) {
         loadedJson = false;
@@ -114,6 +126,107 @@
         }
     };
 
+
+
+
+    //----------------------------------------------------------
+    // vpTree creation 
+    // from cached files: 
+
+    // todo: completely remove dataObj
+    // completely load polylines throught this
+    // 
+
+    var vptrees = [];
+    var polylines = [];
+    var polylineCount = [];
+
+    function loadNextTree(){
+        readTextFile('data/' + vpTreeToLoad + '.json', loadVPTree);
+    }
+
+    Array.prototype.append = function(array)
+    {
+        this.push.apply(this, array)
+    }
+
+
+    var jsonData;
+    var dataParseCount = 0;
+    var parseWorkToDo = false;
+    var polylinesTemp = [];
+
+    function parseLoadVPTree(){
+
+        if (!parseWorkToDo){
+            return;
+        }
+
+
+        // otherwise let's do some work (accross frames) 
+
+        console.log("doing some work! " +  dataParseCount + " of " + jsonData["polylines"].length);
+
+        var start =  dataParseCount;
+        var end = Math.min(jsonData["polylines"].length,  dataParseCount + 50);
+
+        //------------------------------------------------ do some work 
+        var polylinePoints = jsonData["polylines"];
+        
+        for (j = start; j < end; j++){
+            dataobj.push(polylinePoints[j]);
+            ptsTemp = [];
+            var x = 0;
+            var y = 0;
+            for (k = 0; k < polylinePoints[j].length/2; k++){
+                x = polylinePoints[j][k*2];                      // converted to be relative...
+                y = polylinePoints[j][k*2+1];
+                pt = [];
+                pt[0] = x;
+                pt[1] = y;
+                ptsTemp.push(pt);
+            }
+            var p = createPolyline(ptsTemp);
+            p.init(true);
+            polylinesTemp.push(p);
+            polylines.push(p);  
+        }
+        
+
+        dataParseCount = end;
+
+        //------------------------------------------------ 
+        if (end === jsonData["polylines"].length){          // we did it! 
+
+            parseWorkToDo = false;
+            polylineCount.push(polylinePoints.length);
+            vpTreeString = eval('(' + jsonData["vpTree"] + ')');
+            vptrees.push(VPTreeFactory.load(polylinesTemp, dist, vpTreeString));        
+            vpTreeToLoad++;
+            if (vpTreeToLoad < 5){
+                window.setTimeout(loadNextTree, 10000);
+            }
+        }
+
+    }
+
+    function loadVPTree(code, data) {
+        
+        polylinesTemp = [];
+        jsonData = JSON.parse(data);
+        dataParseCount = 0;
+        parseWorkToDo = true;
+
+       
+    }
+
+    var vpTreeToLoad = 0;
+    readTextFile('data/' + vpTreeToLoad + '.json', loadVPTree);
+
+    //----------------------------------------------------------
+    
+
+
     // Temporary!
     // Load a list of existing meta data ids in case we try to request one
     // that doesn't exist yet (because we're still waiting on real data)
@@ -158,7 +271,7 @@
     var drawnCircle;
     var angleMatch = 0;
     var infoobj = JSON.parse(info);
-    var dataobj = JSON.parse(data);
+    var dataobj = [];    ///= JSON.parse(data);
 
     var animatingCircle = {};
     var matchedMetadata = {};
@@ -213,42 +326,42 @@
     }
 
 
-    // make data obj non relative: 
-    console.log('Make data obj non relative:', 'starting...');
+    // // make data obj non relative: 
+    // console.log('Make data obj non relative:', 'starting...');
 
-    for (i = 0; i < dataobj.length; i++){
-        var x = 0;
-        var y = 0;
-        for (j = 0; j < dataobj[i].length/2; j++){
-             x += dataobj[i][j*2];                      // converted to be relative...
-             y += dataobj[i][j*2+1];
-             dataobj[i][j*2] = x;
-             dataobj[i][j*2+1] = y; 
-        }
-    }
+    // for (i = 0; i < dataobj.length; i++){
+    //     var x = 0;
+    //     var y = 0;
+    //     for (j = 0; j < dataobj[i].length/2; j++){
+    //          x += dataobj[i][j*2];                      // converted to be relative...
+    //          y += dataobj[i][j*2+1];
+    //          dataobj[i][j*2] = x;
+    //          dataobj[i][j*2+1] = y; 
+    //     }
+    // }
 
-    console.log('Make data obj non relative:', 'finished.');
+    // console.log('Make data obj non relative:', 'finished.');
     
 
     // convert to Polyline :) 
-    var polylines = [];
-    for (i = 0; i < dataobj.length; i++){
-        ptsTemp = [];
-        var x = 0;
-        var y = 0;
-        for (j = 0; j < dataobj[i].length/2; j++){
-            x = dataobj[i][j*2];                      // converted to be relative...
-            y = dataobj[i][j*2+1];
-            pt = [];
-            pt[0] = x;
-            pt[1] = y;
-            ptsTemp.push(pt);
-        }
-        var p = createPolyline(ptsTemp);
-        p.init(true);
-        polylines.push(p);
-        //console.log(p);
-    }
+    // var polylines = [];
+    // for (i = 0; i < dataobj.length; i++){
+    //     ptsTemp = [];
+    //     var x = 0;
+    //     var y = 0;
+    //     for (j = 0; j < dataobj[i].length/2; j++){
+    //         x = dataobj[i][j*2];                      // converted to be relative...
+    //         y = dataobj[i][j*2+1];
+    //         pt = [];
+    //         pt[0] = x;
+    //         pt[1] = y;
+    //         ptsTemp.push(pt);
+    //     }
+    //     var p = createPolyline(ptsTemp);
+    //     p.init(true);
+    //     polylines.push(p);
+    //     //console.log(p);
+    // }
 
     function dist(a, b) {
         return Utils.cosDistance(a.vector, b.vector);
@@ -280,18 +393,67 @@
         return distance / 60.0;
     }
 
-    var vptree;
-    //vptree = VPTreeFactory.build(polylines, dist);
+    //--------------------------------------------
+    // split data obj 5 ways and make 5 vantage point trees. 
+    // to test if checking against 5 is as good as checking one...
+    //console.log("making a split to test multi vp trees");
 
-    //var newType = {};
+    // var vptrees = [];
+    // var polylinesSplit = [];
+    // var amount = Math.ceil(dataobj.length / 5);
+    // var dataObjChunked = dataobj.chunkArray(amount);
+    // for (var i = 0; i < dataObjChunked.length; i++){
+
+    //     var polylinesTemp = [];
+    //     for (j = 0; j < dataObjChunked[i].length; j++){
+    //         ptsTemp = [];
+    //         var x = 0;
+    //         var y = 0;
+    //         for (k = 0; k < dataObjChunked[i][j].length/2; k++){
+    //             x = dataObjChunked[i][j][k*2];                      // converted to be relative...
+    //             y = dataObjChunked[i][j][k*2+1];
+    //             pt = [];
+    //             pt[0] = x;
+    //             pt[1] = y;
+    //             ptsTemp.push(pt);
+    //         }
+    //         var p = createPolyline(ptsTemp);
+    //         p.init(true);
+    //         polylinesTemp.push(p);
+    //         //console.log(p);
+    //     }
+    //     polylinesSplit.push(polylinesTemp);
+    //     vptrees.push(VPTreeFactory.build(polylinesSplit[i], dist));
+    // }
+
+    // this was used to export the data
+    // for (var i = 0; i < dataObjChunked.length; i++){
+    //      var objectForExport = {};
+    //      objectForExport["polylines"] =  dataObjChunked[i];
+    //      objectForExport["vpTree"] = vptrees[i].stringify();
+    //      console.log(JSON.stringify(objectForExport));
+    // }
+    //  console.log(JSON.stringify(dataObjChunked[0]));
+    //  console.log(JSON.stringify(polylinesSplit[0]));
 
 
-    console.log('VPTreeFactory.load():', 'starting...');
-    vptree = VPTreeFactory.load(polylines,dist,vpTreeString );
 
-    //console.log(vptree.stringify());
+    //console.log("done making a split to test multi vp trees " + vptrees.length);
     
-    console.log('VPTreeFactory.load():', 'finished.');
+    //--------------------------------------------
+
+    // var vptree;
+    // //vptree = VPTreeFactory.build(polylines, dist);
+
+    // //var newType = {};
+
+
+    // console.log('VPTreeFactory.load():', 'starting...');
+    // vptree = VPTreeFactory.load(polylines,dist,vpTreeString );
+
+    // //console.log(vptree.stringify());
+    
+    // console.log('VPTreeFactory.load():', 'finished.');
     //console.log(dataobj[0]);
 
     var drawing = false;
@@ -331,6 +493,14 @@
     stage.addChild(drawing);
     drawing.position.x = 0;
     drawing.position.y = 0;
+
+
+    // loading: 
+    var text = new PIXI.Text('Loading',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+    stage.addChild(text);
+    text.position.x = 300;
+    text.position.y = 300;
+
 
     var circleOffsetX;
     var circleOffsetY;
@@ -383,179 +553,229 @@
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
         bAmDrawing = false;
 
-        //-----------------------------------------------------
-
+        // resample if we need to: 
         if (pts.length != 120){
+            var xPts = [];
+            var yPts = [];
+            for (var i = 0; i < pts.length/2; i++){
+                x = pts[i*2];
+                y = pts[i*2+1];
+                xPts[i] = x;
+                yPts[i] = y;
+            }
+            pts = [];       
+            var xSmooth = Smooth(xPts);
+            var ySmooth = Smooth(yPts);
+            for (var i = 0; i < 60; i++){
+                pctMe = i / 59.0;
+                var newX = xSmooth(pctMe * (xPts.length -1));
+                var newY = ySmooth(pctMe * (yPts.length -1));
+                pts[pts.length] = newX;
+                pts[pts.length] = newY;
+            }
+        }
 
-                    var xPts = [];
-                    var yPts = [];
+        ptsTemp = [];
+        for (j = 0; j < pts.length/2; j++){
+            x = pts[j*2];
+            y = pts[j*2+1];
+            pt = [];
+            pt[0] = x;
+            pt[1] = y;
+            ptsTemp.push(pt);
+        }
 
-                    for (var i = 0; i < pts.length/2; i++){
-                        x = pts[i*2];
-                        y = pts[i*2+1];
-                        xPts[i] = x;
-                        yPts[i] = y;
-                    }
+        ptsTemp2 = [];
+        for (j = 0; j < pts.length/2; j++){
+            x = pts[j*2];
+            y = pts[j*2+1];
+            pt = [];
+            pt[0] = x;
+            pt[1] = y;
+            ptsTemp2.push(pt);
+        }
+        ptsTemp2.reverse();
 
-                    pts = [];       
+        // make a circle so we can scale this circle 
+        drawnCircle = makeCircle(returnPathForArray(pts));
+        var p = createPolyline(ptsTemp);
+        var p2 = createPolyline(ptsTemp2);
+        p.init(true);
+        p2.init(true);
+        var resultsA; //= vptree.search(p, 1);
+        //console.log('resultsA:', resultsA[0]);
+        var resultsB; // = vptree.search(p2, 1);
+        //console.log('resultsB:', resultsB[0]);
 
-                    var xSmooth = Smooth(xPts);
-                    var ySmooth = Smooth(yPts);
+        if (vptrees.length == 0){
+            console.log("we are still loading data, returning");
+            return;
+        }
 
-                    for (var i = 0; i < 60; i++){
-                        pctMe = i / 59.0;
-                        var newX = xSmooth(pctMe * (xPts.length -1));
-                        var newY = ySmooth(pctMe * (yPts.length -1));
+        // check the multiple trees: 
+        var minA = 1000000.0;
+        var minAindex = -1;
+        var minAnum = -1;
 
-                        pts[pts.length] = newX;
-                        pts[pts.length] = newY;
-                           
-                    }
+        var minB = 1000000.0;
+        var minBindex = -1;
+        var minBnum = -1;
 
-                }
+        for (var i = 0; i < vptrees.length; i++){
 
+            var multiResultsA = vptrees[i].search(p, 1);
+            console.log('multiResultsA:', multiResultsA[0]);
+            var multiResultsB = vptrees[i].search(p2, 1);
+            console.log('multiResultsB:', multiResultsB[0]);
 
+            if (i === 0){
+                resultsA = multiResultsA;
+                resultsB = multiResultsB;
+            }
 
-                ptsTemp = [];
-                for (j = 0; j < pts.length/2; j++){
-                    x = pts[j*2];
-                    y = pts[j*2+1];
-                    pt = [];
-                    pt[0] = x;
-                    pt[1] = y;
-                    ptsTemp.push(pt);
-                }
+            if (multiResultsA[0].d < minA){
+                minA = multiResultsA[0].d ;
+                minAindex =  multiResultsA[0].i;
+                minANum = i;
+            }
 
+            if (multiResultsB[0].d < minB){
+                minB = multiResultsB[0].d ;
+                minBindex =  multiResultsB[0].i;
+                minBNum = i;
+            }
+        }
 
-                ptsTemp2 = [];
-                for (j = 0; j < pts.length/2; j++){
-                    x = pts[j*2];
-                    y = pts[j*2+1];
-                    pt = [];
-                    pt[0] = x;
-                    pt[1] = y;
-                    ptsTemp2.push(pt);
-                }
+        var whichOneA = 0;
+        var whichOneB = 0;
 
-                ptsTemp2.reverse();
+        for (var i = 0; i < minANum; i++){
+            whichOneA += polylineCount[i];
+        }
+        whichOneA += minAindex;
 
-                // make a circle so we can scale this circle 
-                drawnCircle = makeCircle(returnPathForArray(pts));
-                var p = createPolyline(ptsTemp);
-                var p2 = createPolyline(ptsTemp2);
-                p.init(true);
-                p2.init(true);
-                resultsA = vptree.search(p, 1);
+        for (var i = 0; i < minBNum; i++){
+            whichOneB += polylineCount[i];
+        }
+        whichOneB += minBindex;
+        
+        console.log(minA + " " + minB + " " + whichOneA + " " + whichOneB);
 
-                console.log('resultsA:', resultsA[0]);
-
-                resultsB = vptree.search(p2, 1);
-
-                console.log('resultsB:', resultsB[0]);
-
-                if (resultsB[0].d < resultsA[0].d){
-                    results = resultsB;
-                    //pts.reverse();
-                    // reverse pair of two
-                    for (j = 0; j < pts.length/2; j++){
-                        pts[j*2] = ptsTemp2[j][0];
-                        pts[j*2+1] = ptsTemp2[j][1];
-                    }      
-
-                } else {
-                    results = resultsA;
-                }
-
-                console.log('results:', results[0]);
-
-
-                var ptsScaled = pts.slice();
-                var scaleMe = scale = 250.0 / drawnCircle.r;
-                for (j = 0; j < ptsScaled.length/2; j++){
-                    ptsScaled[j*2] -= drawnCircle.x;
-                    ptsScaled[j*2+1] -= drawnCircle.y;
-                    ptsScaled[j*2] *= scaleMe;
-                    ptsScaled[j*2+1] *= scaleMe;
-                         
-                }
-
-
-
-                var bestAngle = 0;
-                var smallestDiff = 10000000;
-                for (var i = 0; i < 300; i++){
-                    var angle = (i/300.0) * Math.PI * 2;
-                    var ptsRotated = dataobj[results[0].i].slice(0);
-
-                    rotate(ptsRotated, angle);
-                    rotatedDist = distNormalizedLines(ptsScaled, ptsRotated);
-
-                    if (rotatedDist < smallestDiff){
-                        smallestDiff = rotatedDist;
-                        bestAngle = angle;
-                    }
-                   
-                }
-
-                var id = infoobj[results[0].i][0];
-                readTextFile('metadata/' + id + '.json', updateMetadataCallback);
+        console.log("overwriting original results");    
 
 
-                //console.log( infoobj[results[0].i] );
+        resultsA[0].i = whichOneA;
+        resultsA[0].d = minA;
 
-                angleMatch = bestAngle;
-                updateGraphics = true;
+        resultsB[0].i = whichOneB;
+        resultsB[0].d = minB;
+        
+        console.log("done overwriting original results");
+
+    
+        if (resultsB[0].d < resultsA[0].d){
+            results = resultsB;
+            //pts.reverse();
+            // reverse pair of two
+            for (j = 0; j < pts.length/2; j++){
+                pts[j*2] = ptsTemp2[j][0];
+                pts[j*2+1] = ptsTemp2[j][1];
+            }      
+
+        } else {
+            results = resultsA;
+        }
+
+        console.log('results:', results[0]);
 
 
-                console.log('TextureCache:', PIXI.utils.TextureCache);
+        var ptsScaled = pts.slice();
+        var scaleMe = scale = 250.0 / drawnCircle.r;
+        for (j = 0; j < ptsScaled.length/2; j++){
+            ptsScaled[j*2] -= drawnCircle.x;
+            ptsScaled[j*2+1] -= drawnCircle.y;
+            ptsScaled[j*2] *= scaleMe;
+            ptsScaled[j*2+1] *= scaleMe;
+                 
+        }
 
-                var random = Math.floor(Math.random()*1000);
 
-                // Create a new Texture and Sprite from the matched image
-                if (myGui.loadFromCloud)
-                    var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
-                else
-                    var url = 'full/';
-                var texture = PIXI.Texture.fromImage(url + infoobj[results[0].i][0] + '.jpg');
 
-                var sprite = new PIXI.Sprite(texture);
+        var bestAngle = 0;
+        var smallestDiff = 10000000;
+        for (var i = 0; i < 300; i++){
+            var angle = (i/300.0) * Math.PI * 2;
+            var ptsRotated = dataobj[results[0].i].slice(0);
 
-                // Add the new Sprite to the stage
-                // Old Sprits will fade out, calculated in animate()
-                sprites.push(sprite);
-                stage.addChild(sprite);
+            rotate(ptsRotated, angle);
+            rotatedDist = distNormalizedLines(ptsScaled, ptsRotated);
 
-                // Move drawn line on top of images
-                stage.removeChild(drawing);
-                stage.addChild(drawing);
+            if (rotatedDist < smallestDiff){
+                smallestDiff = rotatedDist;
+                bestAngle = angle;
+            }
+           
+        }
 
-                // Positioning for matched image
-                sprite.position.x = drawnCircle.x;
-                sprite.position.y = drawnCircle.y;
-                sprite.rotation = angleMatch;
-                sprite.scale.x = drawnCircle.r / infoobj[results[0].i][3];
-                sprite.scale.y = drawnCircle.r / infoobj[results[0].i][3];
+        var id = infoobj[results[0].i][0];
+        readTextFile('metadata/' + id + '.json', updateMetadataCallback);
 
-                xPosOrig = infoobj[results[0].i][1];
-                yPosOrig = infoobj[results[0].i][2];
 
-                sprite.anchor.x = xPosOrig / 1800.0;
-                sprite.anchor.y = yPosOrig / 1200.0;
+        //console.log( infoobj[results[0].i] );
 
-                sprite.originalPosition = {};
-                sprite.originalPosition.x = sprite.position.x;
-                sprite.originalPosition.y = sprite.position.y;
-                sprite.originalScale = sprite.scale.x;
+        angleMatch = bestAngle;
+        updateGraphics = true;
 
-                animatingCircle.x = drawnCircle.x;
-                animatingCircle.y = drawnCircle.y;
-                animatingCircle.r = drawnCircle.r;
 
-                matched = true;
-                
-                //sprite1.scale.x =  1.0;
+        console.log('TextureCache:', PIXI.utils.TextureCache);
 
-            //----------------------------
+        var random = Math.floor(Math.random()*1000);
+
+        // Create a new Texture and Sprite from the matched image
+        if (myGui.loadFromCloud)
+            var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+        else
+            var url = 'full/';
+        var texture = PIXI.Texture.fromImage(url + infoobj[results[0].i][0] + '.jpg');
+
+        var sprite = new PIXI.Sprite(texture);
+
+        // Add the new Sprite to the stage
+        // Old Sprits will fade out, calculated in animate()
+        sprites.push(sprite);
+        stage.addChild(sprite);
+
+        // Move drawn line on top of images
+        stage.removeChild(drawing);
+        stage.addChild(drawing);
+
+        // Positioning for matched image
+        sprite.position.x = drawnCircle.x;
+        sprite.position.y = drawnCircle.y;
+        sprite.rotation = angleMatch;
+        sprite.scale.x = drawnCircle.r / infoobj[results[0].i][3];
+        sprite.scale.y = drawnCircle.r / infoobj[results[0].i][3];
+
+        xPosOrig = infoobj[results[0].i][1];
+        yPosOrig = infoobj[results[0].i][2];
+
+        sprite.anchor.x = xPosOrig / 1800.0;
+        sprite.anchor.y = yPosOrig / 1200.0;
+
+        sprite.originalPosition = {};
+        sprite.originalPosition.x = sprite.position.x;
+        sprite.originalPosition.y = sprite.position.y;
+        sprite.originalScale = sprite.scale.x;
+
+        animatingCircle.x = drawnCircle.x;
+        animatingCircle.y = drawnCircle.y;
+        animatingCircle.r = drawnCircle.r;
+
+        matched = true;
+        
+        //sprite1.scale.x =  1.0;
+
+    //----------------------------
 
     }; 
 
@@ -575,7 +795,16 @@
     var timef = 0;
 
     function animate() {
-            
+        
+
+        parseLoadVPTree();  // always try to parse ! 
+
+
+        if (vptrees.length > 0){
+            text.position.x = -1000;
+        }
+
+
         if (drawing === false && 
             matched === true){
             updateGraphics === true;
