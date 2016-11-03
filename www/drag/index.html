@@ -151,6 +151,9 @@ var Gui = function() {
   this.lineColor = 0xffffff;
   this.lineOpacity = 0.7;
   this.lineWidth = 3;
+  this.lineShadow = false;
+  this.shadowDistance = 3;
+  this.shadowBlur = 4;
   this.dragSpeed = 1.0;
   this.velSmoothRate = 0.8;
   this.angleSmoothRate = 0.97;
@@ -204,6 +207,9 @@ window.onload = function() {
     gui.addColor(myGui, 'lineColor');
     gui.add(myGui, 'lineOpacity', 0, 1);
     gui.add(myGui, 'lineWidth', 1, 10);
+    var shadowToggle = gui.add(myGui, 'lineShadow');
+    gui.add(myGui, 'shadowDistance', 0, 10);
+    gui.add(myGui, 'shadowBlur', 0, 10);
     gui.add(myGui, 'dragSpeed', 0.1, 5);
     gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
     gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
@@ -213,6 +219,8 @@ window.onload = function() {
     gui.add(myGui, 'reverseSwipe');
 
     gui.remember(myGui);
+
+    shadowToggle.onFinishChange(updateLineShadow);
 };
 //-------------------------------------------
    
@@ -343,9 +351,14 @@ function simpleStringify (object){
     stage.interactive = true;
     stage.hitArea = new PIXI.Rectangle(0, 0, w, h);
     
+    var dropShadowFilter = new PIXI.filters.DropShadowFilter();
     var drawing = new PIXI.Graphics();
     var container = new PIXI.Container();
     var overalContainer = new PIXI.Container();
+
+    function updateLineShadow(val) {
+        drawing.filters = val ? [ dropShadowFilter ] : null;
+    }
     
     overalContainer.addChild(container);
     overalContainer.addChild(drawing);
@@ -825,6 +838,8 @@ function simpleStringify (object){
         if (updateGraphics === true && ptsSmooth.length > 1){
             drawing.clear();
             drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
+            dropShadowFilter.blur = myGui.shadowBlur;
+            dropShadowFilter.distance = myGui.shadowDistance;
 
             if (pts.length > 0){
                 smoothPt.x = myGui.centerSmoothRate * smoothPt.x + (1.0 - myGui.centerSmoothRate) * ptsSmooth[ptsSmooth.length-1].x;
@@ -894,8 +909,9 @@ function simpleStringify (object){
                    
             }
 
-
-            updateGraphics = false;
+            // Keep this on for now since GUI changes won't take affect if we're not rendering
+            // updateGraphics = false;
+            updateGraphics = true;
          }
 
         renderer.render(stage);
