@@ -295,7 +295,7 @@
 
     var animatingCircle = {};
     var matchedMetadata = {};
-    var textureJustLoaded = false;
+    var textureHasLoaded = false;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -547,7 +547,7 @@
 
         bAmDrawing = true;
         linePulseCounter = 0;
-        textureJustLoaded = false;
+        textureHasLoaded = false;
         pts = [];
         matched = false;
         pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
@@ -769,6 +769,7 @@
         var texture = PIXI.Texture.fromImage(url + infoobj[results[0].i][0] + '.jpg');
 
         var sprite = new PIXI.Sprite(texture);
+        sprite.alpha = 0;
 
         // Add the new Sprite to the stage
         // Old Sprits will fade out, calculated in animate()
@@ -858,19 +859,31 @@
                         drawing.lineTo(pts[i*2], pts[i*2+1]);
                     }
                 }
+
+                // Fade out old images to halfway
+                for (var i = 0; i < sprites.length; i++) {
+                    if (sprites[i].alpha >= 0.5) {
+                        sprites[i].alpha -= myGui.fadeSpeed;
+                    }
+                }
+
             } else {
 
+                // Update metadata UI when the texture loads
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
-                    if (!textureJustLoaded) {
+                    if (!textureHasLoaded) {
                         console.log('Texture just finished loading!');
-                        textureJustLoaded = true;
+                        textureHasLoaded = true;
                         updateMetadata(matchedMetadata);
                     }
                 }
 
-                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded)
+                // Set the line style based on our state
+                // If the texture is loading, then it should pulse
+                // Otherwise it's solid
+                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
                     drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
-                else {
+                } else {
                     linePulseCounter += (0.01 * myGui.pulseSpeed);
                     var sine = Math.sin(linePulseCounter);
                     var thickness = Utils.remap(sine, -1, 1, myGui.lineWidth - myGui.pulseWidth, myGui.lineWidth + myGui.pulseWidth);
@@ -937,18 +950,26 @@
 
             // Fade out old images
             if (sprites.length) {
-                // If we're drawing then all images should get faded out
-                // If we're not drawing, then the last image should stay but
-                // everything else before it should get faded
                 var endingIndex = bAmDrawing ? sprites.length - 1 : sprites.length - 2;
                 for (var i = 0; i <= endingIndex; i++) {
                     sprites[i].alpha -= myGui.fadeSpeed;
                 }
+                // Fade in most recent image
+                if (sprites[sprites.length-1].alpha < 1) {
+                    sprites[sprites.length-1].alpha += myGui.fadeSpeed;
+
+                    // Make sure it doesn't exceed 1.0
+                    if (sprites[sprites.length-1].alpha > 1)
+                        sprites[sprites.length-1].alpha = 1;
+                }
+
                 // Remove invisible Sprites
                 // Work in reverse to avoid the delete-while-iterating problem
                 for (var i = sprites.length-1; i >= 0; i--) {
                     if (sprites[i].alpha <= 0) {
                         // Delete 1 element at this index
+                        stage.removeChild(sprites[i]);
+                        sprites[i].destroy();
                         sprites.splice(i, 1);
                     }
                 }
