@@ -101,33 +101,22 @@
 
     // Update DOM elements with new data
     function updateMetadata(data) {
-        if (data.locality) var topLine = data.locality;
-        else if (data.admin3) var topLine = data.admin3;
-        else if (data.admin2) var topLine = data.admin2;
-        else if (data.admin1) var topLine = data.admin1;
-        else var topLine = '';
+        var line1 = data['line-1'] || '';
+        var line2 = data['line-2'] || '';
+        var attribution = data['attribution'] || '';
+        var url = data['url'] || '';
 
-        var attribution = data.attribution || '';
-        var country = data.country || '';
-
+        document.getElementById('info-line1').innerText = line1;
+        document.getElementById('info-line2').innerText = line2;
+        document.getElementById('info-line1').href = url;
+        document.getElementById('info-line2').href = url;
         document.getElementById('info-attribution').innerText = attribution;
-        document.getElementById('info-line1').innerText = topLine;
-        document.getElementById('info-line2').innerText = country;
     }
 
     // Callback from AJAX request to get metadata for matched line
-    // Because we don't have all the metadata yet, we sometimes get a 404
-    // Therefore pull metadata from a random image from a list that we've built
-    // that has known, existing filenames. The 404 section can eventually
-    // be removed
     function updateMetadataCallback(code, data) {
         if (code == 200) {
             matchedMetadata = JSON.parse(data);
-        }
-        else if (code == 404) {
-            var index = Math.floor(Math.random()*metadataIDList.length);
-            var id = metadataIDList[index];
-            readTextFile('metadata/' + id + '.json', updateMetadataCallback);
         }
     };
 
@@ -232,9 +221,8 @@
     
 
 
-    // Temporary!
-    // Load a list of existing meta data ids in case we try to request one
-    // that doesn't exist yet (because we're still waiting on real data)
+    // Load a list of existing meta data ids since the filenames are actually indexed
+    // from 0 - 1521 instead of using the id as the filename
     var metadataIDList = [];
     readTextFile('metadata-id-list.json', function(code, data) {
         metadataIDList = JSON.parse(data);
@@ -781,7 +769,7 @@
         }
 
         var id = infoobj[results[0].i][0];
-        readTextFile('metadata/' + id + '.json', updateMetadataCallback);
+        readTextFile('metadata/' + metadataIDList[id] + '.json', updateMetadataCallback);
 
 
         //console.log( infoobj[results[0].i] );
@@ -1106,8 +1094,8 @@
     </script>
 
     <div class="info">
-        <div><a id="info-line1" href="asdf"></a></div>
-        <div><a id="info-line2" href="asdf"></a></div>
+        <div><a id="info-line1" href="" target="maps"></a></div>
+        <div><a id="info-line2" href="" target="maps"></a></div>
         <div id="info-attribution"></div>
     </div>
 
