@@ -165,7 +165,7 @@
 
         // otherwise let's do some work (accross frames) 
 
-        console.log("doing some work! " +  dataParseCount + " of " + jsonData["polylines"].length);
+        //console.log("doing some work! " +  dataParseCount + " of " + jsonData["polylines"].length);
 
         var start =  dataParseCount;
         var end = Math.min(jsonData["polylines"].length,  dataParseCount + 50);
@@ -530,12 +530,15 @@
     var circleOffsetX;
     var circleOffsetY;
     var circleScaleRatio;
+    var touchID;
     
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     stage.mousedown = stage.touchstart = function(moveData) {
 
-        console.log('mousedown/touchstart');
+
+        //if (bAmDrawing === true) return;
+
         // var random = Math.floor(Math.random()*1000);
         // texture = PIXI.Texture.fromImage('full/' + random + '.jpg');
         // sprite1 = new PIXI.Sprite(texture);
@@ -560,11 +563,12 @@
     stage.mousemove = stage.touchmove = function(moveData) {
 
 
+        
          
         if (bAmDrawing === true){
 
 
-                console.log("move " + moveData.data.identifier);
+                //console.log("move " + moveData.data.identifier);
 
                  pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
                  pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
@@ -581,6 +585,9 @@
     };
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
+
+      
+
         bAmDrawing = false;
 
         // resample if we need to: 
@@ -969,6 +976,7 @@
                     if (sprites[i].alpha <= 0) {
                         // Delete 1 element at this index
                         stage.removeChild(sprites[i]);
+                        sprites[i].texture.destroy(true);
                         sprites[i].destroy();
                         sprites.splice(i, 1);
                     }
