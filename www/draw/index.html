@@ -259,8 +259,9 @@
 
         this.imgFadeInSpeed = 0.01;
         this.imgFadeOutSpeed = 0.01;
-        this.bgFadeInSpeed = 0.008;
+        this.bgFadeInSpeed = 0.004;
         this.bgFadeOutSpeed = 0.015;
+        this.bgOpacity = 0.75;
         
         this.loadFromCloud = true;
     };
@@ -294,6 +295,7 @@
         f4.add(myGui, 'imgFadeOutSpeed', 0, 0.2);
         f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
         f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
+        f4.add(myGui, 'bgOpacity', 0, 1);
 
         // gui.add(myGui, 'loadFromCloud');
         
@@ -907,9 +909,10 @@
             } else {
 
                 // Update metadata UI when the texture loads
-                console.log('Updating metadata UI, sprites length is:', sprites.length);
-                if (sprites[sprites.length-1].texture.baseTexture &&
-                    sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                var lastSprite = sprites[sprites.length-1];
+                if (lastSprite.texture.baseTexture &&
+                    lastSprite.texture.baseTexture.hasLoaded) {
+
                     if (!textureHasLoaded) {
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
@@ -944,8 +947,7 @@
 
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
-                if (sprites[sprites.length-1].texture.baseTexture &&
-                    sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                if (textureHasLoaded) {
                     animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
                     animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
                     animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
@@ -1024,7 +1026,7 @@
                     backgroundImages[i].alpha -= myGui.bgFadeOutSpeed;
                 }
                 // Fade in most recent image
-                if (backgroundImages[backgroundImages.length-1].alpha < 1) {
+                if (backgroundImages[backgroundImages.length-1].alpha < myGui.bgOpacity) {
                     backgroundImages[backgroundImages.length-1].alpha += myGui.bgFadeInSpeed;
 
                     // Make sure it doesn't exceed 1.0
