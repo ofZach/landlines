@@ -559,8 +559,13 @@
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
-         console.log("move");
+
+         
         if (bAmDrawing === true){
+
+
+                console.log("move " + moveData.data.identifier);
+
                  pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
                  pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
                 
@@ -838,6 +843,8 @@
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
+
+            //console.log(drawing);
             dropShadowFilter.blur = myGui.shadowBlur;
             dropShadowFilter.distance = myGui.shadowDistance;
 
@@ -869,7 +876,9 @@
                     var thickness = Utils.remap(sine, -1, 1, myGui.lineWidth - myGui.pulseWidth, myGui.lineWidth + myGui.pulseWidth);
                     var opacity = Utils.remap(sine, -1, 1, myGui.pulseOpacityLow, myGui.pulseOpacityHigh);
                     drawing.lineStyle(thickness, myGui.lineColor, opacity);
-                }
+                }   
+
+
 
                 var translateSpeed = myGui.translateSpeed;
                 var scaleSpeed = myGui.scaleSpeed;
