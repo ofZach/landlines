@@ -246,15 +246,22 @@
         this.lineShadow = false;
         this.shadowDistance = 3;
         this.shadowBlur = 4;
+
         this.pulseWidth = 2;
         this.pulseSpeed = 10;
         this.pulseOpacityLow = 0.2;
         this.pulseOpacityHigh = 0.9;
+
         this.scaleSize = 0.4;
         this.scaleSpeed = 0.05;
         this.translateSpeed = 0.1;
-        this.fadeSpeed = 0.01;
         this.showEnclosingCircle = false;
+
+        this.imgFadeInSpeed = 0.01;
+        this.imgFadeOutSpeed = 0.01;
+        this.bgFadeInSpeed = 0.008;
+        this.bgFadeOutSpeed = 0.015;
+        
         this.loadFromCloud = true;
     };
 
@@ -262,22 +269,33 @@
         myGui = new Gui();
 
         var gui = new dat.GUI();
-        gui.addColor(myGui, 'lineColor');
-        gui.add(myGui, 'lineOpacity', 0, 1);
-        gui.add(myGui, 'lineWidth', 1, 10);
-        var shadowToggle = gui.add(myGui, 'lineShadow');
-        gui.add(myGui, 'shadowDistance', 0, 10);
-        gui.add(myGui, 'shadowBlur', 0, 10);
-        gui.add(myGui, 'pulseWidth', 1, 10);
-        gui.add(myGui, 'pulseOpacityLow', 0, 1);
-        gui.add(myGui, 'pulseOpacityHigh', 0, 1);
-        gui.add(myGui, 'pulseSpeed', 1, 20);
-        gui.add(myGui, 'scaleSize', 0.2, 0.5);
-        gui.add(myGui, 'scaleSpeed', 0, 0.5);
-        gui.add(myGui, 'translateSpeed', 0, 0.5);
-        gui.add(myGui, 'fadeSpeed', 0, 0.2);
-        gui.add(myGui, 'showEnclosingCircle');
-        gui.add(myGui, 'loadFromCloud');
+        var f1 = gui.addFolder('line');
+        f1.addColor(myGui, 'lineColor');
+        f1.add(myGui, 'lineOpacity', 0, 1);
+        f1.add(myGui, 'lineWidth', 1, 10);
+        var shadowToggle = f1.add(myGui, 'lineShadow');
+        f1.add(myGui, 'shadowDistance', 0, 10);
+        f1.add(myGui, 'shadowBlur', 0, 10);
+
+        var f2 = gui.addFolder('pulse');
+        f2.add(myGui, 'pulseWidth', 1, 10);
+        f2.add(myGui, 'pulseOpacityLow', 0, 1);
+        f2.add(myGui, 'pulseOpacityHigh', 0, 1);
+        f2.add(myGui, 'pulseSpeed', 1, 20);
+
+        var f3 = gui.addFolder('scale/translate');
+        f3.add(myGui, 'scaleSize', 0.2, 0.5);
+        f3.add(myGui, 'scaleSpeed', 0, 0.5);
+        f3.add(myGui, 'translateSpeed', 0, 0.5);
+        f3.add(myGui, 'showEnclosingCircle');
+        
+        var f4 = gui.addFolder('fade');
+        f4.add(myGui, 'imgFadeInSpeed', 0, 0.2);
+        f4.add(myGui, 'imgFadeOutSpeed', 0, 0.2);
+        f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
+        f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
+
+        // gui.add(myGui, 'loadFromCloud');
         
         gui.remember(myGui);
 
@@ -487,6 +505,7 @@
     var bAmDrawing = false;
     var updateGraphics = false;
     var sprites = [];
+    var backgroundImages = [];
 
     // Create the Renderer
     var w = window.innerWidth;
@@ -770,11 +789,11 @@
 
         // Create a new Texture and Sprite from the matched image
         if (myGui.loadFromCloud)
-            var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+            var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/';
         else
-            var url = 'full/';
-        var texture = PIXI.Texture.fromImage(url + infoobj[results[0].i][0] + '.jpg');
-
+            var url = '/';
+        
+        var texture = PIXI.Texture.fromImage(url + 'full/' + infoobj[results[0].i][0] + '.jpg');
         var sprite = new PIXI.Sprite(texture);
         sprite.alpha = 0;
 
@@ -809,9 +828,17 @@
         animatingCircle.y = drawnCircle.y;
         animatingCircle.r = drawnCircle.r;
 
+        // Update background image
+        var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
+        bg.alpha = 0;
+        // TODO Properly scale the background image to cover the background while maintaing
+        // its aspect ratio. For now just stretch to fill
+        bg.width = renderer.view.width;
+        bg.height = renderer.view.height;
+        backgroundImages.push(bg);
+        stage.addChildAt(bg, 0);
+
         matched = true;
-        
-        //sprite1.scale.x =  1.0;
 
     //----------------------------
 
@@ -820,10 +847,6 @@
 
 
     //------------------------------------------------------------------------------------------------
-    
-    // stage.click = stage.tap = function()
-    // {
-    // }
 
     animate();
     //requestAnimationFrame(animate);
@@ -870,8 +893,12 @@
                 // Fade out old images to halfway
                 for (var i = 0; i < sprites.length; i++) {
                     if (sprites[i].alpha >= 0.5) {
-                        sprites[i].alpha -= myGui.fadeSpeed;
+                        sprites[i].alpha -= myGui.imgFadeOutSpeed;
                     }
+                }
+                // Fade out background images
+                for (var i = 0; i < backgroundImages.length; i++) {
+                    backgroundImages[i].alpha -= myGui.bgFadeOutSpeed;
                 }
 
             } else {
@@ -960,11 +987,11 @@
             if (sprites.length) {
                 var endingIndex = bAmDrawing ? sprites.length - 1 : sprites.length - 2;
                 for (var i = 0; i <= endingIndex; i++) {
-                    sprites[i].alpha -= myGui.fadeSpeed;
+                    sprites[i].alpha -= myGui.imgFadeOutSpeed;
                 }
                 // Fade in most recent image
                 if (sprites[sprites.length-1].alpha < 1) {
-                    sprites[sprites.length-1].alpha += myGui.fadeSpeed;
+                    sprites[sprites.length-1].alpha += myGui.imgFadeInSpeed;
 
                     // Make sure it doesn't exceed 1.0
                     if (sprites[sprites.length-1].alpha > 1)
@@ -980,6 +1007,34 @@
                         sprites[i].texture.destroy(true);
                         sprites[i].destroy();
                         sprites.splice(i, 1);
+                    }
+                }
+            }
+
+            // Fade out background images
+            console.log()
+            if (backgroundImages.length) {
+                var endingIndex = bAmDrawing ? backgroundImages.length - 1 : backgroundImages.length - 2;
+                for (var i = 0; i <= endingIndex; i++) {
+                    backgroundImages[i].alpha -= myGui.bgFadeOutSpeed;
+                }
+                // Fade in most recent image
+                if (backgroundImages[backgroundImages.length-1].alpha < 1) {
+                    backgroundImages[backgroundImages.length-1].alpha += myGui.bgFadeInSpeed;
+
+                    // Make sure it doesn't exceed 1.0
+                    if (backgroundImages[backgroundImages.length-1].alpha > 1)
+                        backgroundImages[backgroundImages.length-1].alpha = 1;
+                }
+
+                // Remove invisible Sprites
+                // Work in reverse to avoid the delete-while-iterating problem
+                for (var i = backgroundImages.length-1; i >= 0; i--) {
+                    if (backgroundImages[i].alpha <= 0) {
+                        // Delete 1 element at this index
+                        stage.removeChild(backgroundImages[i]);
+                        backgroundImages[i].destroy();
+                        backgroundImages.splice(i, 1);
                     }
                 }
             }
