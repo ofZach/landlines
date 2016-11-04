@@ -793,6 +793,8 @@
         else
             var url = '/';
         
+        PIXI.loader.reset();
+
         var texture = PIXI.Texture.fromImage(url + 'full/' + infoobj[results[0].i][0] + '.jpg');
         var sprite = new PIXI.Sprite(texture);
         sprite.alpha = 0;
@@ -829,6 +831,7 @@
         animatingCircle.r = drawnCircle.r;
 
         // Update background image
+        PIXI.loader.reset();
         var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
@@ -905,7 +908,8 @@
 
                 // Update metadata UI when the texture loads
                 console.log('Updating metadata UI, sprites length is:', sprites.length);
-                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                if (sprites[sprites.length-1].texture.baseTexture &&
+                    sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
                     if (!textureHasLoaded) {
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
@@ -916,7 +920,7 @@
                 // Set the line style based on our state
                 // If the texture is loading, then it should pulse
                 // Otherwise it's solid
-                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                if (textureHasLoaded) {
                     drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
                 } else {
                     linePulseCounter += (0.01 * myGui.pulseSpeed);
@@ -940,7 +944,8 @@
 
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
-                if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
+                if (sprites[sprites.length-1].texture.baseTexture &&
+                    sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
                     animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
                     animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
                     animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
