@@ -240,7 +240,16 @@
     //------------------------------------------------------------------- GUI
     var myGui;
     var Gui = function() {
+        this.lineColor = 0xe8f700;
+        this.lineOpacity = 0.75;
+        this.lineWidth = 4;
+        this.lineShadow = false;
+        this.shadowDistance = 3;
+        this.shadowBlur = 4;
+        this.pulseWidth = 2;
         this.pulseSpeed = 10;
+        this.pulseOpacityLow = 0.2;
+        this.pulseOpacityHigh = 0.9;
         this.scaleSize = 0.4;
         this.scaleSpeed = 0.05;
         this.translateSpeed = 0.1;
@@ -253,7 +262,16 @@
         myGui = new Gui();
 
         var gui = new dat.GUI();
-        gui.add(myGui, 'pulseSpeed', 1, 15);
+        gui.addColor(myGui, 'lineColor');
+        gui.add(myGui, 'lineOpacity', 0, 1);
+        gui.add(myGui, 'lineWidth', 1, 10);
+        var shadowToggle = gui.add(myGui, 'lineShadow');
+        gui.add(myGui, 'shadowDistance', 0, 10);
+        gui.add(myGui, 'shadowBlur', 0, 10);
+        gui.add(myGui, 'pulseWidth', 1, 10);
+        gui.add(myGui, 'pulseOpacityLow', 0, 1);
+        gui.add(myGui, 'pulseOpacityHigh', 0, 1);
+        gui.add(myGui, 'pulseSpeed', 1, 20);
         gui.add(myGui, 'scaleSize', 0.2, 0.5);
         gui.add(myGui, 'scaleSpeed', 0, 0.5);
         gui.add(myGui, 'translateSpeed', 0, 0.5);
@@ -262,6 +280,8 @@
         gui.add(myGui, 'loadFromCloud');
         
         gui.remember(myGui);
+
+        shadowToggle.onFinishChange(updateLineShadow);
     };
 
 
@@ -481,18 +501,23 @@
     stage.hitArea = new PIXI.Rectangle(0, 0, w, h);
 
     // Handle device orientation change
-    window.addEventListener("deviceorientation", function() {
-        console.log('orientation change!', window.orientation);
-        console.log('inner width:', window.innerWidth, 'inner height:', window.innerHeight);
-        renderer.resize(window.innerWidth, window.innerHeight);
-        stage.hitArea.set(window.innerWidth, window.innerHeight);
-    }, true);
+    // window.addEventListener("deviceorientation", function() {
+    //     console.log('orientation change!', window.orientation);
+    //     console.log('inner width:', window.innerWidth, 'inner height:', window.innerHeight);
+    //     renderer.resize(window.innerWidth, window.innerHeight);
+    //     stage.hitArea = new PIXI.Rectangle(window.innerWidth, window.innerHeight);
+    // }, true);
 
     // Line drawn out by the user
+    var dropShadowFilter = new PIXI.filters.DropShadowFilter();
     var drawing = new PIXI.Graphics();
     stage.addChild(drawing);
     drawing.position.x = 0;
     drawing.position.y = 0;
+
+    function updateLineShadow(val) {
+        drawing.filters = val ? [ dropShadowFilter ] : null;
+    }
 
 
     // loading: 
@@ -813,9 +838,11 @@
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
+            dropShadowFilter.blur = myGui.shadowBlur;
+            dropShadowFilter.distance = myGui.shadowDistance;
 
             if (!matched){
-                drawing.lineStyle(4, 0xffffff, 1);
+                drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
 
                 for (var i = 0; i < pts.length/2; i++){
                     if (i == 0){
@@ -835,13 +862,13 @@
                 }
 
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded)
-                    drawing.lineStyle(4, 0xffffff, 1);
+                    drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
                 else {
                     linePulseCounter += (0.01 * myGui.pulseSpeed);
                     var sine = Math.sin(linePulseCounter);
-                    var thickness = (sine + 3) * 2;
-                    var opacity = (sine + 2) / 2;
-                    drawing.lineStyle(thickness, 0xffffff, opacity);
+                    var thickness = Utils.remap(sine, -1, 1, myGui.lineWidth - myGui.pulseWidth, myGui.lineWidth + myGui.pulseWidth);
+                    var opacity = Utils.remap(sine, -1, 1, myGui.pulseOpacityLow, myGui.pulseOpacityHigh);
+                    drawing.lineStyle(thickness, myGui.lineColor, opacity);
                 }
 
                 var translateSpeed = myGui.translateSpeed;
@@ -955,14 +982,17 @@
 
             // Only update graphics on next pass if there is something
             // to animate
-            updateGraphics = false;
 
-                 if (bAmDrawing && sprites.length > 0) updateGraphics = true;
-            else if (sprites.length > 1) updateGraphics = true;
-            else if (sprites.length && !sprites[sprites.length-1].texture.baseTexture.hasLoaded) updateGraphics = true;
-            else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
-            else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
-            else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
+            // Keep this on for now since GUI changes won't take affect if we're not rendering
+            // updateGraphics = false;
+            updateGraphics = true;
+
+            //      if (bAmDrawing && sprites.length > 0) updateGraphics = true;
+            // else if (sprites.length > 1) updateGraphics = true;
+            // else if (sprites.length && !sprites[sprites.length-1].texture.baseTexture.hasLoaded) updateGraphics = true;
+            // else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
+            // else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
+            // else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
          }
         renderer.render(stage);
         requestAnimationFrame( animate );

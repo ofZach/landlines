@@ -99,5 +99,9 @@ var Utils = {
             newPoints.push([points[len - 1][0], points[len - 1][1]]);
         }
         return newPoints;
+    },
+
+    remap: function(val, inMin, inMax, outMin, outMax) {
+        return ((val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin);
     }
 };
