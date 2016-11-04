@@ -960,7 +960,7 @@
                     if (sprites[i].alpha <= 0) {
                         // Delete 1 element at this index
                         stage.removeChild(sprites[i]);
-                        sprites[i].destroy(true);
+                        sprites[i].destroy();
                         sprites.splice(i, 1);
                     }
                 }
