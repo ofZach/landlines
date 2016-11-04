@@ -877,6 +877,7 @@
             } else {
 
                 // Update metadata UI when the texture loads
+                console.log('Updating metadata UI, sprites length is:', sprites.length);
                 if (sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
                     if (!textureHasLoaded) {
                         console.log('Texture just finished loading!');
