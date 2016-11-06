@@ -21,13 +21,19 @@ var data = require('./' + jsonFile);
 for (var i = 0; i < data.length; i++) {
 	// Try and find an ID
 	if (data[i].hasOwnProperty('ID'))
-		var filename = folderPath + '/' + data[i].ID + '.json';
+		var id = data[i].ID.toString();
 	else if (data[i].hasOwnProperty('id'))
-		var filename = folderPath + '/' + data[i].id + '.json';
+		var id = data[i].id.toString();
 	else {
 		console.warn('Cannot determine ID:', data[i]);
 		continue;
 	}
+
+	var fullPath = folderPath + '/' + id.substr(0, 1);
+	if (!fs.existsSync(fullPath)) {
+		fs.mkdirSync(fullPath);
+	}
+	var filename = fullPath + '/' + id + '.json';
 
 	// Convert keys to lowercase
 	for (var key in data[i]) {
@@ -39,5 +45,6 @@ for (var i = 0; i < data.length; i++) {
 		data[i][keyLower] = val;
 	}
 
+	console.log(filename);
 	fs.writeFileSync(filename, JSON.stringify(data[i]));
 }
