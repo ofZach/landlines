@@ -557,37 +557,33 @@
     //------------------------------------------------------------------------------------------------
     stage.mousedown = stage.touchstart = function(moveData) {
 
-
-
+        matched = false;
         bAmDrawing = true;
         linePulseCounter = 0;
         textureHasLoaded = false;
         metadataTargetOpacity = 0;
         
         pts = [];
-        matched = false;
-        pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
-        pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
-
+        pts.push(moveData.data.global.x);
+        pts.push(moveData.data.global.y);
+    
     };
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
         if (bAmDrawing === true){
 
+            pts.push(moveData.data.global.x);
+            pts.push(moveData.data.global.y);
 
-                 pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
-                 pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
-                
-                if (pts.length > 60*2){
-                        pts.shift();
-                        pts.shift();
-                 } 
+            if (pts.length > 60*2){
+                pts.shift();
+                pts.shift();
+            } 
 
-                updateGraphics = true;
-
+            updateGraphics = true;
         }
-        
+
     };
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
@@ -1058,31 +1054,7 @@
                 var scale = sprites[index].originalScale * circleScaleRatio;
                 sprites[index].scale.set(scale, scale);
             }
-            
 
-            // for (var i = 0; i < Math.min(results.length,1); i++){
-            //         var index = results[i].i;
-            //         var tempMe = dataobj[index].slice(0);
-            //          rotate(tempMe, angleMatch);
-
-            //         for (var j = 0; j < tempMe.length; j++){
-            //             if (j == 0) 
-            //                  drawing.moveTo(tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );
-            //             else 
-            //                  drawing.lineTo( tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );                
-            //         }
-            //         //this.stroke();
-                   
-
-            //     }
-
-            // for (var i = 0; i < pts.length; i++){
-            //     if (i == 0){
-            //         drawing.moveTo(pts[0][0] + 100, pts[0][1]);
-            //     } else {
-            //         drawing.lineTo(pts[i][0] + 100, pts[i][1]);
-            //     }
-            // }
             var infoElem = document.getElementById('info');
             if (Math.abs(metadataTargetOpacity - infoElem.style.opacity) > .01) {
                 infoElem.style.opacity = Utils.lerp(infoElem.style.opacity, metadataTargetOpacity, myGui.metadata);
