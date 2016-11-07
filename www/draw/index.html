@@ -774,7 +774,7 @@
         // Pull ID from info obj, which actually stores IDs starting from 0
         var id = infoobj[results[0].i][0];
         // Convert filename-based ID to "real" ID from spreadsheet
-        id = metadataIDList[id];
+        id = metadataIDList[id].toString();
         readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
 
 
