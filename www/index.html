@@ -6,6 +6,7 @@
     <title>Land Lines - Chrome Experiments</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400" rel="stylesheet">
     <style>
+
     html, body {
         height: 100%;
         margin: 0;
@@ -13,6 +14,11 @@
     	background-color: black;
     	font-family: 'Roboto Condensed', sans-serif;
         font-weight: 300;
+    }
+
+    a {
+        color: white;
+        text-decoration: none;
     }
 
     #container {
@@ -58,7 +64,6 @@
     }
 
     .app-button {
-        color: white;
         border: 1px solid white;
         background-color: rgba(0, 0, 0, 0.25);
         display: block;
@@ -66,7 +71,6 @@
         height: 30px;
         font-size: 13pt;
         text-align: center;
-        text-decoration: none;
         vertical-align: middle;
         margin: 0 auto;
         padding-top: 10px;
@@ -88,6 +92,16 @@
 
     .chrome-experiment div {
         font-size: 14pt;
+    }
+
+    .privacy-terms {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        padding: 0 5px 5px 0;
+        font-size: 9pt;
+        letter-spacing: 0.5pt;
+        text-transform: uppercase;
     }
     </style>
 </head>
@@ -111,6 +125,11 @@
         This is a
         <div>Chrome</div>
         <div>Experiment</div>
+    </div>
+
+    <div class="privacy-terms">
+        <a target="_blank" href="https://www.google.com/policies/privacy/">Privacy</a> &
+        <a target="_blank" href="https://www.google.com/policies/terms/">Terms</a>
     </div>
 
     <script>
