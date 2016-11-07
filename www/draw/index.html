@@ -732,7 +732,8 @@
             results = resultsB;
             //pts.reverse();
             // reverse pair of two
-            for (j = 0; j < pts.length/2; j++){
+            console.log("FLIP");
+            for (j = 0; j < ptsResampled.length/2; j++){
                 ptsResampled[j*2] = ptsTemp2[j][0];
                 ptsResampled[j*2+1] = ptsTemp2[j][1];
             }      
@@ -776,7 +777,7 @@
         readTextFile('metadata/' + id + '.json', updateMetadataCallback);
 
 
-        //console.log( infoobj[results[0].i] );
+        console.log( "smallestDiff " + smallestDiff + " " + " bestAngle " + bestAngle );
 
         angleMatch = bestAngle;
         updateGraphics = true;
