@@ -947,9 +947,9 @@
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
                 if (textureHasLoaded) {
-                    animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
-                    animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
-                    animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
+                    animatingCircle.x = Utils.lerp(animatingCircle.x, targetX, translateSpeed);
+                    animatingCircle.y = Utils.lerp(animatingCircle.y, targetY, translateSpeed);
+                    animatingCircle.r = Utils.lerp(animatingCircle.r, targetR, scaleSpeed);
                 }
 
                 // Update offsets/scale ratios to move drawing line & image toward center
