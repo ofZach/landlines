@@ -249,6 +249,7 @@
         this.scaleSpeed = 0.021;
         this.translateSpeed = 0.01;
         this.showEnclosingCircle = false;
+        this.maxImageScale = 1.01;
 
         this.imgFadeInSpeed = 0.01;
         this.imgFadeOutSpeed = 0.01;
@@ -283,6 +284,7 @@
         f3.add(myGui, 'scaleSpeed', 0, 0.5);
         f3.add(myGui, 'translateSpeed', 0, 0.5);
         f3.add(myGui, 'showEnclosingCircle');
+        f3.add(myGui, 'maxImageScale', 0.01, 4.01);
         
         var f4 = gui.addFolder('fade');
         f4.add(myGui, 'imgFadeInSpeed', 0, 0.2);
@@ -834,6 +836,9 @@
         animatingCircle.x = drawnCircle.x;
         animatingCircle.y = drawnCircle.y;
         animatingCircle.r = drawnCircle.r;
+        animatingCircle.origR = drawnCircle.r;
+
+
 
         // Update background image
         PIXI.loader.reset();
@@ -913,10 +918,7 @@
             } else {
 
                 // Update metadata UI when the texture loads
-<<<<<<< HEAD
 
-=======
->>>>>>> f57f6d4c917c0526b6ca0ccc049f8cf707c21de4
                 var lastSprite = sprites[sprites.length-1];
                 if (lastSprite.texture.baseTexture &&
                     lastSprite.texture.baseTexture.hasLoaded) {
@@ -954,8 +956,30 @@
                 else
                     var targetR = renderer.view.width * myGui.scaleSize;
 
+            
+
+
+                ///var targetR = renderer.view.height * myGui.scaleSize;
+                if (sprites.length > 0){
+                    var goToScale = sprites[sprites.length - 1].originalScale * (targetR / drawnCircle.r);
+                    if (goToScale > myGui.maxImageScale){
+                         
+                         // 1.0 = A * (B / C); // solve for B
+                         // 1.0/A = (B/C);
+                         // B = (1.0/A) * C;
+                         // omg algebra
+
+                         targetR = (myGui.maxImageScale / sprites[sprites.length - 1].originalScale) * drawnCircle.r;
+                    }
+                }
+                
+
+
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
+
+                //console.log("scale factor = " + animatingCircle.origR + " " + targetR + " "  + 1.0 / (animatingCircle.origR / targetR));
+
                 if (textureHasLoaded) {
                     animatingCircle.x = Utils.lerp(animatingCircle.x, targetX, translateSpeed);
                     animatingCircle.y = Utils.lerp(animatingCircle.y, targetY, translateSpeed);
@@ -1042,7 +1066,7 @@
             }
 
             // Fade out background images
-            console.log()
+           
             if (backgroundImages.length) {
                 var endingIndex = bAmDrawing ? backgroundImages.length - 1 : backgroundImages.length - 2;
                 for (var i = 0; i <= endingIndex; i++) {
@@ -1076,6 +1100,8 @@
                 sprites[index].position.y = sprites[index].originalPosition.y + circleOffsetY;
 
                 var scale = sprites[index].originalScale * circleScaleRatio;
+
+                //console.log("scale ???? " + sprites[index].originalScale );
                 sprites[index].scale.set(scale, scale);
             }
 
