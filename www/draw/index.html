@@ -82,7 +82,7 @@
     // Generic function to load a file asynchronously
     function readTextFile(file, callback) {
         loadedJson = false;
-        console.log('Requesting file:', file);
+        //console.log('Requesting file:', file);
         var rawFile = new XMLHttpRequest();
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
@@ -425,10 +425,14 @@
         var a = vector1;
         var b = vector2;
         var distance = 0;
+        var weight = 0;
         for (var i = 0; i < a.length/2; i++){
-            distance +=    Math.sqrt((b[i*2] - a[i*2])*(b[i*2] - a[i*2]) +  (b[i*2+1] - a[i*2+1])*(b[i*2+1] - a[i*2+1])); 
+            var pct = i / (a.length/2);
+            var scalar = 1.0+ (1.0 - Math.sin(pct * Math.PI))*10000.0;
+            distance +=    scalar * Math.sqrt((b[i*2] - a[i*2])*(b[i*2] - a[i*2]) +  (b[i*2+1] - a[i*2+1])*(b[i*2+1] - a[i*2+1])); 
+            weight += scalar;
         }
-        return distance / 60.0;
+        return distance / weight;
     }
 
     //--------------------------------------------
@@ -556,16 +560,6 @@
     stage.mousedown = stage.touchstart = function(moveData) {
 
 
-        //if (bAmDrawing === true) return;
-
-        // var random = Math.floor(Math.random()*1000);
-        // texture = PIXI.Texture.fromImage('full/' + random + '.jpg');
-        // sprite1 = new PIXI.Sprite(texture);
-        // stage.removeChild(sprite1);
-        // stage.addChild(sprite1);
-
-
-        console.log(moveData.data.global.x); //renderer.plugins.interaction);
 
         bAmDrawing = true;
         linePulseCounter = 0;
@@ -581,13 +575,8 @@
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
-
-        
-         
         if (bAmDrawing === true){
 
-
-                //console.log("move " + moveData.data.identifier);
 
                  pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
                  pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
@@ -605,11 +594,17 @@
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
 
-      
+        // if we weren't drawing (gui, etc) return;
+         if (bAmDrawing === false){
+            return;
+        }
+
 
         bAmDrawing = false;
 
         // resample if we need to: 
+        var ptsResampled = [];
+
         if (pts.length != 120){
             var xPts = [];
             var yPts = [];
@@ -619,22 +614,26 @@
                 xPts[i] = x;
                 yPts[i] = y;
             }
-            pts = [];       
+            //ptsResampled = [];       
             var xSmooth = Smooth(xPts);
             var ySmooth = Smooth(yPts);
             for (var i = 0; i < 60; i++){
                 pctMe = i / 59.0;
                 var newX = xSmooth(pctMe * (xPts.length -1));
                 var newY = ySmooth(pctMe * (yPts.length -1));
-                pts[pts.length] = newX;
-                pts[pts.length] = newY;
+                ptsResampled[i*2] = newX;
+                ptsResampled[i*2+1] = newY;
+            }
+        } else {
+            for (var i = 0; i < pts.length; i++){
+                ptsResampled.push(pts[i]);
             }
         }
 
         ptsTemp = [];
-        for (j = 0; j < pts.length/2; j++){
-            x = pts[j*2];
-            y = pts[j*2+1];
+        for (j = 0; j < ptsResampled.length/2; j++){
+            x = ptsResampled[j*2];
+            y = ptsResampled[j*2+1];
             pt = [];
             pt[0] = x;
             pt[1] = y;
@@ -642,9 +641,9 @@
         }
 
         ptsTemp2 = [];
-        for (j = 0; j < pts.length/2; j++){
-            x = pts[j*2];
-            y = pts[j*2+1];
+        for (j = 0; j < ptsResampled.length/2; j++){
+            x = ptsResampled[j*2];
+            y = ptsResampled[j*2+1];
             pt = [];
             pt[0] = x;
             pt[1] = y;
@@ -653,7 +652,7 @@
         ptsTemp2.reverse();
 
         // make a circle so we can scale this circle 
-        drawnCircle = makeCircle(returnPathForArray(pts));
+        drawnCircle = makeCircle(returnPathForArray(ptsResampled));
         var p = createPolyline(ptsTemp);
         var p2 = createPolyline(ptsTemp2);
         p.init(true);
@@ -734,8 +733,8 @@
             //pts.reverse();
             // reverse pair of two
             for (j = 0; j < pts.length/2; j++){
-                pts[j*2] = ptsTemp2[j][0];
-                pts[j*2+1] = ptsTemp2[j][1];
+                ptsResampled[j*2] = ptsTemp2[j][0];
+                ptsResampled[j*2+1] = ptsTemp2[j][1];
             }      
 
         } else {
@@ -745,7 +744,7 @@
         console.log('results:', results[0]);
 
 
-        var ptsScaled = pts.slice();
+        var ptsScaled = ptsResampled.slice();
         var scaleMe = scale = 250.0 / drawnCircle.r;
         for (j = 0; j < ptsScaled.length/2; j++){
             ptsScaled[j*2] -= drawnCircle.x;
@@ -794,6 +793,8 @@
             var url = '/';
         
         PIXI.loader.reset();
+
+        console.log("loading num : "  + infoobj[results[0].i][0]);
 
         var texture = PIXI.Texture.fromImage(url + 'full/' + infoobj[results[0].i][0] + '.jpg');
         var sprite = new PIXI.Sprite(texture);
@@ -907,7 +908,7 @@
             } else {
 
                 // Update metadata UI when the texture loads
-                console.log('Updating metadata UI, sprites length is:', sprites.length);
+                //console.log('Updating metadata UI, sprites length is:', sprites.length);
                 if (sprites[sprites.length-1].texture.baseTexture &&
                     sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
                     if (!textureHasLoaded) {
