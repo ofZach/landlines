@@ -40,14 +40,14 @@
             cursor: default;
         }
 
-        .info {
+        #info {
             color: white;
             position: absolute;
             bottom: 0px;
             text-transform: uppercase;
             padding: 0 0 15px 15px;
         }
-        .info a {
+        #info a {
             color: white;
             text-decoration: none;
         }
@@ -255,6 +255,7 @@
         this.bgFadeInSpeed = 0.004;
         this.bgFadeOutSpeed = 0.015;
         this.bgOpacity = 0.75;
+        this.metadata = 0.15;
         
         this.loadFromCloud = true;
     };
@@ -289,6 +290,7 @@
         f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
         f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
         f4.add(myGui, 'bgOpacity', 0, 1);
+        f4.add(myGui, 'metadata', 0, 1);
 
         // gui.add(myGui, 'loadFromCloud');
         
@@ -309,6 +311,7 @@
     var animatingCircle = {};
     var matchedMetadata = {};
     var textureHasLoaded = false;
+    var metadataTargetOpacity = 0;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -554,37 +557,33 @@
     //------------------------------------------------------------------------------------------------
     stage.mousedown = stage.touchstart = function(moveData) {
 
-
-
+        matched = false;
         bAmDrawing = true;
         linePulseCounter = 0;
         textureHasLoaded = false;
+        metadataTargetOpacity = 0;
+        
         pts = [];
-        matched = false;
-        pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
-        pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
-
-        // Clear metadata by updating it with an empty object
-        updateMetadata({});
+        pts.push(moveData.data.global.x);
+        pts.push(moveData.data.global.y);
+    
     };
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
         if (bAmDrawing === true){
 
+            pts.push(moveData.data.global.x);
+            pts.push(moveData.data.global.y);
 
-                 pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
-                 pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
-                
-                if (pts.length > 60*2){
-                        pts.shift();
-                        pts.shift();
-                 } 
+            if (pts.length > 60*2){
+                pts.shift();
+                pts.shift();
+            } 
 
-                updateGraphics = true;
-
+            updateGraphics = true;
         }
-        
+
     };
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
@@ -772,8 +771,12 @@
         var id = infoobj[results[0].i][0];
         console.log("loading metadata for id " + id);
         // Convert filename-based ID to "real" ID from spreadsheet
-        id = metadataIDList[id];
-        console.log("metadataIDList length ! " + metadataIDList.length);
+
+        // older: 
+        // id = metadataIDList[id];
+        // console.log("metadataIDList length ! " + metadataIDList.length);
+
+        id = metadataIDList[id].toString();
         readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
 
 
@@ -834,6 +837,7 @@
 
         // Update background image
         PIXI.loader.reset();
+        url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v2/';
         var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
@@ -909,7 +913,10 @@
             } else {
 
                 // Update metadata UI when the texture loads
+<<<<<<< HEAD
 
+=======
+>>>>>>> f57f6d4c917c0526b6ca0ccc049f8cf707c21de4
                 var lastSprite = sprites[sprites.length-1];
                 if (lastSprite.texture.baseTexture &&
                     lastSprite.texture.baseTexture.hasLoaded) {
@@ -918,6 +925,7 @@
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
                         updateMetadata(matchedMetadata);
+                        metadataTargetOpacity = 1;
                     }
                 }
 
@@ -949,9 +957,9 @@
                 // Make sure the most recent matched image has loaded
                 // Then begin calculating a lerped toward the target
                 if (textureHasLoaded) {
-                    animatingCircle.x = animatingCircle.x * (1 - translateSpeed) + targetX * translateSpeed;
-                    animatingCircle.y = animatingCircle.y * (1 - translateSpeed) + targetY * translateSpeed;
-                    animatingCircle.r = animatingCircle.r * (1 - scaleSpeed) + targetR * scaleSpeed;
+                    animatingCircle.x = Utils.lerp(animatingCircle.x, targetX, translateSpeed);
+                    animatingCircle.y = Utils.lerp(animatingCircle.y, targetY, translateSpeed);
+                    animatingCircle.r = Utils.lerp(animatingCircle.r, targetR, scaleSpeed);
                 }
 
                 // Update offsets/scale ratios to move drawing line & image toward center
@@ -1070,31 +1078,12 @@
                 var scale = sprites[index].originalScale * circleScaleRatio;
                 sprites[index].scale.set(scale, scale);
             }
-            
 
-            // for (var i = 0; i < Math.min(results.length,1); i++){
-            //         var index = results[i].i;
-            //         var tempMe = dataobj[index].slice(0);
-            //          rotate(tempMe, angleMatch);
+            var infoElem = document.getElementById('info');
+            if (Math.abs(metadataTargetOpacity - infoElem.style.opacity) > .01) {
+                infoElem.style.opacity = Utils.lerp(infoElem.style.opacity, metadataTargetOpacity, myGui.metadata);
+            }
 
-            //         for (var j = 0; j < tempMe.length; j++){
-            //             if (j == 0) 
-            //                  drawing.moveTo(tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );
-            //             else 
-            //                  drawing.lineTo( tempMe[j*2]*0.1 + (i%16+1) * 80, tempMe[j*2+1]*0.1 + Math.floor(i/16 + 1) * 80 );                
-            //         }
-            //         //this.stroke();
-                   
-
-            //     }
-
-            // for (var i = 0; i < pts.length; i++){
-            //     if (i == 0){
-            //         drawing.moveTo(pts[0][0] + 100, pts[0][1]);
-            //     } else {
-            //         drawing.lineTo(pts[i][0] + 100, pts[i][1]);
-            //     }
-            // }
 
             // Only update graphics on next pass if there is something
             // to animate
@@ -1115,7 +1104,7 @@
     }
     </script>
 
-    <div class="info">
+    <div id="info">
         <div><a id="info-line1" href="" target="maps"></a></div>
         <div><a id="info-line2" href="" target="maps"></a></div>
         <div id="info-attribution"></div>

@@ -6,6 +6,7 @@
     <title>Land Lines - Chrome Experiments</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400" rel="stylesheet">
     <style>
+
     html, body {
         height: 100%;
         margin: 0;
@@ -15,15 +16,9 @@
         font-weight: 300;
     }
 
-    header {
-        text-transform: uppercase;
-        text-align: center;
-        font-size: 18pt;
-        font-weight: 300;
-        letter-spacing: 3pt;
-        vertical-align: middle;
-        padding-top: 4px;
-        padding-bottom: 4px;
+    a {
+        color: white;
+        text-decoration: none;
     }
 
     #container {
@@ -33,30 +28,42 @@
         height: 100%;
     }
 
-    .app {
-        display: table-row;
-        height: 46%;
+    #header {
+        font-size: 24pt;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+        letter-spacing: 2pt;
+        vertical-align: middle;
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+
+    #desc {
+        margin-top: 0;
+        margin-bottom: 50px;
+    }
+
+    #app {
+        display: table-cell;
+        vertical-align: middle;
         font-size: 12pt;
         letter-spacing: 0.5pt;
         text-align: center;
         background-position: center;
-        background-size: 150%;
+        background-size: cover; 
+        background-image: url('img/draw-hero.jpg');
     }
 
-    .app p {
-        padding-top: 15%;
-    }
-
-    /* Change display to side-by-side for desktop */
-    @media screen and (min-device-width: 1024px) {
-        .app {
-            display: table-cell;
-            background-size: auto 115%;
+    
+    /* Changes for mobile */
+    @media screen and (max-device-width: 1023px) {
+        #desc {
+            font-size: 11pt;
         }
     }
 
     .app-button {
-        color: white;
         border: 1px solid white;
         background-color: rgba(0, 0, 0, 0.25);
         display: block;
@@ -64,18 +71,14 @@
         height: 30px;
         font-size: 13pt;
         text-align: center;
-        text-decoration: none;
         vertical-align: middle;
         margin: 0 auto;
         padding-top: 10px;
+        margin-bottom: 10px;
     }
 
-    #draw {
-        background-image: url('img/draw-hero.jpg');
-    }
-
-    #drag {
-        background-image: url('img/drag-hero.jpg');
+    .app-button:last-child {
+        margin-bottom: 50px;
     }
 
     .chrome-experiment {
@@ -90,6 +93,16 @@
     .chrome-experiment div {
         font-size: 14pt;
     }
+
+    .privacy-terms {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        padding: 0 5px 5px 0;
+        font-size: 9pt;
+        letter-spacing: 0.5pt;
+        text-transform: uppercase;
+    }
     </style>
 </head>
 
@@ -97,18 +110,15 @@
 	<script>
 	</script>    
 
-    <header>Land Lines</header>
-
     <div id="container">
 
-        <div class="app" id="draw">
-            <p id="draw-desc">Draw a line, let the planet complete the picture.</p>
-            <a class="app-button" href="draw">Draw to explore</a>
+        <div id="app">
+            <p id="header">Land Lines</p>
+            <p id="desc">Sketch a line, let the planet complete the picture.</p>
+            <a class="app-button" href="draw">Draw</a>
+            <a class="app-button" href="drag">Swipe</a>
         </div>
-        <div class="app" id="drag">
-            <p id="drag-desc">Swipe in any direction to create a connected landscape.</p>
-            <a class="app-button" href="drag">Swipe to explore</a>
-        </div>
+
     </div>
 
     <div class="chrome-experiment">
@@ -117,8 +127,12 @@
         <div>Experiment</div>
     </div>
 
+    <div class="privacy-terms">
+        <a target="_blank" href="https://www.google.com/policies/privacy/">Privacy</a> &
+        <a target="_blank" href="https://www.google.com/policies/terms/">Terms</a>
+    </div>
+
     <script>
-    updateAppDescriptionPosition();
 
     // Layout / background image stuff
     function updateBackgroundMouse(e) {
@@ -135,25 +149,13 @@
     }
      
     function updateBackgroundAccel(e) {
-        document.getElementById('draw').style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
-        document.getElementById('draw').style.backgroundPositionY = (50 + (e.beta/2)) + '%';
-        
-        document.getElementById('drag').style.backgroundPositionX = (50 + (e.gamma/2)) + '%';
-        document.getElementById('drag').style.backgroundPositionY = (50 + (e.beta/1.5)) + '%';
+        var elem = document.getElementById('app');
+        elem.style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
+        elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
     }
 
-    function updateAppDescriptionPosition() {
-        if (document.body.clientWidth < 1024) return;
-        var h = document.getElementById('container').clientHeight;
-        var padding = Math.floor(h * 0.38) + 'px';
-        document.getElementById('draw-desc').style.paddingTop = padding;
-        document.getElementById('drag-desc').style.paddingTop = padding;
-    }
-
-    document.getElementById('draw').onmousemove = updateBackgroundMouse;
-    document.getElementById('drag').onmousemove = updateBackgroundMouse;
+    document.getElementById('app').onmousemove = updateBackgroundMouse;
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
-    window.addEventListener('resize', updateAppDescriptionPosition, false);
     </script>
 </body>
 

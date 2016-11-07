@@ -103,5 +103,9 @@ var Utils = {
 
     remap: function(val, inMin, inMax, outMin, outMax) {
         return ((val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin);
+    },
+
+    lerp: function(val, target, amount) {
+        return val * (1 - amount) + target * amount;
     }
 };
