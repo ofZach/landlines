@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Land Lines - Chrome Experiments</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400" rel="stylesheet">
     <style>
 
@@ -14,6 +15,7 @@
     	background-color: black;
     	font-family: 'Roboto Condensed', sans-serif;
         font-weight: 300;
+        overflow: hidden;
     }
 
     a {
@@ -55,14 +57,6 @@
         background-image: url('img/draw-hero.jpg');
     }
 
-    
-    /* Changes for mobile */
-    @media screen and (max-device-width: 1023px) {
-        #desc {
-            font-size: 11pt;
-        }
-    }
-
     .app-button {
         border: 1px solid white;
         background-color: rgba(0, 0, 0, 0.25);
@@ -81,34 +75,91 @@
         margin-bottom: 50px;
     }
 
-    .chrome-experiment {
+    #chrome-experiment {
         color: white;
-        font-size: 9pt;
-        font-family: Helvetica, Arial, sans-serif;
         position: absolute;
         bottom: 0px;
-        padding: 0 0 5px 5px;
+        left: 0;
     }
 
-    .chrome-experiment div {
-        font-size: 14pt;
-    }
-
-    .privacy-terms {
+    #privacy-terms {
         position: absolute;
         bottom: 0px;
         right: 0px;
-        padding: 0 5px 5px 0;
+        padding: 0 8px 8px 0;
         font-size: 9pt;
-        letter-spacing: 0.5pt;
+        letter-spacing: 1pt;
         text-transform: uppercase;
     }
+
+    #overlay-open, #overlay-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+    }
+    #overlay-close {
+        display: none;
+    }
+
+    #about-overlay {
+        display: none;
+        opacity: 0;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.85);
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #about-overlay-content {
+        width: 60%;
+        margin: 0 auto;
+        font-size: 10pt;
+        letter-spacing: 0.5pt;
+        line-height: 2.3;
+    }
+
+    #about-overlay-content p {
+        margin: 8px 0;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .about-heading {
+        font-size: 14pt;
+        letter-spacing: 1pt;
+        text-transform: uppercase;
+        padding-top: 40px;
+    }
+
+    .about-heading span {
+        padding-bottom: 3px;
+        border-bottom: 1px solid white;
+    }
+
+    .about-tech {
+        font-weight: bold;
+        padding-top: 10px;
+    }
+
+    /* Changes for mobile */
+    @media screen and (max-device-width: 1023px) {
+        #desc {
+            font-size: 11pt;
+        }
+
+        #about-overlay-content {
+            width: 80%;
+        }
+    }
+
     </style>
 </head>
 
 <body>
-	<script>
-	</script>    
 
     <div id="container">
 
@@ -121,18 +172,83 @@
 
     </div>
 
-    <div class="chrome-experiment">
-        This is a
-        <div>Chrome</div>
-        <div>Experiment</div>
-    </div>
-
-    <div class="privacy-terms">
+    <div id="privacy-terms">
         <a target="_blank" href="https://www.google.com/policies/privacy/">Privacy</a> &
         <a target="_blank" href="https://www.google.com/policies/terms/">Terms</a>
     </div>
 
+    <a href="#"><img id="overlay-open" src="img/question-mark@2x.png" width="25"></img></a>
+    <img id="chrome-experiment" src="img/CE_badge@2x.png" width="125"></img>
+
+    <div id="about-overlay">
+        <div id="about-overlay-content">
+
+            <div class="about-heading"><span>About</span></div>
+            <p>Land Lines is an experiment that lets anyone explore incredible satellite images from Google Maps. This project is collaborations between artist Zach Lieberman and some friends from Google. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+            <div class="about-heading"><span>Technology</span></div>
+            <p>Land Lines is a a lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+            <div class="about-tech">WebGL</div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+            <div class="about-tech">App Engine</div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+            <div class="about-tech">Technology</div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+            <div class="about-tech">Technology</div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+
+        </div>
+    </div>
+    <a href="#"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
+
     <script>
+
+    function showAboutOverlay() {
+        var elem = document.getElementById('about-overlay');
+        elem.style.display = 'block';
+        
+        if (elem.style.opacity == '')
+            elem.style.opacity = 0;
+
+        var timer = setInterval(function() {
+            if (elem.style.opacity >= 1) {
+                elem.style.opacity = 1;
+                clearInterval(timer);
+                return;
+            }
+
+            var opacity = elem.style.opacity || 0;
+            elem.style.opacity = parseFloat(elem.style.opacity) + 0.07;
+        }, 1000 / 60);
+
+        document.getElementById('overlay-close').style.display = 'block';
+    }
+
+    function hideAboutOverlay() {
+        var elem = document.getElementById('about-overlay');
+        elem.style.display = 'block';
+        
+        // if (elem.style.opacity == '')
+        //     elem.style.opacity = 0;
+
+        var timer = setInterval(function() {
+            if (elem.style.opacity <= 0) {
+                elem.style.opacity = 0;
+                elem.style.display = 'none';
+                clearInterval(timer);
+                return;
+            }
+
+            var opacity = elem.style.opacity || 0;
+            elem.style.opacity = parseFloat(elem.style.opacity) - 0.07;
+        }, 1000 / 60);
+
+        document.getElementById('overlay-close').style.display = 'none';
+    }
 
     // Layout / background image stuff
     function updateBackgroundMouse(e) {
@@ -154,6 +270,8 @@
         elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
     }
 
+    document.getElementById('overlay-open').onclick = showAboutOverlay;
+    document.getElementById('overlay-close').onclick = hideAboutOverlay;
     document.getElementById('app').onmousemove = updateBackgroundMouse;
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
