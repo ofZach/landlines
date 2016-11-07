@@ -770,8 +770,10 @@
 
         // Pull ID from info obj, which actually stores IDs starting from 0
         var id = infoobj[results[0].i][0];
+        console.log("loading metadata for id " + id);
         // Convert filename-based ID to "real" ID from spreadsheet
         id = metadataIDList[id];
+        console.log("metadataIDList length ! " + metadataIDList.length);
         readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
 
 
@@ -907,16 +909,11 @@
             } else {
 
                 // Update metadata UI when the texture loads
-<<<<<<< HEAD
-                //console.log('Updating metadata UI, sprites length is:', sprites.length);
-                if (sprites[sprites.length-1].texture.baseTexture &&
-                    sprites[sprites.length-1].texture.baseTexture.hasLoaded) {
-=======
+
                 var lastSprite = sprites[sprites.length-1];
                 if (lastSprite.texture.baseTexture &&
                     lastSprite.texture.baseTexture.hasLoaded) {
 
->>>>>>> 6431cea705fd9d0b801b17ead506cfdb2c1281b5
                     if (!textureHasLoaded) {
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
@@ -1015,8 +1012,22 @@
                     if (sprites[i].alpha <= 0) {
                         // Delete 1 element at this index
                         stage.removeChild(sprites[i]);
-                        sprites[i].texture.destroy(true);
-                        sprites[i].destroy();
+                        
+                        // do I remove this texture?
+                        var amIsolo = true;
+                        for (var j = 0; j < sprites.length; j++) {
+                            if (j !== i){
+                                if (sprites[i].texture.baseTexture === sprites[j].texture.baseTexture){
+                                    amIsolo = false;
+                                }
+                            }
+                        }
+
+                        if (amIsolo === true){
+                            sprites[i].texture.destroy(true);
+                            sprites[i].destroy();
+                        }
+                        
                         sprites.splice(i, 1);
                     }
                 }
