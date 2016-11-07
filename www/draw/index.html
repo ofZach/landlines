@@ -40,14 +40,14 @@
             cursor: default;
         }
 
-        .info {
+        #info {
             color: white;
             position: absolute;
             bottom: 0px;
             text-transform: uppercase;
             padding: 0 0 15px 15px;
         }
-        .info a {
+        #info a {
             color: white;
             text-decoration: none;
         }
@@ -255,6 +255,7 @@
         this.bgFadeInSpeed = 0.004;
         this.bgFadeOutSpeed = 0.015;
         this.bgOpacity = 0.75;
+        this.metadata = 0.15;
         
         this.loadFromCloud = true;
     };
@@ -289,6 +290,7 @@
         f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
         f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
         f4.add(myGui, 'bgOpacity', 0, 1);
+        f4.add(myGui, 'metadata', 0, 1);
 
         // gui.add(myGui, 'loadFromCloud');
         
@@ -309,6 +311,7 @@
     var animatingCircle = {};
     var matchedMetadata = {};
     var textureHasLoaded = false;
+    var metadataTargetOpacity = 0;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -559,13 +562,13 @@
         bAmDrawing = true;
         linePulseCounter = 0;
         textureHasLoaded = false;
+        metadataTargetOpacity = 0;
+        
         pts = [];
         matched = false;
         pts.push(moveData.data.global.x); //renderer.plugins.interaction.mouse.global.x);
         pts.push(moveData.data.global.y); //renderer.plugins.interaction.mouse.global.y);
 
-        // Clear metadata by updating it with an empty object
-        updateMetadata({});
     };
 
     stage.mousemove = stage.touchmove = function(moveData) {
@@ -916,6 +919,7 @@
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
                         updateMetadata(matchedMetadata);
+                        metadataTargetOpacity = 1;
                     }
                 }
 
@@ -1079,6 +1083,11 @@
             //         drawing.lineTo(pts[i][0] + 100, pts[i][1]);
             //     }
             // }
+            var infoElem = document.getElementById('info');
+            if (Math.abs(metadataTargetOpacity - infoElem.style.opacity) > .01) {
+                infoElem.style.opacity = Utils.lerp(infoElem.style.opacity, metadataTargetOpacity, myGui.metadata);
+            }
+
 
             // Only update graphics on next pass if there is something
             // to animate
@@ -1099,7 +1108,7 @@
     }
     </script>
 
-    <div class="info">
+    <div id="info">
         <div><a id="info-line1" href="" target="maps"></a></div>
         <div><a id="info-line2" href="" target="maps"></a></div>
         <div id="info-attribution"></div>
