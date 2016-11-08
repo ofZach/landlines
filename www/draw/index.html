@@ -1179,7 +1179,7 @@
                     sprites[i].alpha -= myGui.imgFadeOutSpeed;
                 }
                 // Fade in most recent image
-                if (sprites[sprites.length-1].alpha < 1) {
+                if (sprites[sprites.length-1].alpha < 1 && textureHasLoaded) {
                     sprites[sprites.length-1].alpha += myGui.imgFadeInSpeed;
 
                     // Make sure it doesn't exceed 1.0
@@ -1190,7 +1190,7 @@
                 // Remove invisible Sprites
                 // Work in reverse to avoid the delete-while-iterating problem
                 for (var i = sprites.length-1; i >= 0; i--) {
-                    if (sprites[i].alpha <= 0) {
+                    if (sprites[i].alpha < 0) {
                         // Delete 1 element at this index
                         stage.removeChild(sprites[i]);
                         
