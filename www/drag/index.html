@@ -19,7 +19,16 @@
             font-family: 'Roboto Condensed', sans-serif;
         }
 
-        .info {
+        #gradient-bottom {
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+            height: 150px;
+            background-size: auto 100%;
+            background-image: url('../img/gradient_bottom.png');
+        }
+
+        #info {
             color: white;
             position: absolute;
             bottom: 0px;
@@ -28,7 +37,7 @@
             letter-spacing: 0.5pt;
             padding: 0 0 15px 15px;
         }
-        .info a {
+        #info a {
             color: white;
             text-decoration: none;
         }
@@ -1008,7 +1017,9 @@ function simpleStringify (object){
     }
     </script>
 
-    <div class="info">
+    <div id="gradient-bottom"></div>
+
+    <div id="info">
         <div><a id="info-line1" href="asdf"></a></div>
         <div><a id="info-line2" href="asdf"></a></div>
         <div id="info-attribution"></div>
