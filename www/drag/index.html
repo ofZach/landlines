@@ -500,6 +500,11 @@ function simpleStringify (object){
         lastMouseY = moveData.data.global.y;
     };
 
+    stage.mouseupoutside = function(mouseData){
+        bAmDrawing = false;
+    }
+ 
+
     stage.mousemove = stage.touchmove = function(moveData) {
 
         if (bAmDrawing === true){
@@ -523,7 +528,6 @@ function simpleStringify (object){
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
         bAmDrawing = false;
-
     }; 
 
 
