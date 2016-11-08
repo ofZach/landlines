@@ -218,6 +218,7 @@
     <a href="javascript:void(0)"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
 
     <script>
+    updateBackgroundSize();
 
     function show(elem) {
         elem.style.opacity = 0;
@@ -296,6 +297,13 @@
         elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
     }
 
+    function updateBackgroundSize() {
+        if (window.innerHeight > window.innerWidth)
+            document.getElementById('app').style.backgroundSize = 'auto 150%'
+        else
+            document.getElementById('app').style.backgroundSize = '150%'
+    }
+
     document.getElementById('overlay-open').onclick = showAboutOverlay;
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
 
@@ -303,6 +311,7 @@
     document.getElementById('button-swipe').onclick = loadAppSwipe;
 
     document.getElementById('app').onmousemove = updateBackgroundMouse;
+    window.addEventListener('resize', updateBackgroundSize, false);
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
 </body>
