@@ -53,6 +53,24 @@
             font-size: 9pt;
             letter-spacing: 0;
         }
+
+        #instruction {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+            pointer-events: none;
+        }
+        #instruction img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            user-select: none;
+            pointer-events: none;
+        }
     </style>
  
  
@@ -509,7 +527,13 @@ function simpleStringify (object){
 
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
+    var firstTouch = true;
     stage.mousedown = stage.touchstart = function(moveData) {
+
+        if (firstTouch) {
+            firstTouch = false;
+            document.body.removeChild(document.getElementById('instruction'));    
+    }
 
         bAmDrawing = true;
         lastMouseX = moveData.data.global.x;
@@ -1039,6 +1063,10 @@ function simpleStringify (object){
         <div><a id="info-line1" href="asdf"></a></div>
         <div><a id="info-line2" href="asdf"></a></div>
         <div id="info-attribution"></div>
+    </div>
+
+    <div id="instruction">
+        <img src="../img/instruction-swipe@2x.gif">
     </div>
 
 </body>
