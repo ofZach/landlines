@@ -67,6 +67,7 @@
             pointer-events: none;
         }
         #instruction img {
+            display: none;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -692,10 +693,10 @@
 
 
     // loading: 
-    var text = new PIXI.Text('Loading',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-    stage.addChild(text);
-    text.position.x = 300;
-    text.position.y = 300;
+    var loadingText = new PIXI.Text('Loading',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+    stage.addChild(loadingText);
+    loadingText.position.x = 300;
+    loadingText.position.y = 300;
 
 
     var circleOffsetX;
@@ -1072,7 +1073,19 @@
 
 
         if (vptrees.length > 0){
-            text.position.x = -1000;
+            if (loadingText != null) {
+                stage.removeChild(loadingText);
+                loadingText.destroy();
+                loadingText = null;    
+
+                // Temporarily clear & restore img src so that gif animation
+                // starts over
+                var elem = document.getElementById('instruction-animation');
+                var srcCache = elem.src;
+                elem.src = '';
+                elem.src = srcCache;
+                elem.style.display = 'block';
+            }
         }
 
 
@@ -1343,7 +1356,7 @@
     </div>
 
     <div id="instruction">
-        <img src="../img/instruction-draw@2x.gif">
+        <img id="instruction-animation" src="../img/instruction-draw@2x.gif">
     </div>
 
 </body>
