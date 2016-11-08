@@ -261,6 +261,11 @@
                 "closed": false,
                 "folders": {}
 
+              },
+              "match": {
+                "preset": "Default",
+                "closed": false,
+                "folders": {}
               }
             },
           },
@@ -297,6 +302,8 @@
         this.bgFadeOutSpeed = 0.015;
         this.bgOpacity = 0.75;
         this.metadata = 0.15;
+
+        this.badMatchThreshold = 0.25;
         
         this.loadFromCloud = true;
     };
@@ -334,6 +341,10 @@
         f4.add(myGui, 'bgOpacity', 0, 1);
         f4.add(myGui, 'metadata', 0, 1);
 
+
+        var f4 = gui.addFolder('match');
+        f4.add(myGui, 'badMatchThreshold', 0.0, 1.0);
+
         // gui.add(myGui, 'loadFromCloud');
         
         gui.remember(myGui);
@@ -354,6 +365,8 @@
     var matchedMetadata = {};
     var textureHasLoaded = false;
     var metadataTargetOpacity = 0;
+    var drawingAlpha = 1.0;
+    var drawingAlphaTarget = 1.0;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -688,6 +701,9 @@
         } else {
             touchID = moveData.data.identifier;
         }
+
+        drawingAlpha = 1.0;
+        drawingAlphaTarget = 1.0;
         //console.log(moveData.data.identifier);
         matched = false;
         bAmDrawing = true;
@@ -918,6 +934,12 @@
            
         }
 
+        console.log("smallestDiff " + smallestDiff  + " results d " + results[0].d);
+
+        if (results[0].d > myGui.badMatchThreshold){
+            drawingAlphaTarget = 0.0;                       // fade out weird stuff 
+        }
+
         // Pull ID from info obj, which actually stores IDs starting from 0
         var id = infoobj[results[0].i][0];
         console.log("loading metadata for id " + id);
@@ -931,7 +953,7 @@
         readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
 
 
-        console.log( "smallestDiff " + smallestDiff + " " + " bestAngle " + bestAngle );
+        //console.log( "smallestDiff " + smallestDiff + " " + " bestAngle " + bestAngle );
 
         angleMatch = bestAngle;
         updateGraphics = true;
@@ -1021,6 +1043,7 @@
     function animate() {
         
 
+       
         parseLoadVPTree();  // always try to parse ! 
 
 
@@ -1037,6 +1060,10 @@
         //------------------------------------------------------- drawing
         if (updateGraphics === true){
             drawing.clear();
+
+            drawingAlpha = 0.98 * drawingAlpha + 0.02 * drawingAlphaTarget;
+            //drawing.alpha = drawingAlpha;
+
 
             //console.log(drawing);
             dropShadowFilter.blur = myGui.shadowBlur;
@@ -1084,13 +1111,13 @@
                 // If the texture is loading, then it should pulse
                 // Otherwise it's solid
                 if (textureHasLoaded) {
-                    drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
+                    drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity * drawingAlpha);
                 } else {
                     linePulseCounter += (0.01 * myGui.pulseSpeed);
                     var sine = Math.sin(linePulseCounter);
                     var thickness = Utils.remap(sine, -1, 1, myGui.lineWidth - myGui.pulseWidth, myGui.lineWidth + myGui.pulseWidth);
                     var opacity = Utils.remap(sine, -1, 1, myGui.pulseOpacityLow, myGui.pulseOpacityHigh);
-                    drawing.lineStyle(thickness, myGui.lineColor, opacity);
+                    drawing.lineStyle(thickness, myGui.lineColor, opacity * drawingAlpha);
                 }   
 
 
