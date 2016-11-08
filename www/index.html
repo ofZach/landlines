@@ -23,7 +23,7 @@
         text-decoration: none;
     }
 
-    #container {
+    #landing-container {
         display: table;
         table-layout: fixed;
         width: 100%;
@@ -73,6 +73,26 @@
 
     .app-button:last-child {
         margin-bottom: 50px;
+    }
+
+    #nav {
+        display: none;
+        color: white;
+        position: absolute;
+        top: 0px;
+        padding: 5px 0 0 5px;
+        font-size: 15pt;
+        font-weight: bold;
+        letter-spacing: 0.75pt;
+    }
+
+    #nav a {
+        padding: 0 5px;
+    }
+
+    #nav .inactive {
+        color: #666;
+        cursor: default;
     }
 
     #chrome-experiment {
@@ -145,7 +165,7 @@
         padding-top: 10px;
     }
 
-    #app-container {
+    #draw-container, #swipe-container {
         display: none;
         position: absolute;
         top: 0;
@@ -171,7 +191,7 @@
 
 <body>
 
-    <div id="container">
+    <div id="landing-container">
 
         <div id="app">
             <p id="header">Land Lines</p>
@@ -182,7 +202,12 @@
 
     </div>
 
-    <iframe id="app-container"></iframe>
+    <iframe id="draw-container"></iframe>
+    <iframe id="swipe-container"></iframe>
+
+    <div id="nav">
+        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
+    </div>
 
     <div id="privacy-terms">
         <a target="_blank" href="https://www.google.com/policies/privacy/">Privacy</a> &
@@ -237,7 +262,6 @@
 
     function hide(elem) {
         elem.style.opacity = 1;
-        elem.style.display = 'block';
         
         var timer = setInterval(function() {
             if (elem.style.opacity <= 0) {
@@ -262,19 +286,46 @@
     }
 
     function loadApp() {
-        show(document.getElementById('app-container'));
+        show(document.getElementById('nav'));
+        hide(document.getElementById('landing-container'));
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
     }
 
     function loadAppDraw() {
+        // Skip if this app is already active
+        if (document.getElementById('nav-draw').classList.length) return;
+
         loadApp();
-        document.getElementById('app-container').src = '/draw';
+
+        var draw = document.getElementById('draw-container');
+        var swipe = document.getElementById('swipe-container');
+        
+        hide(swipe);
+        show(draw);
+        draw.src = '/draw';
+        swipe.src = '';
+
+        document.getElementById('nav-draw').classList = ['inactive'];
+        document.getElementById('nav-swipe').classList = [];
     }
 
     function loadAppSwipe() {
+        // Skip if this app is already active
+        if (document.getElementById('nav-swipe').classList.length) return;
+
         loadApp();
-        document.getElementById('app-container').src = '/drag';
+        
+        var draw = document.getElementById('draw-container');
+        var swipe = document.getElementById('swipe-container');
+        
+        hide(draw);
+        show(swipe);
+        draw.src = '';
+        swipe.src = '/drag';
+
+        document.getElementById('nav-draw').classList = [];
+        document.getElementById('nav-swipe').classList = ['inactive'];
     }
 
     // Layout / background image stuff
@@ -309,6 +360,8 @@
 
     document.getElementById('button-draw').onclick = loadAppDraw;
     document.getElementById('button-swipe').onclick = loadAppSwipe;
+    document.getElementById('nav-draw').onclick = loadAppDraw;
+    document.getElementById('nav-swipe').onclick = loadAppSwipe;
 
     document.getElementById('app').onmousemove = updateBackgroundMouse;
     window.addEventListener('resize', updateBackgroundSize, false);
