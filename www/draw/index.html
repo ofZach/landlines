@@ -523,6 +523,85 @@
     stage.interactive = true;
     stage.hitArea = new PIXI.Rectangle(0, 0, w, h);
 
+
+    window.onresize = function (event){    
+        var w = window.innerWidth;    
+        var h = window.innerHeight;    //this part resizes the canvas but keeps ratio the same    
+        renderer.view.style.width = w + "px";    
+        renderer.view.style.height = h + "px";    //this part adjusts the ratio:    
+        renderer.resize(w,h);
+    }
+    // resize things: 
+
+//     var scene = new PIXI.DisplayObjectContainer();
+ 
+// /**
+//  * Add listeners for canvas scaling with window resizing and device rotation
+//  */
+// var resize = function () {
+//         window.addEventListener('resize', rendererResize);
+//         window.addEventListener('deviceOrientation', rendererResize);
+// };
+
+// /**
+//  * Calculate the current window size and set the canvas renderer size accordingly
+//  */
+// var rendererResize = function () {
+//     alert("hi");
+//     var width = window.innerWidth,
+//         height = window.innerHeight,
+//         targetScale;
+
+//     /**
+//      * Set the canvas size and display size
+//      * This way we can support retina graphics and make our game really crisp
+//      */
+//     canvas.width = width * window.devicePixelRatio;
+//     canvas.height = height * window.devicePixelRatio;
+//     canvas.style.width = width + 'px';
+//     canvas.style.height = height + 'px';
+
+//     /**
+//      * Resize the PIXI renderer
+//      * Let PIXI know that we changed the size of the viewport
+//      */
+//     renderer().resize(canvas.width, canvas.height);
+
+//     /**
+//      * Scale the canvas horizontally and vertically keeping in mind the screen estate we have
+//      * at our disposal. This keeps the relative game dimensions in place.
+//      */
+//      if (height / targetHeight < width / targetWidth) {
+//          scene.scale.x = scene.scale.y = height / targetHeight;
+//      } else {
+//          scene.scale.x = scene.scale.y = width / targetWidth;
+//      }
+
+//     /**
+//      * Some sugar
+//      * Set the x horizontal center point of the canvas after resizing.
+//      * This should be used for engines which calculate object position from anchor 0.5/0.5
+//      */
+//     scene.pivot.y = -(width * (1 / scene.scale.y) / 2) * window.devicePixelRatio;
+//     scene.pivot.x = -(width * (1 / scene.scale.x) / 2) * window.devicePixelRatio;
+
+//     /**
+//      * iOS likes to scroll when rotating - fix that 
+//      */
+//     window.scrollTo(0, 0);
+// };
+
+
+// // After the renderer and scene are initialized just call
+// resize();
+
+
+
+
+
+
+
+
     // Handle device orientation change
     // window.addEventListener("deviceorientation", function() {
     //     console.log('orientation change!', window.orientation);
@@ -1127,6 +1206,9 @@
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
+
+
+
     }
     </script>
 

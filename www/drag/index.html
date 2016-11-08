@@ -390,6 +390,15 @@ function simpleStringify (object){
     drawing.position.x = 0;
     drawing.position.y = 0;
 
+
+    window.onresize = function (event){    
+        var w = window.innerWidth;    
+        var h = window.innerHeight;    //this part resizes the canvas but keeps ratio the same    
+        renderer.view.style.width = w + "px";    
+        renderer.view.style.height = h + "px";    //this part adjusts the ratio:    
+        renderer.resize(w,h);
+    }
+
     //var targetAngle = 0;
 
     var smoothPt = new Point(renderer.view.width*0.5,renderer.view.height*0.5);
