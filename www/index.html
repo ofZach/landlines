@@ -40,7 +40,6 @@
         margin-top: 0;
         margin-bottom: 5px;
     }
-
     #desc {
         margin-top: 0;
         margin-bottom: 50px;
@@ -56,7 +55,6 @@
         background-size: cover; 
         background-image: url('img/draw-hero.jpg');
     }
-
     .app-button {
         border: 1px solid white;
         background-color: rgba(0, 0, 0, 0.25);
@@ -70,7 +68,6 @@
         padding-top: 10px;
         margin-bottom: 10px;
     }
-
     .app-button:last-child {
         margin-bottom: 50px;
     }
@@ -85,14 +82,28 @@
         font-weight: bold;
         letter-spacing: 0.75pt;
     }
-
     #nav a {
         padding: 0 5px;
     }
-
     #nav .inactive {
         color: #666;
         cursor: default;
+    }
+
+    #gradient-top, #gradient-bottom {
+        position: absolute;
+        width: 100%;
+        background-size: auto 100%;
+    }
+    #gradient-top {
+        top: 0;
+        height: 100px;
+        background-image: url('img/gradient_top_1pixel.png');
+    }
+    #gradient-bottom {
+        bottom: 0;
+        height: 150px;
+        background-image: url('img/gradient_bottom.png');
     }
 
     #chrome-experiment {
@@ -134,7 +145,6 @@
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
     }
-
     #about-overlay-content {
         width: 60%;
         margin: 0 auto;
@@ -142,24 +152,20 @@
         letter-spacing: 0.5pt;
         line-height: 2.3;
     }
-
     #about-overlay-content p {
         margin: 8px 0;
         font-family: 'Roboto', sans-serif;
     }
-
     .about-heading {
         font-size: 14pt;
         letter-spacing: 1pt;
         text-transform: uppercase;
         padding-top: 40px;
     }
-
     .about-heading span {
         padding-bottom: 3px;
         border-bottom: 1px solid white;
     }
-
     .about-tech {
         font-weight: bold;
         padding-top: 10px;
@@ -205,6 +211,9 @@
     <iframe id="draw-container"></iframe>
     <iframe id="swipe-container"></iframe>
 
+    <div id="gradient-top"></div>
+    <div id="gradient-bottom"></div>
+
     <div id="nav">
         <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
     </div>
@@ -215,6 +224,7 @@
     </div>
 
     <a href="javascript:void(0)"><img id="overlay-open" src="img/question-mark@2x.png" width="25"></img></a>
+
     <img id="chrome-experiment" src="img/CE_badge@2x.png" width="125"></img>
 
     <div id="about-overlay">
@@ -287,6 +297,7 @@
 
     function loadApp() {
         show(document.getElementById('nav'));
+        hide(document.getElementById('gradient-bottom'));
         hide(document.getElementById('landing-container'));
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
