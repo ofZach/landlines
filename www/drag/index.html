@@ -106,29 +106,14 @@ function updateMetadata(data) {
 }
 
 // Callback from AJAX request to get metadata for matched line
-// Because we don't have all the metadata yet, we sometimes get a 404
-// Therefore pull metadata from a random image from a list that we've built
-// that has known, existing filenames. The 404 section can eventually
-// be removed
 function updateMetadataCallback(code, data) {
     if (code == 200) {
         matchedMetadata = JSON.parse(data);
         updateMetadata(matchedMetadata);
     } else if (code == 404) {
-        var index = Math.floor(Math.random()*metadataIDList.length);
-        var id = metadataIDList[index].toString();
-        readTextFile('../draw/metadata/' + id.substr(0, 1) + '/' + id + '.json', updateMetadataCallback);
+        console.log('Received 404 for metadata');
     }
 };
-
-// Temporary!
-// Load a list of existing meta data ids in case we try to request one
-// that doesn't exist yet (because we're still waiting on real data)
-var metadataIDList = [];
-readTextFile('../draw/metadata-id-list.json', function(code, data) {
-    metadataIDList = JSON.parse(data);
-});
-
 
 
 //-------------------------------------------
@@ -556,11 +541,8 @@ function simpleStringify (object){
 
         var lineToAdd = loadedCache[lineToAddFromCache].index;
 
-        var index = Math.floor(Math.random()*metadataIDList.length);
-        var id = metadataIDList[index].toString();
-        // var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
-        var metaFilename = id + '.json';
-        readTextFile('../draw/metadata/' + metaFilename, updateMetadataCallback);
+        var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
+        readTextFile('metadata/' + metaFilename.substr(0, 1) + '/' + metaFilename, updateMetadataCallback);
 
         var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
         var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
@@ -801,6 +783,7 @@ function simpleStringify (object){
 
         var adder = velSmooth*myGui.dragSpeed;
         console.log("adding " + adder);
+        // console.log("adding " + adder);
 
         if (adder < 0.1){
             velStopEnergy = 0.99 * velStopEnergy + 0.01 * 1.0;
