@@ -145,6 +145,16 @@
         padding-top: 10px;
     }
 
+    #app-container {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
     /* Changes for mobile */
     @media screen and (max-device-width: 1023px) {
         #desc {
@@ -166,18 +176,20 @@
         <div id="app">
             <p id="header">Land Lines</p>
             <p id="desc">Sketch a line, let the planet complete the picture.</p>
-            <a class="app-button" href="draw">Draw</a>
-            <a class="app-button" href="drag">Swipe</a>
+            <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
+            <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
         </div>
 
     </div>
+
+    <iframe id="app-container"></iframe>
 
     <div id="privacy-terms">
         <a target="_blank" href="https://www.google.com/policies/privacy/">Privacy</a> &
         <a target="_blank" href="https://www.google.com/policies/terms/">Terms</a>
     </div>
 
-    <a href="#"><img id="overlay-open" src="img/question-mark@2x.png" width="25"></img></a>
+    <a href="javascript:void(0)"><img id="overlay-open" src="img/question-mark@2x.png" width="25"></img></a>
     <img id="chrome-experiment" src="img/CE_badge@2x.png" width="125"></img>
 
     <div id="about-overlay">
@@ -203,17 +215,14 @@
 
         </div>
     </div>
-    <a href="#"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
+    <a href="javascript:void(0)"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
 
     <script>
 
-    function showAboutOverlay() {
-        var elem = document.getElementById('about-overlay');
+    function show(elem) {
+        elem.style.opacity = 0;
         elem.style.display = 'block';
         
-        if (elem.style.opacity == '')
-            elem.style.opacity = 0;
-
         var timer = setInterval(function() {
             if (elem.style.opacity >= 1) {
                 elem.style.opacity = 1;
@@ -221,20 +230,14 @@
                 return;
             }
 
-            var opacity = elem.style.opacity || 0;
             elem.style.opacity = parseFloat(elem.style.opacity) + 0.07;
         }, 1000 / 60);
-
-        document.getElementById('overlay-close').style.display = 'block';
     }
 
-    function hideAboutOverlay() {
-        var elem = document.getElementById('about-overlay');
+    function hide(elem) {
+        elem.style.opacity = 1;
         elem.style.display = 'block';
         
-        // if (elem.style.opacity == '')
-        //     elem.style.opacity = 0;
-
         var timer = setInterval(function() {
             if (elem.style.opacity <= 0) {
                 elem.style.opacity = 0;
@@ -243,11 +246,34 @@
                 return;
             }
 
-            var opacity = elem.style.opacity || 0;
             elem.style.opacity = parseFloat(elem.style.opacity) - 0.07;
         }, 1000 / 60);
+    }
 
+    function showAboutOverlay() {
+        show(document.getElementById('about-overlay'));
+        document.getElementById('overlay-close').style.display = 'block';
+    }
+
+    function hideAboutOverlay() {
+        hide(document.getElementById('about-overlay'));
         document.getElementById('overlay-close').style.display = 'none';
+    }
+
+    function loadApp() {
+        show(document.getElementById('app-container'));
+        hide(document.getElementById('chrome-experiment'));
+        hide(document.getElementById('privacy-terms'));
+    }
+
+    function loadAppDraw() {
+        loadApp();
+        document.getElementById('app-container').src = '/draw';
+    }
+
+    function loadAppSwipe() {
+        loadApp();
+        document.getElementById('app-container').src = '/drag';
     }
 
     // Layout / background image stuff
@@ -272,6 +298,10 @@
 
     document.getElementById('overlay-open').onclick = showAboutOverlay;
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
+
+    document.getElementById('button-draw').onclick = loadAppDraw;
+    document.getElementById('button-swipe').onclick = loadAppSwipe;
+
     document.getElementById('app').onmousemove = updateBackgroundMouse;
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
