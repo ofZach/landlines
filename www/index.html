@@ -74,20 +74,29 @@
 
     #nav {
         display: none;
-        color: white;
         position: absolute;
-        top: 0px;
-        padding: 5px 0 0 5px;
+        top: 15px;
+        left: 10px;
         font-size: 15pt;
         font-weight: bold;
         letter-spacing: 0.75pt;
     }
     #nav a {
-        padding: 0 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+        cursor: default;
+        text-decoration: none;
+        padding-bottom: 4px;
+        border-bottom: 1px solid;
+    }
+    #nav a:hover {
+        color: white;
+        border-color: white;
     }
     #nav .inactive {
-        color: #666;
-        cursor: default;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        border-color: rgba(255, 255, 255, 0);
     }
 
     #gradient-top, #gradient-bottom {
@@ -308,7 +317,7 @@
 
     function loadAppDraw() {
         // Skip if this app is already active
-        if (document.getElementById('nav-draw').classList.length) return;
+        if (document.getElementById('nav-swipe').classList.length) return;
 
         loadApp();
 
@@ -320,13 +329,13 @@
         draw.src = '/draw';
         swipe.src = '';
 
-        document.getElementById('nav-draw').classList = ['inactive'];
-        document.getElementById('nav-swipe').classList = [];
+        document.getElementById('nav-draw').classList = [];
+        document.getElementById('nav-swipe').classList = ['inactive'];
     }
 
     function loadAppSwipe() {
         // Skip if this app is already active
-        if (document.getElementById('nav-swipe').classList.length) return;
+        if (document.getElementById('nav-draw').classList.length) return;
 
         loadApp();
         
@@ -338,8 +347,8 @@
         draw.src = '';
         swipe.src = '/drag';
 
-        document.getElementById('nav-draw').classList = [];
-        document.getElementById('nav-swipe').classList = ['inactive'];
+        document.getElementById('nav-draw').classList = ['inactive'];
+        document.getElementById('nav-swipe').classList = [];
     }
 
     // Layout / background image stuff
