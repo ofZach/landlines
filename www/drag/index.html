@@ -93,18 +93,16 @@ readTextFile("dataobj.json", function(code, data){
 
 // Update DOM elements with new data
 function updateMetadata(data) {
-    if (data.locality) var topLine = data.locality;
-    else if (data.admin3) var topLine = data.admin3;
-    else if (data.admin2) var topLine = data.admin2;
-    else if (data.admin1) var topLine = data.admin1;
-    else var topLine = '';
+    var line1 = data['line-1'] || '';
+    var line2 = data['line-2'] || '';
+    var attribution = data['attribution'] || '';
+    var url = data['url'] || '';
 
-    var attribution = data.attribution || '';
-    var country = data.country || '';
-
+    document.getElementById('info-line1').innerText = line1;
+    document.getElementById('info-line2').innerText = line2;
+    document.getElementById('info-line1').href = url;
+    document.getElementById('info-line2').href = url;
     document.getElementById('info-attribution').innerText = attribution;
-    document.getElementById('info-line1').innerText = topLine;
-    document.getElementById('info-line2').innerText = country;
 }
 
 // Callback from AJAX request to get metadata for matched line
@@ -118,8 +116,8 @@ function updateMetadataCallback(code, data) {
         updateMetadata(matchedMetadata);
     } else if (code == 404) {
         var index = Math.floor(Math.random()*metadataIDList.length);
-        var id = metadataIDList[index];
-        readTextFile('../draw/metadata/' + id + '.json', updateMetadataCallback);
+        var id = metadataIDList[index].toString();
+        readTextFile('../draw/metadata/' + id.substr(0, 1) + '/' + id + '.json', updateMetadataCallback);
     }
 };
 
@@ -558,8 +556,11 @@ function simpleStringify (object){
 
         var lineToAdd = loadedCache[lineToAddFromCache].index;
 
-        var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
-        readTextFile('metadata/' + metaFilename, updateMetadataCallback);
+        var index = Math.floor(Math.random()*metadataIDList.length);
+        var id = metadataIDList[index].toString();
+        // var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
+        var metaFilename = id + '.json';
+        readTextFile('../draw/metadata/' + metaFilename, updateMetadataCallback);
 
         var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
         var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
