@@ -512,7 +512,10 @@ function simpleStringify (object){
     stage.mouseupoutside = function(mouseData){
         bAmDrawing = false;
     }
- 
+    
+    stage.mouseout = function(moveData) {
+        bAmDrawing = false;
+    }
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
@@ -524,6 +527,7 @@ function simpleStringify (object){
                 diffy *= -1;
             }
 
+            console.log(moveData.data.global.x + " " + moveData.data.global.y + " " + diffx + " " + diffy);
             velThisFrame = Math.sqrt(diffx * diffx + diffy*diffy);
             lastDiff.x = diffx;
             lastDiff.y = diffy;
