@@ -634,10 +634,21 @@
     var circleScaleRatio;
     var touchID;
     
+
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
     stage.mousedown = stage.touchstart = function(moveData) {
 
+        if (bAmDrawing === true){
+            return;
+        }
+
+        if (moveData.data.identifier === undefined){
+            touchID = 0;
+        } else {
+            touchID = moveData.data.identifier;
+        }
+        //console.log(moveData.data.identifier);
         matched = false;
         bAmDrawing = true;
         linePulseCounter = 0;
@@ -652,7 +663,16 @@
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
+
+
+
         if (bAmDrawing === true){
+
+             if (moveData.data.identifier !== undefined) {
+                if (touchID !== moveData.data.identifier){
+                    return;
+                }
+             }
 
             pts.push(moveData.data.global.x);
             pts.push(moveData.data.global.y);
@@ -669,6 +689,13 @@
 
     stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
 
+
+        if (moveData.data.identifier !== undefined) {
+            if (touchID !== moveData.data.identifier){
+                return;
+            }
+         }
+             
         // if we weren't drawing (gui, etc) return;
          if (bAmDrawing === false){
             return;
@@ -676,6 +703,9 @@
 
 
         bAmDrawing = false;
+
+
+
 
         // resample if we need to: 
         var ptsResampled = [];
