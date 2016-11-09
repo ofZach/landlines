@@ -1324,19 +1324,15 @@
             }
 
 
-            // Only update graphics on next pass if there is something
-            // to animate
+            // Only update graphics on next pass if there is something to animate
+            updateGraphics = false;
 
-            // Keep this on for now since GUI changes won't take affect if we're not rendering
-            // updateGraphics = false;
-            updateGraphics = true;
-
-            //      if (bAmDrawing && sprites.length > 0) updateGraphics = true;
-            // else if (sprites.length > 1) updateGraphics = true;
-            // else if (sprites.length && !sprites[sprites.length-1].texture.baseTexture.hasLoaded) updateGraphics = true;
-            // else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
-            // else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
-            // else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
+                 if (bAmDrawing && sprites.length > 0) updateGraphics = true;
+            else if (sprites.length > 1) updateGraphics = true;
+            else if (sprites.length && !sprites[sprites.length-1].texture.baseTexture.hasLoaded) updateGraphics = true;
+            else if (Math.abs(animatingCircle.x - targetX) > 1) updateGraphics = true;
+            else if (Math.abs(animatingCircle.y - targetY) > 1) updateGraphics = true;
+            else if (Math.abs(animatingCircle.r - targetR) > 1) updateGraphics = true;
          }
         renderer.render(stage);
         requestAnimationFrame( animate );
