@@ -327,8 +327,8 @@
         
         hide(swipe);
         show(draw);
-        draw.src = '/draw';
         swipe.src = '';
+        setTimeout(function(){ draw.src = '/draw'; }, 250);
 
         draw.onload = function() {
             draw.style.visibility = 'visible';
@@ -350,7 +350,7 @@
         hide(draw);
         show(swipe);
         draw.src = '';
-        swipe.src = '/drag';
+        setTimeout(function(){ swipe.src = '/drag'; }, 250);
 
         draw.onload = function() {
             swipe.style.visibility = 'visible';
