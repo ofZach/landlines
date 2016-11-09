@@ -17,6 +17,7 @@
         body {
             margin: 0;
             padding: 0;
+            color: white;
             background-color: #000;
             font-family: 'Roboto Condensed', sans-serif;
         }
@@ -38,7 +39,6 @@
         }
 
         #info {
-            color: white;
             position: absolute;
             bottom: 0px;
             text-transform: uppercase;
@@ -61,22 +61,26 @@
             padding-top: 4px;
         }
 
-        #instruction {
+        #loading {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             user-select: none;
-            pointer-events: none;
         }
-        #instruction img {
-            display: none;
+        #progress, #instruction {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             user-select: none;
+        }
+        #progress {
+            font-size: 18pt;
+        }
+        #instruction {
+            display: none;
             pointer-events: none;
         }
     </style>
@@ -693,13 +697,7 @@
         drawing.filters = val ? [ dropShadowFilter ] : null;
     }
 
-
-    // loading: 
-    var loadingText = new PIXI.Text('Loading',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-    stage.addChild(loadingText);
-    loadingText.position.x = 300;
-    loadingText.position.y = 300;
-
+    var finishedLoading = false;
 
     var circleOffsetX;
     var circleOffsetY;
@@ -711,11 +709,11 @@
     //------------------------------------------------------------------------------------------------
     var firstTouch = true;
     stage.mousedown = stage.touchstart = function(moveData) {
-        // document.getElementById('instruction').style.display = 'none';
 
+        // Remove the instruction animation on first touch
         if (firstTouch) {
             firstTouch = false;
-            document.body.removeChild(document.getElementById('instruction'));    
+            document.getElementById('loading').removeChild(document.getElementById('instruction'));
         }
         
 
@@ -1069,20 +1067,20 @@
 
     function animate() {
         
-
-       
         parseLoadVPTree();  // always try to parse ! 
 
-
         if (vptrees.length > 0){
-            if (loadingText != null) {
-                stage.removeChild(loadingText);
-                loadingText.destroy();
-                loadingText = null;    
+            if (!finishedLoading) {
+                finishedLoading = true;
+                // Remove 'Loading' text
+                var elem = document.getElementById('loading');
+                elem.removeChild(document.getElementById('progress'));
 
-                // Temporarily clear & restore img src so that gif animation
-                // starts over
-                var elem = document.getElementById('instruction-animation');
+                // Stop using the loading div to block input
+                elem.style.pointerEvents = 'none'
+
+                // Temporarily clear & restore img src so that gif animation resets to beginning
+                elem = document.getElementById('instruction');
                 var srcCache = elem.src;
                 elem.src = '';
                 elem.src = srcCache;
@@ -1357,8 +1355,9 @@
         <div id="info-attribution"></div>
     </div>
 
-    <div id="instruction">
-        <img id="instruction-animation" src="../img/instruction-draw@2x.gif">
+    <div id="loading">
+        <div id="progress">Loading</div>
+        <img id="instruction" src="../img/instruction-draw@2x.gif">
     </div>
 
 </body>
