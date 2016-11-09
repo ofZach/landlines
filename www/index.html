@@ -182,6 +182,7 @@
 
     #draw-container, #swipe-container {
         display: none;
+        visibility: hidden;
         position: absolute;
         top: 0;
         left: 0;
@@ -329,6 +330,10 @@
         draw.src = '/draw';
         swipe.src = '';
 
+        draw.onload = function() {
+            draw.style.visibility = 'visible';
+        }
+
         document.getElementById('nav-draw').classList = [];
         document.getElementById('nav-swipe').classList = ['inactive'];
     }
@@ -346,6 +351,10 @@
         show(swipe);
         draw.src = '';
         swipe.src = '/drag';
+
+        draw.onload = function() {
+            swipe.style.visibility = 'visible';
+        }
 
         document.getElementById('nav-draw').classList = ['inactive'];
         document.getElementById('nav-swipe').classList = [];
