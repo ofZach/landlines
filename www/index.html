@@ -52,8 +52,7 @@
         letter-spacing: 0.5pt;
         text-align: center;
         background-position: center;
-        background-size: cover; 
-        background-image: url('img/draw-hero.jpg');
+        background-size: cover;
     }
     .app-button {
         border: 1px solid white;
@@ -266,6 +265,12 @@
 
     <script>
     updateBackgroundSize();
+
+    // Load a random background image
+    var bgList = ['1006', '1018', '1102', '1240', '1353', '1463', '1557', '5586', '6498', '6578'];
+    var bgIndex = Math.floor(Math.random() * bgList.length);
+    var bgFile = 'url("/img/landing/' + bgList[bgIndex] + '.jpg")';
+    document.getElementById('app').style.backgroundImage = bgFile;
 
     function show(elem) {
         elem.style.opacity = 0;
