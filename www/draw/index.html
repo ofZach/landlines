@@ -107,13 +107,40 @@
     });
 
 
+    requestStatus = {};
+
+    function updateProgress(evt) 
+    {
+        if (evt.lengthComputable) 
+        {  //evt.loaded the bytes browser receive
+          //evt.total the total bytes seted by the header
+          //
+            var percentComplete = (evt.loaded / evt.total)*100;  
+            console.log("PROGRESS " + percentComplete);
+            console.log(evt.srcElement.responseURL);
+            //console.log(requestStatus);
+            // check each element for progess: 
+            for (var key in requestStatus) {
+              if (p.hasOwnProperty(key)) {
+                console.log(key + " -> " + p[key]);
+              }
+            }
+
+        } else {
+            console.log("don't know length");
+        }
+    }  
+
     // Generic function to load a file asynchronously
     function readTextFile(file, callback) {
         loadedJson = false;
         //console.log('Requesting file:', file);
         var rawFile = new XMLHttpRequest();
+        
+        rawFile.onprogress=updateProgress;
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
+        requestStatus[file] = 0.0;
         rawFile.onreadystatechange = function() {
             if (rawFile.readyState === 4) {
                 callback(rawFile.status, rawFile.responseText);
@@ -1083,7 +1110,8 @@
                 elem = document.getElementById('instruction');
                 var srcCache = elem.src;
                 elem.src = '';
-                elem.src = srcCache;
+                elem.src = srcCache +"?x="+Math.random();
+                console.log(elem.src);
                 elem.style.display = 'block';
             }
         }
