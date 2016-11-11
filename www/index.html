@@ -267,9 +267,37 @@
     updateBackgroundSize();
 
     // Load a random background image
-    var bgList = ['1006', '1018', '1102', '1240', '1353', '1463', '1557', '5586', '6498', '6578'];
-    var bgIndex = Math.floor(Math.random() * bgList.length);
-    var bgFile = 'url("/img/landing/' + bgList[bgIndex] + '.jpg")';
+    // Store the backgrounds in localStorag as they're used, and use those values
+    // to filter out the bgList to only use new ones
+    var bgList = ['1006', '1018', '1102', '1240', '1353', '1463', '1557', '5586', '6578', '1432', '1495', '1556', '1559', '1567', '1578', '1584', '1617', '1653', '1834', '5425'];
+    var filteredList = bgList.slice(0);
+    var usedBGs = localStorage.getItem('usedBGs') || '';
+    usedBGs = usedBGs.split(',');
+
+    // Remove the empty value from the array that results when you call
+    // Array.split() on an empty string
+    if (usedBGs.includes(''))
+        usedBGs.splice(usedBGs.indexOf(''), 1);
+
+    // Remove used backgrounds to create a filtered list
+    for (var i = 0; i < usedBGs.length; i++) {
+        if (filteredList.includes(usedBGs[i]))
+            filteredList.splice(filteredList.indexOf(usedBGs[i]), 1);
+    }
+
+    // Check if we'v cycled through all of them
+    if (filteredList.length == 0) {
+        console.log('Used all backgrounds, resetting');
+        filteredList = bgList;
+        usedBGs = [];
+        localStorage.setItem('usedBGs', usedBGs);
+    }
+
+    // Finally pull a random image from the filtered list and store it in localStorage
+    var bgIndex = Math.floor(Math.random() * filteredList.length);
+    var bgFile = 'url("/img/landing/' + filteredList[bgIndex] + '.jpg")';
+    usedBGs.push(filteredList[bgIndex]);
+    localStorage.setItem('usedBGs', usedBGs.join(','));
     document.getElementById('app').style.backgroundImage = bgFile;
 
     function show(elem) {
