@@ -115,15 +115,19 @@
         {  //evt.loaded the bytes browser receive
           //evt.total the total bytes seted by the header
           //
-            var percentComplete = (evt.loaded / evt.total)*100;  
-            console.log("PROGRESS " + percentComplete);
-            console.log(evt.srcElement.responseURL);
-            //console.log(requestStatus);
+            var percentComplete = (evt.loaded / evt.total);  
+            // console.log("PROGRESS " + percentComplete);
+            // console.log(evt.srcElement.responseURL);
+            // console.log(requestStatus);
+            // console.log("??");
             // check each element for progess: 
-            for (var key in requestStatus) {
-              if (p.hasOwnProperty(key)) {
-                console.log(key + " -> " + p[key]);
-              }
+            for(var key in requestStatus){
+                if (evt.srcElement.responseURL.includes(key)){
+                    //console.log("match!");
+                    requestStatus[key] = percentComplete;
+                }
+                //console.log(key);
+                //console.log(requestStatus[key]);
             }
 
         } else {
@@ -137,10 +141,12 @@
         //console.log('Requesting file:', file);
         var rawFile = new XMLHttpRequest();
         
+        requestStatus[file] = 0.0;
+
         rawFile.onprogress=updateProgress;
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
-        requestStatus[file] = 0.0;
+        
         rawFile.onreadystatechange = function() {
             if (rawFile.readyState === 4) {
                 callback(rawFile.status, rawFile.responseText);
@@ -1096,6 +1102,41 @@
 
     function animate() {
         
+
+        // if (Math.random() > 0.99){
+        //      console.log(requestStatus);
+        // }
+
+    if ( vptrees.length === 0){
+        // we are preloading, let's do some math. 
+        var pctData = 0.0;
+        var pctMetaData =  0.0;
+        var pctParsed = 0.0;
+
+        if ("data/0.json" in requestStatus){
+            pctData = requestStatus["data/0.json"];
+        }
+
+        if ("metadata-id-list.json" in requestStatus){
+            pctMetaData = requestStatus["metadata-id-list.json"];
+        }
+
+        if (parseWorkToDo){
+            pctParsed = dataParseCount / jsonData["polylines"].length;
+        }
+
+        var preloadPct = pctData * 0.7 + pctMetaData * 0.1 + pctParsed * 0.2;
+
+        
+        if(document.getElementById("progress") != null){
+            document.getElementById("progress").innerHTML = "Loading</br>" + Math.round(preloadPct*100) + " / 100";
+        }
+        //document.getElementById("progress").innerHTML = "Loading " + preloadPct;
+        //console.log("PRELOAD " + pctData + " " + pctMetaData + " " + pctParsed + " " + preloadPct);
+
+    }   
+
+
         parseLoadVPTree();  // always try to parse ! 
 
         if (vptrees.length > 0){
