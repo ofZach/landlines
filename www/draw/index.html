@@ -1083,9 +1083,7 @@
 
                 // Temporarily clear & restore img src so that gif animation resets to beginning
                 elem = document.getElementById('instruction');
-                var srcCache = elem.src;
-                elem.src = '';
-                elem.src = srcCache;
+                elem.src = '../img/instruction-draw@2x.gif';
                 elem.style.display = 'block';
             }
         }
@@ -1356,7 +1354,7 @@
 
     <div id="loading">
         <div id="progress">Loading</div>
-        <img id="instruction" src="../img/instruction-draw@2x.gif">
+        <img id="instruction">
     </div>
 
 </body>
