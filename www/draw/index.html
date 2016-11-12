@@ -202,11 +202,11 @@
     }
 
     // Callback from AJAX request to get metadata for matched line
-    function updateMetadataCallback(code, data) {
-        if (code == 200) {
-            matchedMetadata = JSON.parse(data);
-        }
-    };
+    // function updateMetadataCallback(code, data) {
+    //     if (code == 200) {
+    //         matchedMetadata = JSON.parse(data);
+    //     }
+    // };
 
 
 
@@ -311,9 +311,13 @@
 
     // Load a list of existing meta data ids since the filenames are actually indexed
     // from 0 - 1521 instead of using the id as the filename
+    var metadata = {};
     var metadataIDList = [];
     readTextFile('metadata-id-list.json', function(code, data) {
         metadataIDList = JSON.parse(data);
+    });
+    readTextFile('metadata-converted.json', function(code, data) {
+        metadata = JSON.parse(data);
     });
 
 
@@ -1045,7 +1049,8 @@
         // console.log("metadataIDList length ! " + metadataIDList.length);
 
         id = metadataIDList[id].toString();
-        readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
+        // readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
+        matchedMetadata = metadata[id];
 
 
         //console.log( "smallestDiff " + smallestDiff + " " + " bestAngle " + bestAngle );

@@ -174,16 +174,22 @@ function updateMetadata(data) {
 }
 
 // Callback from AJAX request to get metadata for matched line
-function updateMetadataCallback(code, data) {
-    if (code == 200) {
-        matchedMetadata = JSON.parse(data);
+// function updateMetadataCallback(code, data) {
+//     if (code == 200) {
+//         matchedMetadata = JSON.parse(data);
 
-        if (!firstTouch)
-            updateMetadata(matchedMetadata);
-    } else if (code == 404) {
-        console.log('Received 404 for metadata');
-    }
-};
+//         if (!firstTouch)
+//             updateMetadata(matchedMetadata);
+//     } else if (code == 404) {
+//         console.log('Received 404 for metadata');
+//     }
+// };
+
+// Load metadata
+var metadata = {};
+readTextFile('metadata-converted.json', function(code, data) {
+    metadata = JSON.parse(data);
+});
 
 
 //-------------------------------------------
@@ -597,7 +603,7 @@ function simpleStringify (object){
                 updateMetadata(matchedMetadata);
                 document.body.removeChild(document.getElementById('instruction'));    
             }
-        
+
             var diffx = (moveData.data.global.x - lastMouseX);
             var diffy = (moveData.data.global.y - lastMouseY);
             if (myGui.reverseSwipe) {
@@ -636,8 +642,14 @@ function simpleStringify (object){
 
         var lineToAdd = loadedCache[lineToAddFromCache].index;
 
-        var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
-        readTextFile('metadata/' + metaFilename.substr(0, 1) + '/' + metaFilename, updateMetadataCallback);
+        // var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
+        // readTextFile('metadata/' + metaFilename.substr(0, 1) + '/' + metaFilename, updateMetadataCallback);
+        var filename = dataobj[lineToAdd].fileName;
+        var id = filename.substr(0, filename.length-4);
+        if (firstTouch)
+            matchedMetadata = metadata[id];
+        else
+            updateMetadata(metadata[id]);
 
         var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
         var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
