@@ -134,10 +134,12 @@ function updateMetadata(data) {
     var attribution = data['attribution'] || '';
     var url = data['url'] || '';
 
-    document.getElementById('info-line1').innerText = line1;
-    document.getElementById('info-line2').innerText = line2;
-    document.getElementById('info-line1').href = url;
-    document.getElementById('info-line2').href = url;
+    // document.getElementById('info-line1').innerText = line1;
+    // document.getElementById('info-line2').innerText = line2;
+    // document.getElementById('info-line1').href = url;
+    // document.getElementById('info-line2').href = url;
+    document.getElementById('info-link').innerHTML = line1 + "<br>" + line2;
+    document.getElementById('info-link').href = url;
     document.getElementById('info-attribution').innerText = attribution;
 }
 
@@ -1069,8 +1071,9 @@ function simpleStringify (object){
     <div id="gradient-bottom"></div>
 
     <div id="info">
-        <div><a id="info-line1" href="" target="maps"></a></div>
-        <div><a id="info-line2" href="" target="maps"></a></div>
+        <!-- <div><a id="info-line1" href="" target="maps"></a></div>
+        <div><a id="info-line2" href="" target="maps"></a></div> -->
+        <a id="info-link" href="" target="maps"></a>
         <div id="info-attribution"></div>
     </div>
 
