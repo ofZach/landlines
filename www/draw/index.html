@@ -20,12 +20,15 @@
             color: white;
             background-color: #000;
             font-family: 'Roboto Condensed', sans-serif;
+            position: fixed;
         }
 
         #gradient-top, #gradient-bottom {
             position: absolute;
             width: 100%;
             background-size: auto 100%;
+            pointer-events: none;
+            touch-action: none;
         }
         #gradient-top {
             top: 0;
@@ -642,6 +645,11 @@
         renderer.view.style.height = h + "px";    //this part adjusts the ratio:    
         renderer.resize(w,h);
     }
+
+    // Prevent the page from scrolling if swipe up/down with your finger on elements
+    // like the Draw/Swipe nav or the metadata info on the bottom
+    document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });
+
     // resize things: 
 
 //     var scene = new PIXI.DisplayObjectContainer();
