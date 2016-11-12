@@ -1346,9 +1346,8 @@
                 }
             }
 
-            // Fade out background images
-           
-            if (backgroundImages.length) {
+            // Fade background images
+            if (backgroundImages.length && textureHasLoaded) {
                 var endingIndex = bAmDrawing ? backgroundImages.length - 1 : backgroundImages.length - 2;
                 for (var i = 0; i <= endingIndex; i++) {
                     backgroundImages[i].alpha -= myGui.bgFadeOutSpeed;
