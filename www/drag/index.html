@@ -177,7 +177,9 @@ function updateMetadata(data) {
 function updateMetadataCallback(code, data) {
     if (code == 200) {
         matchedMetadata = JSON.parse(data);
-        updateMetadata(matchedMetadata);
+
+        if (!firstTouch)
+            updateMetadata(matchedMetadata);
     } else if (code == 404) {
         console.log('Received 404 for metadata');
     }
@@ -574,12 +576,6 @@ function simpleStringify (object){
     //------------------------------------------------------------------------------------------------
     var firstTouch = true;
     stage.mousedown = stage.touchstart = function(moveData) {
-
-        if (firstTouch) {
-            firstTouch = false;
-            document.body.removeChild(document.getElementById('instruction'));    
-    }
-
         bAmDrawing = true;
         lastMouseX = moveData.data.global.x;
         lastMouseY = moveData.data.global.y;
@@ -596,6 +592,12 @@ function simpleStringify (object){
     stage.mousemove = stage.touchmove = function(moveData) {
 
         if (bAmDrawing === true){
+            if (firstTouch) {
+                firstTouch = false;
+                updateMetadata(matchedMetadata);
+                document.body.removeChild(document.getElementById('instruction'));    
+            }
+        
             var diffx = (moveData.data.global.x - lastMouseX);
             var diffy = (moveData.data.global.y - lastMouseY);
             if (myGui.reverseSwipe) {
