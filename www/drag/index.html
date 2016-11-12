@@ -169,6 +169,8 @@ function updateMetadata(data) {
     document.getElementById('info-link').innerHTML = line1 + "<br>" + line2;
     document.getElementById('info-link').href = url;
     document.getElementById('info-attribution').innerText = attribution;
+
+    ga('send', 'event', 'Swipe', 'Swipe', data['line-1'] + ' ' + data['line-2']);
 }
 
 // Callback from AJAX request to get metadata for matched line
@@ -1096,6 +1098,11 @@ function simpleStringify (object){
         
         renderer.render(stage);
         
+    }
+
+    // See which images are popular for people checking out on Google Maps
+    document.getElementById('info-link').onclick = function(e) {
+        ga('send', 'event', { eventCategory: 'Outbound Link', eventAction: 'click', eventLabel: e.target.href });
     }
     </script>
 
