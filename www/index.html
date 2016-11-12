@@ -371,7 +371,10 @@
     }
 
     function loadApp() {
-        show(document.getElementById('nav'));
+        var nav = document.getElementById('nav');
+        if (!nav.style.display)
+            show(nav);
+
         // hide(document.getElementById('gradient-top'));
         // hide(document.getElementById('gradient-bottom'));
         hide(document.getElementById('landing-container'));
