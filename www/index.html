@@ -6,6 +6,7 @@
     <title>Earth Lines - Chrome Experiments</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400" rel="stylesheet">
+    <script src="/js/dat.gui.min.js"></script>
     <style>
 
     html, body {
@@ -28,6 +29,8 @@
         table-layout: fixed;
         width: 100%;
         height: 100%;
+        background-position: center;
+        background-size: cover;
     }
 
     #header {
@@ -51,8 +54,7 @@
         font-size: 12pt;
         letter-spacing: 0.5pt;
         text-align: center;
-        background-position: center;
-        background-size: cover;
+        background-color: rgba(0, 0, 0, 0.2);
     }
     .app-button {
         border: 1px solid white;
@@ -98,7 +100,7 @@
         border-color: rgba(255, 255, 255, 0);
     }
 
-    #gradient-top, #gradient-bottom {
+    /*#gradient-top, #gradient-bottom {
         position: absolute;
         width: 100%;
         background-size: auto 100%;
@@ -112,7 +114,7 @@
         bottom: 0;
         height: 150px;
         background-image: url('img/gradient_bottom_1pixel.png');
-    }
+    }*/
 
     #chrome-experiment {
         color: white;
@@ -220,8 +222,8 @@
     <iframe id="draw-container"></iframe>
     <iframe id="swipe-container"></iframe>
 
-    <div id="gradient-top"></div>
-    <div id="gradient-bottom"></div>
+    <!-- <div id="gradient-top"></div>
+    <div id="gradient-bottom"></div> -->
 
     <div id="nav">
         <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
@@ -264,6 +266,20 @@
     <a href="javascript:void(0)"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
 
     <script>
+
+    var myGui;
+    var Gui = function() {
+        this.bgOverlay = 0.2;
+    };
+
+    window.onload = function() {
+        myGui = new Gui();
+        var gui = new dat.GUI();
+        
+        var bgSlider = gui.add(myGui, 'bgOverlay', 0, 1);
+        bgSlider.onChange(updateBgOpacity);
+    };
+
     updateBackgroundSize();
 
     // Load a random background image
@@ -298,7 +314,8 @@
     var bgFile = 'url("/img/landing/' + filteredList[bgIndex] + '.jpg")';
     usedBGs.push(filteredList[bgIndex]);
     localStorage.setItem('usedBGs', usedBGs.join(','));
-    document.getElementById('app').style.backgroundImage = bgFile;
+    // document.getElementById('app').style.backgroundImage = bgFile;
+    document.getElementById('landing-container').style.backgroundImage = bgFile;
 
     function show(elem) {
         elem.style.opacity = 0;
@@ -342,8 +359,8 @@
 
     function loadApp() {
         show(document.getElementById('nav'));
-        hide(document.getElementById('gradient-top'));
-        hide(document.getElementById('gradient-bottom'));
+        // hide(document.getElementById('gradient-top'));
+        // hide(document.getElementById('gradient-bottom'));
         hide(document.getElementById('landing-container'));
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
@@ -394,6 +411,10 @@
     }
 
     // Layout / background image stuff
+    function updateBgOpacity() {
+        document.getElementById('app').style.backgroundColor = 'rgba(0, 0, 0, ' + myGui.bgOverlay + ')';
+    }
+
     function updateBackgroundMouse(e) {
         var pctW = e.clientX / this.offsetWidth;
         pctW -= 0.5;
@@ -408,16 +429,19 @@
     }
      
     function updateBackgroundAccel(e) {
-        var elem = document.getElementById('app');
+        // var elem = document.getElementById('app');
+        var elem = document.getElementById('landing-container');
         elem.style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
         elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
     }
 
     function updateBackgroundSize() {
         if (window.innerHeight > window.innerWidth)
-            document.getElementById('app').style.backgroundSize = 'auto 150%'
+            // document.getElementById('app').style.backgroundSize = 'auto 150%'
+        document.getElementById('landing-container').style.backgroundSize = 'auto 150%'
         else
-            document.getElementById('app').style.backgroundSize = '150%'
+            // document.getElementById('app').style.backgroundSize = '150%'
+        document.getElementById('landing-container').style.backgroundSize = '150%'
     }
 
     document.getElementById('overlay-open').onclick = showAboutOverlay;
@@ -428,7 +452,8 @@
     document.getElementById('nav-draw').onclick = loadAppDraw;
     document.getElementById('nav-swipe').onclick = loadAppSwipe;
 
-    document.getElementById('app').onmousemove = updateBackgroundMouse;
+    // document.getElementById('app').onmousemove = updateBackgroundMouse;
+    document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
     window.addEventListener('resize', updateBackgroundSize, false);
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
