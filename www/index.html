@@ -378,7 +378,10 @@
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
 
-        gui.destroy();
+        if (gui) {
+            gui.destroy();
+            gui = null;
+        }
     }
 
     function loadAppDraw() {
