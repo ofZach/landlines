@@ -278,14 +278,16 @@
     <script src="/js/dat.gui.min.js"></script>
     <script>
 
+    var gui;
     var myGui;
+
     var Gui = function() {
         this.bgOverlay = 0.2;
     };
 
     window.onload = function() {
         myGui = new Gui();
-        var gui = new dat.GUI();
+        gui = new dat.GUI();
         
         var bgSlider = gui.add(myGui, 'bgOverlay', 0, 1);
         bgSlider.onChange(updateBgOpacity);
@@ -375,6 +377,8 @@
         hide(document.getElementById('landing-container'));
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
+
+        gui.destroy();
     }
 
     function loadAppDraw() {
