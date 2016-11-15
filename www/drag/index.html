@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700" rel="stylesheet">
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -16,6 +17,7 @@
         body {
             margin: 0;
             padding: 0;
+            color: white;
             background-color: #000;
             font-family: 'Roboto Condensed', sans-serif;
             position: fixed;
@@ -42,12 +44,10 @@
         }
 
         #info {
-            color: white;
             position: absolute;
             bottom: 0px;
             text-transform: uppercase;
             font-size: 20pt;
-            letter-spacing: 0.5pt;
             padding: 0 0 15px 15px;
         }
         #info a {
@@ -66,7 +66,7 @@
             padding-top: 4px;
         }
 
-        #instruction {
+        #loading {
             position: absolute;
             top: 0;
             left: 0;
@@ -75,12 +75,20 @@
             user-select: none;
             pointer-events: none;
         }
-        #instruction img {
+        #progress, #instruction {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             user-select: none;
+             pointer-events: none;
+        }
+        #progress {
+            font-size: 18pt;
+             pointer-events: none;
+        }
+        #instruction {
+            display: none;
             pointer-events: none;
         }
     </style>
@@ -99,12 +107,14 @@
         <div id="info-attribution"></div>
     </div>
 
-    <div id="instruction">
-        <img src="../img/instruction-swipe@2x.gif">
+    <div id="loading">
+        <div id="progress">Loading</div>
+        <img id="instruction">
     </div>
 
+
     <script src="js/angleLines.js"></script>       <!-- heavy ! -->
-    <script src="/js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
+    <script src="/js/Smooth-0.1.7.js"></script>  
     <script src="js/point.min.js"></script> 
     <script src="/js/dat.gui.min.js"></script>
     <script src="/js/pixi.min.js"></script>
@@ -113,262 +123,446 @@
 
 
 
-//------------------------------------------- 
-// load the data async 
+    var utils = PIXI.utils;
 
-var loadedJson = false;
-var dataobj;
+PIXI.GraphicsRenderer.prototype.buildPolygonLine = PIXI.GraphicsRenderer.prototype.buildLine;
 
-function readTextFile(file, callback) {
-
-    //console.log("start loading text");
-    
-    var rawFile = new XMLHttpRequest();
-    rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", file, true);
-    rawFile.onreadystatechange = function() {
-        if (rawFile.readyState === 4) {
-            callback(rawFile.status, rawFile.responseText);
-        }
+PIXI.GraphicsRenderer.prototype.buildLine = function(graphicsData, webGLData) {
+    if (graphicsData.lineWidth === 1) {
+        webGLData.drawNativeLine = true;
+        this.buildNativeLine(graphicsData, webGLData);
+    } else {
+        webGLData.drawNativeLine = false;
+        this.buildPolygonLine(graphicsData, webGLData);
     }
-    rawFile.send(null);
-}
-
-//usage:
-readTextFile("dataobj.json", function(code, data){
-
-    dataobj= JSON.parse(data);
-
-    // calc and sort the angle length
-    for (var i = 0; i < dataobj.length; i++){
-        var startAngle = 0;
-        for (var j = 0; j < dataobj[i].angleDiffs.length; j++){
-            startAngle += dataobj[i].angleDiffs[j];
-        }
-        dataobj[i].angleChange = startAngle;
-    }
-
-    dataobj.sort(function(a,b) {return (a.angleChange > b.angleChange) ? 1 : ((b.angleChange > a.angleChange) ? -1 : 0);} ); 
-
-    console.log("done loading text");
-
-    loadedJson = true;
-});
-
-// Update DOM elements with new data
-function updateMetadata(data) {
-    var line1 = data['line-1'] || '';
-    var line2 = data['line-2'] || '';
-    var attribution = data['attribution'] || '';
-    var url = data['url'] || '';
-
-    // document.getElementById('info-line1').innerText = line1;
-    // document.getElementById('info-line2').innerText = line2;
-    // document.getElementById('info-line1').href = url;
-    // document.getElementById('info-line2').href = url;
-    document.getElementById('info-link').innerHTML = line1 + "<br>" + line2;
-    document.getElementById('info-link').href = url;
-    document.getElementById('info-attribution').innerText = attribution;
-
-    ga('send', 'event', 'Swipe', 'Swipe', data['line-1'] + ' ' + data['line-2']);
-}
-
-// Callback from AJAX request to get metadata for matched line
-// function updateMetadataCallback(code, data) {
-//     if (code == 200) {
-//         matchedMetadata = JSON.parse(data);
-
-//         if (!firstTouch)
-//             updateMetadata(matchedMetadata);
-//     } else if (code == 404) {
-//         console.log('Received 404 for metadata');
-//     }
-// };
-
-// Load metadata
-var metadata = {};
-readTextFile('metadata-converted.json', function(code, data) {
-    metadata = JSON.parse(data);
-});
-
-
-//-------------------------------------------
-var Gui = function() {
-  this.lineColor = 0xffffff;
-  this.lineOpacity = 0.7;
-  this.lineWidth = 3;
-  this.lineShadow = false;
-  this.shadowDistance = 3;
-  this.shadowBlur = 4;
-  this.dragSpeed = 1.0;
-  this.velSmoothRate = 0.8;
-  this.angleSmoothRate = 0.97;
-  this.centerSmoothRate = 0.95;
-  this.scale = 1.0;
-  this.variableSizes = false;
-  this.reverseSwipe = false;
-  this.centerOnImagePct = 0.0413;
-  this.explode = function() { ; };
 };
 
+PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLData) {
 
-var guiSettings = {
-  "preset": "Default",
-  "remembered": {
-    "Default": {
-      "0": {}
-    },
-    "Jeff": {
-      "0": {
-        "dragSpeed": 0.5680101608806096,
-        "velSmoothRate": 0.8,
-        "angleSmoothRate": 0,
-        "scale": 1.6054191363251482,
-        "centerSmoothRate": 0.8758679085520745,
-        "variableSizes": false,
-        "reverseSwipe": true
-      }
-    },
-    "Takashi": {
-      "0": {
-       "lineColor": "#e8f700",
-        "lineOpacity": 0.75,
-        "lineWidth": 3,
-        "lineShadow": false,
-        "shadowDistance": 3,
-        "shadowBlur": 4,
-        "dragSpeed": 0.5149026248941575,
-        "velSmoothRate": 0.8,
-        "angleSmoothRate": 0.02,
-        "scale": 1,
-        "centerSmoothRate": 0.95,
-        "centerOnImagePct": 0.04132091447925487,
-        "variableSizes": false,
-        "reverseSwipe": false
-      }
+    var i = 0;
+    var points = graphicsData.points;
+
+    if (points.length === 0) return;
+
+    var verts = webGLData.points;
+    //var indices = webGLData.indices;
+    var length = points.length / 2;
+    var indexCount = points.length;
+    var indexStart = verts.length / 6;
+
+    // sort color
+    var color = utils.hex2rgb(graphicsData.lineColor);
+    var alpha = graphicsData.lineAlpha;
+    var r = color[0] * alpha;
+    var g = color[1] * alpha;
+    var b = color[2] * alpha;
+
+    var p1x, p1y, p2x, p2y;
+
+    for (i = 1; i < length; i++) {
+
+        var alpha2 = (i-1) / length;
+        var alpha3 = i / length;
+        p1x = points[(i - 1) * 2];
+        p1y = points[(i - 1) * 2 + 1];
+
+        p2x = points[i * 2];
+        p2y = points[i * 2 + 1];
+
+        var dx = p2x - p1x;
+        var dy = p2y - p1y;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+        dx /= dist;
+        dy /= dist;
+        dx*=2.0 * Math.pow(alpha2, 2.0);
+        dy*=2.0 * Math.pow(alpha2, 2.0);
+
+        alpha2 *= 0.7;
+        alpha3 *= 0.7;
+        verts.push(p1x  + dy, p1y - dx);
+        verts.push(1.0,1.0,1.0, alpha2);
+
+        verts.push(p1x - dy, p1y + dx);
+        verts.push(1.0,1.0,1.0, alpha2);
+
+        verts.push(p2x + dy, p2y - dx);
+        verts.push(1.0,1.0,1.0, alpha3);
+
+        verts.push(p2x - dy, p2y + dx);
+        verts.push(1.0,1.0,1.0, alpha3);
     }
-  },
-  "closed": false,
-  "folders": {}
+
+
+    /*for (i = 0; i < indexCount; i++) {
+        indices.push(indexStart++);
+    }*/
+
 };
 
-var myGui;
+PIXI.GraphicsRenderer._oldRender = PIXI.GraphicsRenderer.prototype.render;
 
+PIXI.GraphicsRenderer.prototype.render = function(graphics) {
+    var renderer = this.renderer;
+    var gl = renderer.gl;
+    var shader = renderer.shaderManager.plugins.primitiveShader,
+        webGLData;
 
-window.onload = function() {
-    myGui = new Gui();
-    var gui = new dat.GUI({load:guiSettings});
+    if (graphics.dirty || !graphics._webGL[gl.id])
+        this.updateGraphics(graphics, gl);
 
-    gui.addColor(myGui, 'lineColor');
-    gui.add(myGui, 'lineOpacity', 0, 1);
-    gui.add(myGui, 'lineWidth', 1, 10);
-    var shadowToggle = gui.add(myGui, 'lineShadow');
-    gui.add(myGui, 'shadowDistance', 0, 10);
-    gui.add(myGui, 'shadowBlur', 0, 10);
-    gui.add(myGui, 'dragSpeed', 0.1, 5);
-    gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
-    gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
-    gui.add(myGui, 'scale', 0.0, 10.0);
-    gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
-    gui.add(myGui, 'centerOnImagePct', 0.0, 1.0);
-    gui.add(myGui, 'variableSizes');
-    gui.add(myGui, 'reverseSwipe');
+    var webGL = graphics._webGL[gl.id];
+    // This could be speeded up for sure!
+    renderer.blendModeManager.setBlendMode(graphics.blendMode);
+    // var matrix = graphics.worldTransform.clone();
+    // var matrix = renderer.currentRenderTarget.projectionMatrix.clone();
+    // matrix.append(graphics.worldTransform);
+    for (var i = 0; i < webGL.data.length; i++) {
+        if (webGL.data[i].mode === 1) {
+            webGLData = webGL.data[i];
+            renderer.stencilManager.pushStencil(graphics, webGLData, renderer);
+            // render quad..
+            gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, (webGLData.indices.length - 4) * 2);
+            renderer.stencilManager.popStencil(graphics, webGLData, renderer);
+        } else {
+            webGLData = webGL.data[i];
+            shader = renderer.shaderManager.primitiveShader;
+            renderer.shaderManager.setShader(shader); //activatePrimitiveShader();
+            gl.uniformMatrix3fv(shader.uniforms.translationMatrix._location, false, graphics.worldTransform.toArray(true));
+            gl.uniformMatrix3fv(shader.uniforms.projectionMatrix._location, false, renderer.currentRenderTarget.projectionMatrix.toArray(true));
+            gl.uniform3fv(shader.uniforms.tint._location, utils.hex2rgb(graphics.tint));
+            gl.uniform1f(shader.uniforms.alpha._location, graphics.worldAlpha);
+            gl.bindBuffer(gl.ARRAY_BUFFER, webGLData.buffer);
+            gl.vertexAttribPointer(shader.attributes.aVertexPosition, 2, gl.FLOAT, false, 4 * 6, 0);
+            gl.vertexAttribPointer(shader.attributes.aColor, 4, gl.FLOAT, false, 4 * 6, 2 * 4);
 
-    gui.remember(myGui);
+            if (webGLData.drawNativeLine){
+                
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    shadowToggle.onFinishChange(updateLineShadow);
-};
-//-------------------------------------------
-   
-
-    StopWatch = function(){
-        this.StartMilliseconds = 0;
-        this.ElapsedMilliseconds = 0;
-    }  
-
-    StopWatch.prototype.Start = function(){
-        this.StartMilliseconds = new Date().getTime();
-    }
-
-    StopWatch.prototype.Stop = function(){
-        this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
-    }
-
-
-    imageWithPts = function(){
-        this.startIndex = 0;
-        this.endIndex = 0;
-        this.alpha = 0.0;
-        this.bSetYet = false;
-        this.bLoaded = false;
-        this.index = -1;                // where am I in the dataObj
-        this.cacheIndex = -1;           // where am I in the cache array
-        this.loadedIndex = -1;          // where am I in the loaded array 
-        this.bin = -1;
-        this.position = 0;
-        this.curAngle = 0;
-        this.midAngle = 0;
-        this.midDistance = 0;
-
-    }  
-
-    imageWithPts.prototype.loadImage = function(url){
-        this.sprite1 = PIXI.Sprite.fromImage(url, true);
-        //this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
-    }
-
-    imageWithPts.prototype.ready = function(url){
-        //console.log("ready");
-        //console.log(this);
-        this.sprite1.alpha = 0.0;
-        this.sprite1.anchor.x = 0;
-        this.sprite1.anchor.y = 0;
-        this.sprite1.position.x =-100;
-        this.sprite1.position.y =-100; 
-        this.sprite1.scale.x = 0.05;
-        this.sprite1.scale.y = 0.05;
-        this.bLoaded = true;
-         container.addChild(this.sprite1);
-    }
-
-    imageWithPts.prototype.update = function(){
-        if (this.bLoaded == false){
-            if (!this.sprite1.texture.baseTexture.hasLoaded) {
-                //this.sprite1.texture.baseTexture.on('loaded', this.ready);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, webGLData.points.length / 6);
             } else {
-                this.ready();
+                // set the index buffer!
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, webGLData.indexBuffer);
+                gl.drawElements(gl.TRIANGLE_STRIP, webGLData.indices.length, gl.UNSIGNED_SHORT, 0);
             }
         }
     }
-
-
-
-function simpleStringify (object){
-    var simpleObject = {};
-    for (var prop in object ){
-        if (!object.hasOwnProperty(prop)){
-            continue;
-        }
-        if (typeof(object[prop]) == 'object'){
-            continue;
-        }
-        if (typeof(object[prop]) == 'function'){
-            continue;
-        }
-        simpleObject[prop] = object[prop];
-    }
-    return JSON.stringify(simpleObject); // returns cleaned up JSON
 };
 
 
-    
+function fadeIn( elem, ms )
+{
+  if( ! elem )
+    return;
 
-// var sprite = Sprite.fromImage('...');
-// if (!sprite.texture.baseTexture.hasLoaded) {
-//     sprite.texture.baseTexture.on('loaded', ready);
-// } else {
-//     ready();
-// }
+  elem.style.opacity = 0;
+  elem.style.filter = "alpha(opacity=0)";
+  elem.style.display = "inline-block";
+  elem.style.visibility = "visible";
+
+  if( ms )
+  {
+    var opacity = 0;
+    var timer = setInterval( function() {
+      opacity += 50 / ms;
+      if( opacity >= 1 )
+      {
+        clearInterval(timer);
+        opacity = 1;
+      }
+      elem.style.opacity = opacity;
+      elem.style.filter = "alpha(opacity=" + opacity * 100 + ")";
+    }, 50 );
+  }
+  else
+  {
+    elem.style.opacity = 1;
+    elem.style.filter = "alpha(opacity=1)";
+  }
+}
+
+function fadeOut( elem, ms )
+{
+  if( ! elem )
+    return;
+
+  if( ms )
+  {
+    var opacity = 1;
+    var timer = setInterval( function() {
+      opacity -= 50 / ms;
+      if( opacity <= 0 )
+      {
+        clearInterval(timer);
+        opacity = 0;
+        elem.style.display = "none";
+        elem.style.visibility = "hidden";
+      }
+      elem.style.opacity = opacity;
+      elem.style.filter = "alpha(opacity=" + opacity * 100 + ")";
+    }, 50 );
+  }
+  else
+  {
+    elem.style.opacity = 0;
+    elem.style.filter = "alpha(opacity=0)";
+    elem.style.display = "none";
+    elem.style.visibility = "hidden";
+  }
+}
+
+    //------------------------------------------- 
+    // load the data async 
+
+    var loadedJson = false;
+    var dataobj;
+
+    function readTextFile(file, callback) {
+
+        var rawFile = new XMLHttpRequest();
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4) {
+                callback(rawFile.status, rawFile.responseText);
+            }
+        }
+        rawFile.send(null);
+    }
+
+    //usage:
+    readTextFile("dataobj.json", function(code, data){
+
+        dataobj= JSON.parse(data);
+
+        // calc and sort the angle length
+        for (var i = 0; i < dataobj.length; i++){
+            var startAngle = 0;
+            for (var j = 0; j < dataobj[i].angleDiffs.length; j++){
+                startAngle += dataobj[i].angleDiffs[j];
+            }
+            dataobj[i].angleChange = startAngle;
+        }
+
+        dataobj.sort(function(a,b) {return (a.angleChange > b.angleChange) ? 1 : ((b.angleChange > a.angleChange) ? -1 : 0);} ); 
+
+        console.log("done loading text");
+
+        loadedJson = true;
+    });
+
+    // Update DOM elements with new data
+    function updateMetadata(data) {
+        var line1 = data['line-1'] || '';
+        var line2 = data['line-2'] || '';
+        var attribution = data['attribution'] || '';
+        var url = data['url'] || '';
+
+        // document.getElementById('info-line1').innerText = line1;
+        // document.getElementById('info-line2').innerText = line2;
+        // document.getElementById('info-line1').href = url;
+        // document.getElementById('info-line2').href = url;
+        document.getElementById('info-link').innerHTML = line1 + "<br>" + line2;
+        document.getElementById('info-link').href = url;
+        document.getElementById('info-attribution').innerText = attribution;
+
+        ga('send', 'event', 'Swipe', 'Swipe', data['line-1'] + ' ' + data['line-2']);
+    }
+
+    // Callback from AJAX request to get metadata for matched line
+    // function updateMetadataCallback(code, data) {
+    //     if (code == 200) {
+    //         matchedMetadata = JSON.parse(data);
+
+    //         if (!firstTouch)
+    //             updateMetadata(matchedMetadata);
+    //     } else if (code == 404) {
+    //         console.log('Received 404 for metadata');
+    //     }
+    // };
+
+    // Load metadata
+    var metadata = {};
+    readTextFile('metadata-converted.json', function(code, data) {
+        metadata = JSON.parse(data);
+    });
+
+
+    //-------------------------------------------
+    var Gui = function() {
+      this.lineColor = 0xffffff;
+      this.lineOpacity = 0.7;
+      this.lineWidth = 1;
+      this.lineShadow = false;
+      this.shadowDistance = 3;
+      this.shadowBlur = 4;
+      this.dragSpeed = 1.0;
+      this.velSmoothRate = 0.8;
+      this.angleSmoothRate = 0.97;
+      this.centerSmoothRate = 0.95;
+      this.scale = 1.0;
+      this.variableSizes = false;
+      this.reverseSwipe = false;
+      this.centerOnImagePct = 0.0413;
+      this.explode = function() { ; };
+    };
+
+
+    var guiSettings = {
+      "preset": "Default",
+      "remembered": {
+        "Default": {
+          "0": {}
+        },
+        "Jeff": {
+          "0": {
+            "dragSpeed": 0.5680101608806096,
+            "velSmoothRate": 0.8,
+            "angleSmoothRate": 0,
+            "scale": 1.6054191363251482,
+            "centerSmoothRate": 0.8758679085520745,
+            "variableSizes": false,
+            "reverseSwipe": true
+          }
+        },
+        "Takashi": {
+          "0": {
+           "lineColor": "#e8f700",
+            "lineOpacity": 0.75,
+            "lineWidth": 3,
+            "lineShadow": false,
+            "shadowDistance": 3,
+            "shadowBlur": 4,
+            "dragSpeed": 0.5149026248941575,
+            "velSmoothRate": 0.8,
+            "angleSmoothRate": 0.02,
+            "scale": 1,
+            "centerSmoothRate": 0.95,
+            "centerOnImagePct": 0.04132091447925487,
+            "variableSizes": false,
+            "reverseSwipe": false
+          }
+        }
+      },
+      "closed": false,
+      "folders": {}
+    };
+
+    var myGui;
+
+
+    window.onload = function() {
+        myGui = new Gui();
+        var gui = new dat.GUI({load:guiSettings});
+
+        gui.addColor(myGui, 'lineColor');
+        gui.add(myGui, 'lineOpacity', 0, 1);
+        gui.add(myGui, 'lineWidth', 1, 10);
+        var shadowToggle = gui.add(myGui, 'lineShadow');
+        gui.add(myGui, 'shadowDistance', 0, 10);
+        gui.add(myGui, 'shadowBlur', 0, 10);
+        gui.add(myGui, 'dragSpeed', 0.1, 5);
+        gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
+        gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
+        gui.add(myGui, 'scale', 0.0, 10.0);
+        gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
+        gui.add(myGui, 'centerOnImagePct', 0.0, 1.0);
+        gui.add(myGui, 'variableSizes');
+        gui.add(myGui, 'reverseSwipe');
+
+        gui.remember(myGui);
+
+        shadowToggle.onFinishChange(updateLineShadow);
+    };
+    //-------------------------------------------
+       
+
+        StopWatch = function(){
+            this.StartMilliseconds = 0;
+            this.ElapsedMilliseconds = 0;
+        }  
+
+        StopWatch.prototype.Start = function(){
+            this.StartMilliseconds = new Date().getTime();
+        }
+
+        StopWatch.prototype.Stop = function(){
+            this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
+        }
+
+
+        imageWithPts = function(){
+            this.startIndex = 0;
+            this.endIndex = 0;
+            this.alpha = 0.0;
+            this.bSetYet = false;
+            this.bLoaded = false;
+            this.index = -1;                // where am I in the dataObj
+            this.cacheIndex = -1;           // where am I in the cache array
+            this.loadedIndex = -1;          // where am I in the loaded array 
+            this.bin = -1;
+            this.position = 0;
+            this.curAngle = 0;
+            this.midAngle = 0;
+            this.midDistance = 0;
+
+        }  
+
+        imageWithPts.prototype.loadImage = function(url){
+            this.sprite1 = PIXI.Sprite.fromImage(url, true);
+            //this.ElapsedMilliseconds = new Date().getTime() - this.StartMilliseconds;
+        }
+
+        imageWithPts.prototype.ready = function(url){
+            //console.log("ready");
+            //console.log(this);
+            this.sprite1.alpha = 0.0;
+            this.sprite1.anchor.x = 0;
+            this.sprite1.anchor.y = 0;
+            this.sprite1.position.x =-100;
+            this.sprite1.position.y =-100; 
+            this.sprite1.scale.x = 0.05;
+            this.sprite1.scale.y = 0.05;
+            this.bLoaded = true;
+             container.addChild(this.sprite1);
+        }
+
+        imageWithPts.prototype.update = function(){
+            if (this.bLoaded == false){
+                if (!this.sprite1.texture.baseTexture.hasLoaded) {
+                    //this.sprite1.texture.baseTexture.on('loaded', this.ready);
+                } else {
+                    this.ready();
+                }
+            }
+        }
+
+
+
+    function simpleStringify (object){
+        var simpleObject = {};
+        for (var prop in object ){
+            if (!object.hasOwnProperty(prop)){
+                continue;
+            }
+            if (typeof(object[prop]) == 'object'){
+                continue;
+            }
+            if (typeof(object[prop]) == 'function'){
+                continue;
+            }
+            simpleObject[prop] = object[prop];
+        }
+        return JSON.stringify(simpleObject); // returns cleaned up JSON
+    };
+
+
+    // var sprite = Sprite.fromImage('...');
+    // if (!sprite.texture.baseTexture.hasLoaded) {
+    //     sprite.texture.baseTexture.on('loaded', ready);
+    // } else {
+    //     ready();
+    // }
 
 
     
@@ -408,12 +602,48 @@ function simpleStringify (object){
     var counter = 0;
     var lastSecond = 0;
 
+    var loadingVisible = true;
+    var loadingCount = 0;
+
     var watch = new StopWatch();
     watch.Start();
 
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var renderer = PIXI.autoDetectRenderer(w, h, { backgroundColor : 0x000000 });
+
+
+    var blurSprite = PIXI.Sprite.fromImage("../img/test/blur.jpg", true);
+    blurSprite.alpha = 0.0;
+
+
+function getDimensions () {
+  return {
+    width: window.innerWidth  ||
+        document.documentElement.clientWidth ||
+        document.body.clientWidth,
+
+    height: window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight
+  };
+}
+
+var dimensions = getDimensions();
+
+    var renderer = new PIXI.WebGLRenderer(dimensions.width, dimensions.height, {
+        autoResize: true,
+        backgroundColor : 0x000000
+    });
+
+    var gl = renderer.gl;
+
+    //console.log(gl);
+    
+    //PIXI.autoDetectRenderer(w, h, { backgroundColor : 0x000000 });
+
+
+
+
     renderer.view.style.display = "block";
     document.body.appendChild(renderer.view);
 
@@ -431,6 +661,7 @@ function simpleStringify (object){
         drawing.filters = val ? [ dropShadowFilter ] : null;
     }
     
+    overalContainer.addChild(blurSprite);
     overalContainer.addChild(container);
     overalContainer.addChild(drawing);
     stage.addChild(overalContainer);
@@ -465,6 +696,8 @@ function simpleStringify (object){
     //var angle = 0;
     var myAngle = 0;
     var frameNum = 0;
+    var bHaveShownInstructionGif = false;
+    var bInstructionGifCanFade = false;
 
     // needed to sort on dataObj index angle..
     function sortByAngle(dataToSortOn) {
@@ -582,6 +815,14 @@ function simpleStringify (object){
     //------------------------------------------------------------------------------------------------
     var firstTouch = true;
     stage.mousedown = stage.touchstart = function(moveData) {
+        
+        if (loadingVisible === true) return;
+
+        if (bInstructionGifCanFade === true){
+            bInstructionGifCanFade = false;
+            fadeOut( document.getElementById('instruction'), 10 );
+        }
+
         bAmDrawing = true;
         lastMouseX = moveData.data.global.x;
         lastMouseY = moveData.data.global.y;
@@ -597,11 +838,16 @@ function simpleStringify (object){
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
+        if (loadingVisible === true) return;
+        
         if (bAmDrawing === true){
             if (firstTouch) {
                 firstTouch = false;
                 updateMetadata(matchedMetadata);
-                document.body.removeChild(document.getElementById('instruction'));    
+                //loading
+                //document.body.removeChild(document.getElementById('instruction'));  
+                //console.log(document.getElementById('loading'))
+                //fadeOut( document.getElementById('loading'), 400 );
             }
 
             var diffx = (moveData.data.global.x - lastMouseX);
@@ -632,7 +878,6 @@ function simpleStringify (object){
 
 
     var timef = 0;
-
 
 
     function addLineFromCache(lineToAddFromCache){
@@ -846,17 +1091,20 @@ function simpleStringify (object){
         
         //console.log("------- new frame --------- ");
 
-
         for (var i = 0; i < iwpCache.length; i++){
             iwpCache[i].update();
             iwpCache[i].cacheIndex = i;
         }
 
         makeLoadedCache();
-        
+            
+
+
+
+
+        //console.log("iwpCache " + iwpCache.length + " loaded " + loadedCache.length);
 
         for (var i = 0; i < loadedCache.length; i++){
-            
                 loadedCache[i].sprite1.alpha = 0.0;
                 loadedCache[i].sprite1.anchor.x = 0;
                 loadedCache[i].sprite1.anchor.y = 0;
@@ -867,10 +1115,62 @@ function simpleStringify (object){
             
         }
 
+
+        if (loadedCache.length > 20){
+            if (loadingVisible === true){
+                loadingVisible = false;
+
+                //console.log(document.getElementById('loading'))
+                fadeOut( document.getElementById('progress'), 10 );
+                console.log("fading out");
+
+                if (bHaveShownInstructionGif === false){
+                     elem = document.getElementById('instruction');
+                     elem.src = '../img/instruction-draw@2x.gif' + '?x=' + Math.random();
+                     elem.style.display = 'block';
+                     bHaveShownInstructionGif = true;
+                     bInstructionGifCanFade = true;
+                     //fadeIn(elem, 20);
+                }
+               
+
+                
+            }
+        } else {
+
+            if (loadingVisible === false){
+                loadingVisible = true;
+
+                //console.log("fading in");
+
+                fadeIn( document.getElementById('progress'), 10 );
+            }
+
+            var len = loadedCache.length;
+            if (len !== loadingCount){
+
+                loadingCount = len;
+
+                 if(document.getElementById("progress") != null){
+                    //console.log("change");
+                    document.getElementById("progress").innerHTML = "Loading</br>" + Math.round((loadingCount/20.0)* 100) + " / 100";
+                 }
+
+                
+            }
+
+            renderer.render(stage);
+            return;
+
+        }
+
+
         //console.log("at start loaded " + loadedCache.length );
+
         if (loadedCache.length == 0){
             console.log("skipping frame - no cache yet");
             renderer.render(stage);
+            return;
         }
 
         //var elapsedTime = new Date().getTime() - watch.StartMilliseconds;
@@ -897,6 +1197,15 @@ function simpleStringify (object){
         } else {
             velStopEnergy = 0.9 * velStopEnergy + 0.1 * 0.0;
         }
+
+        //console.log(pts.length );
+        if (ptsSmooth.length > 100){
+            //console.log("huh");
+            blurSprite.alpha = velStopEnergy;
+         } else {
+            blurSprite.alpha = 0.0;
+         }
+       
         
         adderSum += adder;
 
@@ -963,7 +1272,7 @@ function simpleStringify (object){
         //------------------------------------------------------- drawing
         if (updateGraphics === true && ptsSmooth.length > 1){
             drawing.clear();
-            drawing.lineStyle(myGui.lineWidth, myGui.lineColor, myGui.lineOpacity);
+            drawing.lineStyle(1, myGui.lineColor, myGui.lineOpacity);
             dropShadowFilter.blur = myGui.shadowBlur;
             dropShadowFilter.distance = myGui.shadowDistance;
 
@@ -1107,10 +1416,11 @@ function simpleStringify (object){
         var amountToMix = myGui.centerOnImagePct * velStopEnergy;
 
 
-        overalContainer.position.x = (1-amountToMix) * overalContainer.position.x + (amountToMix) * ( renderer.view.width*0.5-centerX);
-        overalContainer.position.y = (1-amountToMix) * overalContainer.position.y + (amountToMix) * ( renderer.view.height*0.5-centerY);
-        
         renderer.render(stage);
+
+
+
+
         
     }
 

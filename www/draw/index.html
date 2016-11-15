@@ -122,18 +122,16 @@
 
     var loadedJson = false;
     
-
-    Object.defineProperty(Array.prototype, 'chunkArray', {
-    value: function(chunkSize) {
-        var array=this;
-        return [].concat.apply([],
-            array.map(function(elem,i) {
-                return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
-            })
-        );
-    }
-    });
-
+    // Object.defineProperty(Array.prototype, 'chunkArray', {
+    // value: function(chunkSize) {
+    //     var array=this;
+    //     return [].concat.apply([],
+    //         array.map(function(elem,i) {
+    //             return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
+    //         })
+    //     );
+    // }
+    // });
 
     requestStatus = {};
 
