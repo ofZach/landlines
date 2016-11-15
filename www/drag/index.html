@@ -610,6 +610,8 @@ function fadeOut( elem, ms )
 
     var w = window.innerWidth;
     var h = window.innerHeight;
+    var touchID;
+
 
 
     var blurSprite = PIXI.Sprite.fromImage("../img/test/blur.jpg", true);
@@ -823,6 +825,15 @@ var dimensions = getDimensions();
             fadeOut( document.getElementById('instruction'), 10 );
         }
 
+
+        if (moveData.data.identifier === undefined){
+            touchID = 0;
+        } else {
+            touchID = moveData.data.identifier;
+        }
+
+
+
         bAmDrawing = true;
         lastMouseX = moveData.data.global.x;
         lastMouseY = moveData.data.global.y;
@@ -841,6 +852,13 @@ var dimensions = getDimensions();
         if (loadingVisible === true) return;
         
         if (bAmDrawing === true){
+
+            if (moveData.data.identifier !== undefined) {
+                if (touchID !== moveData.data.identifier){
+                    return;
+                }
+             }
+
             if (firstTouch) {
                 firstTouch = false;
                 updateMetadata(matchedMetadata);
