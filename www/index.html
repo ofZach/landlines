@@ -62,7 +62,7 @@
         font-size: 12pt;
         letter-spacing: 0.5pt;
         text-align: center;
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: rgba(0, 0, 0, 0.25);
     }
     .app-button {
         border: 1px solid white;
@@ -282,7 +282,7 @@
     var myGui;
 
     var Gui = function() {
-        this.bgOverlay = 0.2;
+        this.bgOverlay = 0.25;
     };
 
     window.onload = function() {
@@ -298,7 +298,7 @@
     // Load a random background image
     // Store the backgrounds in localStorag as they're used, and use those values
     // to filter out the bgList to only use new ones
-    var bgList = ['1006', '1018', '1102', '1240', '1353', '1463', '1557', '5586', '6578', '1432', '1495', '1556', '1559', '1567', '1578', '1584', '1617', '1653', '1834', '5425'];
+    var bgList = ['1006', '1018', '1102', '1240', '1353', '1463', '5586', '6578', '1432', '1495', '1556', '1559', '1567', '1578', '1584', '1617', '1653', '1834', '5425'];
     var filteredList = bgList.slice(0);
     var usedBGs = localStorage.getItem('usedBGs') || '';
     usedBGs = usedBGs.split(',');
