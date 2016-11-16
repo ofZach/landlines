@@ -436,7 +436,15 @@
         document.getElementById('app').style.backgroundColor = 'rgba(0, 0, 0, ' + myGui.bgOverlay + ')';
     }
 
+    var posSet = false;
+    var xPos = 50;
+    var yPos = 50;
+    var xPosTarget = 50;
+    var yPosTarget = 50;
+     
+   
     function updateBackgroundMouse(e) {
+       
         var pctW = e.clientX / this.offsetWidth;
         pctW -= 0.5;
         pctW *= 20;
@@ -445,16 +453,42 @@
         pctH -= 0.5;
         pctH *= 20;
 
-        this.style.backgroundPositionX = (50 + pctW) + '%';
-        this.style.backgroundPositionY = (50 + pctH) + '%';
+        xPosTarget = (50 + pctW);
+        yPosTarget = (50 + pctH);
+        
+        //this.style.backgroundPositionX = (50 + pctW) + '%';
+        //this.style.backgroundPositionY = (50 + pctH) + '%';
     }
      
     function updateBackgroundAccel(e) {
         // var elem = document.getElementById('app');
-        var elem = document.getElementById('landing-container');
-        elem.style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
-        elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
+        // var elem = document.getElementById('landing-container');
+        // elem.style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
+        // elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
+
+        xPosTarget = (50 + (e.gamma/1.5));
+        yPosTarget = (50 + (e.beta/2));
+
     }
+
+    function animate(timestamp) {
+        //console.log("animate " + timestamp);
+        //console.log(this.style);
+        
+        xPos = 0.9 * xPos + 0.1 * xPosTarget;
+        yPos = 0.9 * yPos + 0.1 * yPosTarget;
+        
+        document.getElementById('landing-container').style.backgroundPositionX = xPos + '%';
+        document.getElementById('landing-container').style.backgroundPositionY = yPos + '%';
+        
+        window.requestAnimationFrame(animate);
+  
+    }
+
+    window.requestAnimationFrame(animate);
+
+
+
 
     function updateBackgroundSize() {
         if (window.innerHeight > window.innerWidth)
