@@ -305,12 +305,12 @@
 
     // Remove the empty value from the array that results when you call
     // Array.split() on an empty string
-    if (usedBGs.includes(''))
+    if (usedBGs.indexOf('') >= 0)
         usedBGs.splice(usedBGs.indexOf(''), 1);
 
     // Remove used backgrounds to create a filtered list
     for (var i = 0; i < usedBGs.length; i++) {
-        if (filteredList.includes(usedBGs[i]))
+        if (filteredList.indexOf(usedBGs[i]) >= 0)
             filteredList.splice(filteredList.indexOf(usedBGs[i]), 1);
     }
 
