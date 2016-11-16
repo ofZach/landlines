@@ -283,6 +283,14 @@
 
     var Gui = function() {
         this.bgOverlay = 0.25;
+        this.motionSmooth = 0.1;
+        this.mouseXScale = 20;
+        this.mouseYScale = 20;
+
+
+        this.accelGammaDiv = 1.5;
+        this.accelBetaDiv = 2.0;
+
     };
 
     window.onload = function() {
@@ -290,7 +298,16 @@
         gui = new dat.GUI();
         
         var bgSlider = gui.add(myGui, 'bgOverlay', 0, 1);
+        var motionSmoothSlider = gui.add(myGui, 'motionSmooth', 0, 1);
+        var mouseXScaleSlider = gui.add(myGui, 'mouseXScale', 0, 100);
+        var mouseYScaleSlider = gui.add(myGui, 'mouseYScale', 0, 100);
+
+        var accelGammaDivSlider = gui.add(myGui, 'accelGammaDiv', 0.01, 10.0);
+        var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
+        
         bgSlider.onChange(updateBgOpacity);
+         window.requestAnimationFrame(animate);
+
     };
 
     updateBackgroundSize();
@@ -445,16 +462,22 @@
    
     function updateBackgroundMouse(e) {
        
-        var pctW = e.clientX / this.offsetWidth;
-        pctW -= 0.5;
-        pctW *= 20;
+        if (myGui !== 'undefined'){
+            //console.log(myGui);
 
-        var pctH = e.clientY / this.offsetHeight;
-        pctH -= 0.5;
-        pctH *= 20;
+            var pctW = e.clientX / this.offsetWidth;
+            pctW -= 0.5;
+            pctW *= myGui.mouseXScale;
 
-        xPosTarget = (50 + pctW);
-        yPosTarget = (50 + pctH);
+            var pctH = e.clientY / this.offsetHeight;
+            pctH -= 0.5;
+            pctH *= myGui.mouseYScale;
+
+            xPosTarget = (50 + pctW);
+            yPosTarget = (50 + pctH);
+        }
+
+        
         
         //this.style.backgroundPositionX = (50 + pctW) + '%';
         //this.style.backgroundPositionY = (50 + pctH) + '%';
@@ -466,17 +489,21 @@
         // elem.style.backgroundPositionX = (50 + (e.gamma/1.5)) + '%';
         // elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
 
-        xPosTarget = (50 + (e.gamma/1.5));
-        yPosTarget = (50 + (e.beta/2));
+        if (myGui !== 'undefined'){
+            xPosTarget = (50 + (e.gamma/myGui.accelGammaDiv));
+            yPosTarget = (50 + (e.beta/myGui.accelBetaDiv));
+        }
 
     }
 
     function animate(timestamp) {
         //console.log("animate " + timestamp);
         //console.log(this.style);
+        if (myGui !== 'undefined'){
+            xPos = (1-myGui.motionSmooth) * xPos + myGui.motionSmooth * xPosTarget;
+            yPos = (1-myGui.motionSmooth) * yPos + myGui.motionSmooth * yPosTarget;
+        }
         
-        xPos = 0.9 * xPos + 0.1 * xPosTarget;
-        yPos = 0.9 * yPos + 0.1 * yPosTarget;
         
         document.getElementById('landing-container').style.backgroundPositionX = xPos + '%';
         document.getElementById('landing-container').style.backgroundPositionY = yPos + '%';
@@ -485,8 +512,7 @@
   
     }
 
-    window.requestAnimationFrame(animate);
-
+   
 
 
 
