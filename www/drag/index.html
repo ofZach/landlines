@@ -403,7 +403,7 @@ function fadeOut( elem, ms )
       this.scale = 1.0;
       this.variableSizes = false;
       this.reverseSwipe = false;
-      this.centerOnImagePct = 0.0413;
+      this.maxZoom = 3.0;
       this.explode = function() { ; };
     };
 
@@ -438,7 +438,6 @@ function fadeOut( elem, ms )
             "angleSmoothRate": 0.02,
             "scale": 1,
             "centerSmoothRate": 0.95,
-            "centerOnImagePct": 0.04132091447925487,
             "variableSizes": false,
             "reverseSwipe": false
           }
@@ -466,7 +465,7 @@ function fadeOut( elem, ms )
         gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
         gui.add(myGui, 'scale', 0.0, 10.0);
         gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
-        gui.add(myGui, 'centerOnImagePct', 0.0, 1.0);
+        gui.add(myGui, 'maxZoom', 0.0, 4.0);
         gui.add(myGui, 'variableSizes');
         gui.add(myGui, 'reverseSwipe');
 
@@ -818,8 +817,12 @@ var dimensions = getDimensions();
     var firstTouch = true;
     stage.mousedown = stage.touchstart = function(moveData) {
         
+        //console.log("mousedown");
+
         if (loadingVisible === true) return;
 
+        //console.log("mousedown2");
+        
         if (bInstructionGifCanFade === true){
             bInstructionGifCanFade = false;
             fadeOut( document.getElementById('instruction'), 10 );
@@ -849,7 +852,12 @@ var dimensions = getDimensions();
 
     stage.mousemove = stage.touchmove = function(moveData) {
 
+        //console.log("mousemove");
+        
         if (loadingVisible === true) return;
+
+        //console.log("mousemove2");
+        
         
         if (bAmDrawing === true){
 
@@ -1208,7 +1216,12 @@ var dimensions = getDimensions();
 
         angleSmooth +=  (1.0 - myGui.angleSmoothRate) * diffAngle;
 
-        var adder = velSmooth*myGui.dragSpeed;
+
+        var w = renderer.view.width;
+        var dragScale = 1000.0 / w;
+
+
+        var adder = velSmooth*myGui.dragSpeed *dragScale;
         //console.log("adding " + adder);
         // console.log("adding " + adder);
 
@@ -1308,12 +1321,19 @@ var dimensions = getDimensions();
                 //smoothPt.y = myGui.centerSmoothRate * smoothPt.y + (1.0 - myGui.centerSmoothRate) * centerY;  
             }
 
+            //velStopEnergy = 0.0;
+
             if (ptsSmooth.length > 0){
 
                 var start = Math.max(ptsSmooth.length-1000, 0);
                 for (var i = start; i < ptsSmooth.length; i++){
                     
-                    var scale = myGui.scale * (1-velStopEnergy) + 3.0 * velStopEnergy;
+                    
+                    var w = renderer.view.width;
+                
+                    var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
+
+                    //var scale = myGui.scale * (1-velStopEnergy) + 3.0 * velStopEnergy;
 
                     var p = new Point(ptsSmooth[i].x - smoothPt.x, ptsSmooth[i].y - smoothPt.y).clone().rotate((0)* (180.0/Math.PI)).multiplyNum(scale).addX(renderer.view.width*0.5).addY(renderer.view.height*0.5);
                     
@@ -1350,7 +1370,11 @@ var dimensions = getDimensions();
                     iwp[i].sprite1.alpha = iwp[i].alpha;
                 }
 
-                var scale = myGui.scale * (1-velStopEnergy) + 3.0 * velStopEnergy;
+
+                var w = renderer.view.width;
+                
+
+                var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
 
 
                 var startPt = new Point( pts[iwp[i].startIndex].x - smoothPt.x,  pts[iwp[i].startIndex].y - smoothPt.y).clone().rotate((0) * (180.0/Math.PI)).multiplyNum(scale).addX(renderer.view.width*0.5).addY(renderer.view.height*0.5);
@@ -1403,27 +1427,6 @@ var dimensions = getDimensions();
                     y += iwp[i].midDistance * iwp[i].sprite1.scale.y * 0.25 * Math.sin(0 + iwp[i].curAngle - iwp[i].origAngle + iwp[i].midAngle);
                     
 
-
-                    ///drawing.lineTo(x,y);
-
-
-
-                    var pctToMix = myGui.centerOnImagePct;
-
-
-                    centerX = x;
-                    centerY = y;
-                    //centerX =  temp.x + temp.width/2;
-                    //centerY =  temp.y + temp.height/2;
-
-                    //centerDiffX =  lastPointX - centerX;
-                    //centerDiffY =  lastPointY - centerY;
-                    
-                    //console.log(centerX + "  ?  " + lastPointX);
-                    //console.log(centerY + "  ?  " + lastPointY);
-
-                    //drawing.drawCircle( x,y, 40); // drawCircle(x, y, radius)
-
                 }
                    
             }
@@ -1433,8 +1436,7 @@ var dimensions = getDimensions();
             updateGraphics = true;
          }
 
-        var amountToMix = myGui.centerOnImagePct * velStopEnergy;
-
+        
 
         renderer.render(stage);
 
