@@ -494,6 +494,7 @@ function fadeOut( elem, ms )
             this.startIndex = 0;
             this.endIndex = 0;
             this.alpha = 0.0;
+            this.alphaTarget = 0.0;
             this.bSetYet = false;
             this.bLoaded = false;
             this.index = -1;                // where am I in the dataObj
@@ -1366,9 +1367,21 @@ var dimensions = getDimensions();
             
                 //console.log("in here " + iwp[i].startIndex);
                 if (ptsSmooth.length > iwp[i].startIndex){
-                    iwp[i].alpha = 0.96 * iwp[i].alpha + 0.04 * 1.0;
-                    iwp[i].sprite1.alpha = iwp[i].alpha;
+                    iwp[i].alphaTarget = 1.0; // = 0.96 * iwp[i].alpha + 0.04 * 1.0;
+                    //iwp[i].sprite1.alpha = iwp[i].alpha;
                 }
+
+                if (iwp.length > 5){
+                    //0,1,2,3,4,5,6,7,8,9
+                    var pct = i / (iwp.length - 5);
+                    if (pct > 1){
+                        pct = 1;
+                    }
+                     iwp[i].alphaTarget = pct;
+                    
+                }
+                iwp[i].alpha = 0.96 * iwp[i].alpha + 0.04 * iwp[i].alphaTarget;
+                iwp[i].sprite1.alpha = iwp[i].alpha;
 
 
                 var w = renderer.view.width;
@@ -1412,22 +1425,24 @@ var dimensions = getDimensions();
                 //imageWithPtsTemp.sprite1.anchor.x = dataobj[lineToAdd]['startPt'].x / 2048.0;
                 //imageWithPtsTemp.sprite1.anchor.y = dataobj[lineToAdd]['startPt'].y / 2020.0;
 
-                if (i === iwp.length - 1){
+                
+
+                // if (i === iwp.length - 1){
 
                    
-                    var x = iwp[i].sprite1.position.x;
-                    var y = iwp[i].sprite1.position.y;
+                //     var x = iwp[i].sprite1.position.x;
+                //     var y = iwp[i].sprite1.position.y;
 
-                    var angle = iwp[i].sprite1.rotation;
+                //     var angle = iwp[i].sprite1.rotation;
 
-                    //drawing.moveTo(x,y);
+                //     //drawing.moveTo(x,y);
 
 
-                    x += iwp[i].midDistance * iwp[i].sprite1.scale.x * 0.25 * Math.cos(0 + iwp[i].curAngle - iwp[i].origAngle + iwp[i].midAngle);
-                    y += iwp[i].midDistance * iwp[i].sprite1.scale.y * 0.25 * Math.sin(0 + iwp[i].curAngle - iwp[i].origAngle + iwp[i].midAngle);
+                //     x += iwp[i].midDistance * iwp[i].sprite1.scale.x * 0.25 * Math.cos(0 + iwp[i].curAngle - iwp[i].origAngle + iwp[i].midAngle);
+                //     y += iwp[i].midDistance * iwp[i].sprite1.scale.y * 0.25 * Math.sin(0 + iwp[i].curAngle - iwp[i].origAngle + iwp[i].midAngle);
                     
 
-                }
+                // }
                    
             }
 
