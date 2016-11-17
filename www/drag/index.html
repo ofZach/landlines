@@ -1225,7 +1225,7 @@ var dimensions = getDimensions();
         //console.log("adding " + adder);
         // console.log("adding " + adder);
 
-        if (adder < 0.1){
+        if (adder < 0.1 && ptsSmooth.length > 100){
             velStopEnergy = 0.99 * velStopEnergy + 0.01 * 1.0;
         } else {
             velStopEnergy = 0.9 * velStopEnergy + 0.1 * 0.0;
