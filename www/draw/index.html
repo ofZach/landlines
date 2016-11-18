@@ -175,7 +175,7 @@
         
         rawFile.onreadystatechange = function() {
             if (rawFile.readyState === 4) {
-                
+
                 for(var key in requestStatus){
                     if (rawFile.responseURL.includes(key)){
                         requestStatus[key] = 1.0;
@@ -1125,8 +1125,27 @@
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
         // its aspect ratio. For now just stretch to fill
-        bg.width = renderer.view.width;
-        bg.height = renderer.view.height;
+        // bg.width = renderer.view.width;
+        // bg.height = renderer.view.height;
+
+        var aspectScreen = renderer.view.width / renderer.view.height;
+        var aspectImage = 900 / 600;
+
+        bg.anchor.x = 0.5;
+        bg.anchor.y = 0.5;
+        
+        bg.position.x = renderer.view.width/2;
+        bg.position.y = renderer.view.height/2;
+
+        if (aspectScreen > aspectImage){    // width of screen is greater, scale to width
+            bg.width = renderer.view.width;
+            bg.height = renderer.view.width * (1 / aspectImage);
+        } else {
+            bg.height = renderer.view.height;
+            bg.width = renderer.view.height * (aspectImage);
+        }
+
+        
         backgroundImages.push(bg);
         stage.addChildAt(bg, 0);
 
