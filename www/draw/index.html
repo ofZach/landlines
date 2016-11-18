@@ -175,6 +175,15 @@
         
         rawFile.onreadystatechange = function() {
             if (rawFile.readyState === 4) {
+                
+                for(var key in requestStatus){
+                    if (rawFile.responseURL.includes(key)){
+                        requestStatus[key] = 1.0;
+                    }
+                }
+
+
+                console.log(rawFile);
                 callback(rawFile.status, rawFile.responseText);
             }
         }
