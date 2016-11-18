@@ -236,9 +236,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             gl.vertexAttribPointer(shader.attributes.aColor, 4, gl.FLOAT, false, 4 * 6, 2 * 4);
 
             if (webGLData.drawNativeLine){
-                
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, webGLData.points.length / 6);
             } else {
                 // set the index buffer!
@@ -408,6 +406,14 @@ function fadeOut( elem, ms )
       this.reverseSwipe = false;
       this.maxZoom = 3.0;
       this.explode = function() { ; };
+
+      this.proportionalZoom = false;
+
+      this.pzVelSmoothDownRate = 0.99;
+      this.pzVelSmoothUpRate = 0.99;
+      this.pzMaxVel = 1.0;
+      this.pzMinVel = 0.0;
+
     };
 
 
@@ -489,6 +495,14 @@ function fadeOut( elem, ms )
         gui.add(myGui, 'maxZoom', 0.0, 4.0);
         gui.add(myGui, 'variableSizes');
         gui.add(myGui, 'reverseSwipe');
+
+        gui.add(myGui, 'proportionalZoom');
+        gui.add(myGui, 'pzVelSmoothUpRate', 0.8, 1.0);
+        gui.add(myGui, 'pzVelSmoothDownRate', 0.8, 1.0);
+        gui.add(myGui, 'pzMaxVel', 0, 30);
+        gui.add(myGui, 'pzMinVel', 0, 30);
+
+
 
         gui.remember(myGui);
 
@@ -637,6 +651,7 @@ function fadeOut( elem, ms )
     var bCanLoadNewBg = true;
     var bgAlpha = 0.0;
     var lastFilename;
+    var pzVelSmooth = 0.0;
 
 
 
@@ -1254,7 +1269,20 @@ var dimensions = getDimensions();
             velThisFrame = 0;
         }
 
-        velSmooth = (myGui.velSmoothRate) * velSmooth + (1.0 - myGui.velSmoothRate) * velThisFrame;
+
+        var w = renderer.view.width;
+        var dragScale = 1000.0 / w;
+
+
+        velSmooth = (myGui.velSmoothRate) * velSmooth + (1.0 - myGui.velSmoothRate) * velThisFrame * dragScale;
+
+        if (velThisFrame * dragScale < pzVelSmooth){
+             pzVelSmooth = (myGui.pzVelSmoothDownRate) * pzVelSmooth + (1.0 - myGui.pzVelSmoothDownRate) * velThisFrame * dragScale;
+         } else {
+             pzVelSmooth = (myGui.pzVelSmoothUpRate) * pzVelSmooth + (1.0 - myGui.pzVelSmoothUpRate) * velThisFrame * dragScale;
+         }
+       
+        //console.log(velSmooth);
         var angleDiff = Math.atan2(-lastDiff.y, -lastDiff.x);
         
         var diffAngle = angleDiff - angleSmooth;
@@ -1264,11 +1292,9 @@ var dimensions = getDimensions();
         angleSmooth +=  (1.0 - myGui.angleSmoothRate) * diffAngle;
 
 
-        var w = renderer.view.width;
-        var dragScale = 1000.0 / w;
+        
 
-
-        var adder = velSmooth*myGui.dragSpeed *dragScale;
+        var adder = velSmooth*myGui.dragSpeed;
         //console.log("adding " + adder);
         // console.log("adding " + adder);
 
@@ -1428,10 +1454,17 @@ var dimensions = getDimensions();
                 for (var i = start; i < ptsSmooth.length; i++){
                     
                     
-                    var w = renderer.view.width;
-                
+
                     var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
 
+                    if (myGui.proportionalZoom == true){
+                        // xjx
+                        var pctVel = (pzVelSmooth - myGui.pzMinVel) / (myGui.pzMaxVel - myGui.pzMinVel);
+                        if (pctVel < 0) pctVel = 0;
+                        if (pctVel > 1) pctVel = 1;
+                        scale = (myGui.scale * pctVel + myGui.maxZoom * (1-pctVel)) * (w / 1000.0);
+                    }
+                    
                     //var scale = myGui.scale * (1-velStopEnergy) + 3.0 * velStopEnergy;
 
                     var p = new Point(ptsSmooth[i].x - smoothPt.x, ptsSmooth[i].y - smoothPt.y).clone().rotate((0)* (180.0/Math.PI)).multiplyNum(scale).addX(renderer.view.width*0.5).addY(renderer.view.height*0.5);
@@ -1486,6 +1519,14 @@ var dimensions = getDimensions();
                 
 
                 var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
+
+                if (myGui.proportionalZoom == true){
+                    // xjx
+                    var pctVel = (pzVelSmooth - myGui.pzMinVel) / (myGui.pzMaxVel - myGui.pzMinVel);
+                    if (pctVel < 0) pctVel = 0;
+                    if (pctVel > 1) pctVel = 1;
+                    scale = (myGui.scale * pctVel + myGui.maxZoom * (1-pctVel)) * (w / 1000.0);
+                }
 
 
                 var startPt = new Point( pts[iwp[i].startIndex].x - smoothPt.x,  pts[iwp[i].startIndex].y - smoothPt.y).clone().rotate((0) * (180.0/Math.PI)).multiplyNum(scale).addX(renderer.view.width*0.5).addY(renderer.view.height*0.5);
