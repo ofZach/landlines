@@ -353,6 +353,9 @@ function fadeOut( elem, ms )
 
     // Update DOM elements with new data
     function updateMetadata(data) {
+
+        //console.log(data);
+
         var line1 = data['line-1'] || '';
         var line2 = data['line-2'] || '';
         var attribution = data['attribution'] || '';
@@ -902,7 +905,7 @@ var dimensions = getDimensions();
                 diffy *= -1;
             }
 
-            console.log(moveData.data.global.x + " " + moveData.data.global.y + " " + diffx + " " + diffy);
+            //console.log(moveData.data.global.x + " " + moveData.data.global.y + " " + diffx + " " + diffy);
             velThisFrame = Math.sqrt(diffx * diffx + diffy*diffy);
             lastDiff.x = diffx;
             lastDiff.y = diffy;
@@ -938,8 +941,10 @@ var dimensions = getDimensions();
         var id = filename.substr(0, filename.length-4);
         if (firstTouch)
             matchedMetadata = metadata[id];
-        else
+        else{
+            //console.log(id + " " + filename );
             updateMetadata(metadata[id]);
+        }
 
         var diffx = dataobj[lineToAdd]['startPt'].x - dataobj[lineToAdd]['endPt'].x;
         var diffy = dataobj[lineToAdd]['startPt'].y - dataobj[lineToAdd]['endPt'].y;
