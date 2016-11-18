@@ -633,6 +633,11 @@ function fadeOut( elem, ms )
     var h = window.innerHeight;
     var touchID;
 
+    var bBgShowing = false;
+    var bCanLoadNewBg = true;
+    var bgAlpha = 0.0;
+    var lastFilename;
+
 
 
     var blurSprite = PIXI.Sprite.fromImage("../img/test/blur.jpg", true);
@@ -680,11 +685,14 @@ var dimensions = getDimensions();
     var container = new PIXI.Container();
     var overalContainer = new PIXI.Container();
 
+    var bgContainer = new PIXI.Container();
+
     function updateLineShadow(val) {
         drawing.filters = val ? [ dropShadowFilter ] : null;
     }
-    
-    overalContainer.addChild(blurSprite);
+
+    bgContainer.addChild(blurSprite);
+    overalContainer.addChild(bgContainer);
     overalContainer.addChild(container);
     overalContainer.addChild(drawing);
     stage.addChild(overalContainer);
@@ -729,6 +737,18 @@ var dimensions = getDimensions();
         }
     }
 
+
+
+    function loadBgImage(fileToLoad){
+
+        console.log("loading " + fileToLoad);
+        bgContainer.removeChild(blurSprite);
+        blurSprite.destroy(); 
+        blurSprite= PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/blur/' + fileToLoad, true);
+        bgContainer.addChild(blurSprite);
+
+
+    }
 
 
 
@@ -938,6 +958,9 @@ var dimensions = getDimensions();
         // var metaFilename = dataobj[lineToAdd].fileName.replace('jpg', 'json');
         // readTextFile('metadata/' + metaFilename.substr(0, 1) + '/' + metaFilename, updateMetadataCallback);
         var filename = dataobj[lineToAdd].fileName;
+
+        lastFilename = filename;
+
         var id = filename.substr(0, filename.length-4);
         if (firstTouch)
             matchedMetadata = metadata[id];
@@ -1255,13 +1278,65 @@ var dimensions = getDimensions();
             velStopEnergy = 0.9 * velStopEnergy + 0.1 * 0.0;
         }
 
+
+        // logic for BG loading: 
+
+        // console.log(velStopEnergy);
+
+        if (velStopEnergy > 0.2){
+            bBgShowing = true;
+            if (bCanLoadNewBg == true){
+                
+                //console.log(lastFilename);
+                //console.log("LOAD BG");
+                loadBgImage(lastFilename);
+                bCanLoadNewBg = false;
+            }
+        } else {
+            bBgShowing = false;
+        }
+
+        if (bBgShowing == true){
+            bgAlpha = bgAlpha * 0.99 + 0.01 * 1.0;
+        } else {
+            bgAlpha = bgAlpha * 0.97 + 0.02 * 0.0;
+        }
+
+        if (velStopEnergy < 0.1){
+            bCanLoadNewBg = true;
+        }
+
+
+
+
+
         //console.log(pts.length );
         if (ptsSmooth.length > 100){
             //console.log("huh");
-            blurSprite.alpha = velStopEnergy;
+            blurSprite.alpha = bgAlpha; //velStopEnergy;
          } else {
             blurSprite.alpha = 0.0;
          }
+
+        if (blurSprite.texture.baseTexture &&
+                    blurSprite.texture.baseTexture.hasLoaded){
+              var aspectScreen = renderer.view.width / renderer.view.height;
+            var aspectImage = 512 / 505;
+
+            blurSprite.anchor.x = 0.5;
+            blurSprite.anchor.y = 0.5;
+
+            blurSprite.position.x = renderer.view.width/2;
+            blurSprite.position.y = renderer.view.height/2;
+
+            if (aspectScreen > aspectImage){    // width of screen is greater, scale to width
+                blurSprite.width = renderer.view.width;
+                blurSprite.height = renderer.view.width * (1 / aspectImage);
+            } else {
+                blurSprite.height = renderer.view.height;
+                blurSprite.width = renderer.view.height * (aspectImage);
+            }
+        }
        
         
         adderSum += adder;
