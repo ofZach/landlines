@@ -96,7 +96,6 @@
         cursor: default;
         text-decoration: none;
         padding-bottom: 4px;
-        border-bottom: 1px solid;
     }
     #nav a:hover {
         color: white;
@@ -108,6 +107,9 @@
         cursor: pointer;
         border-color: rgba(255, 255, 255, 0);
         border-bottom: none;
+    }
+    #nav .active {
+        border-bottom: 1px solid;
     }
 
     /*#gradient-top, #gradient-bottom {
@@ -278,6 +280,8 @@
     <script src="/js/dat.gui.min.js"></script>
     <script>
 
+    var activeApp = '';
+
     var gui;
     var myGui;
 
@@ -406,7 +410,8 @@
 
     function loadAppDraw() {
         // Skip if this app is already active
-        if (document.getElementById('nav-swipe').classList.length) return;
+        if (activeApp == 'draw') return;
+        activeApp = 'draw';
 
         loadApp();
 
@@ -422,13 +427,14 @@
             draw.style.visibility = 'visible';
         }
 
-        document.getElementById('nav-draw').classList = [];
-        document.getElementById('nav-swipe').classList = ['inactive'];
+        document.getElementById('nav-draw').className = 'active';
+        document.getElementById('nav-swipe').className = 'inactive';
     }
 
     function loadAppSwipe() {
         // Skip if this app is already active
-        if (document.getElementById('nav-draw').classList.length) return;
+        if (activeApp == 'swipe') return;
+        activeApp = 'swipe';
 
         loadApp();
         
@@ -444,8 +450,8 @@
             swipe.style.visibility = 'visible';
         }
 
-        document.getElementById('nav-draw').classList = ['inactive'];
-        document.getElementById('nav-swipe').classList = [];
+        document.getElementById('nav-draw').className = 'inactive';
+        document.getElementById('nav-swipe').className = 'active';
     }
 
     // Layout / background image stuff
