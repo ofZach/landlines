@@ -293,13 +293,10 @@
     var Gui = function() {
         this.bgOverlay = 0.25;
         this.motionSmooth = 0.1;
-        this.mouseXScale = 20;
-        this.mouseYScale = 20;
-
-
-        this.accelGammaDiv = 1.5;
-        this.accelBetaDiv = 2.0;
-
+        this.mouseXScale = 10;
+        this.mouseYScale = 10;
+        this.accelGammaDiv = 5;
+        this.accelBetaDiv = 3;
     };
 
     window.onload = function() {
