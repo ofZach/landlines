@@ -851,6 +851,7 @@ var dimensions = getDimensions();
 
         console.log("loading " + fileToLoad);
         bgContainer.removeChild(blurSprite);
+        blurSprite.texture.destroy(true);
         blurSprite.destroy(); 
         blurSprite= PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/blur/' + fileToLoad, true);
         bgContainer.addChild(blurSprite);
@@ -1138,6 +1139,7 @@ var dimensions = getDimensions();
        iwp.push(imageWithPtsTemp);
        while (iwp.length > 15){
             container.removeChild(iwp[0].sprite1); 
+            iwp[0].sprite1.texture.destroy(true);
             iwp[0].sprite1.destroy();
             iwp.splice(0, 1);
        }
