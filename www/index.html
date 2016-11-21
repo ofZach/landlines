@@ -283,12 +283,14 @@
     <a href="javascript:void(0)"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
 
     <script src="/js/dat.gui.min.js"></script>
+    <script src="/draw/js/Utils.js"></script>
     <script>
 
     var activeApp = '';
 
     var gui;
     var myGui;
+    var animatingElements = [];
 
     var Gui = function() {
         this.bgOverlay = 0.25;
@@ -312,7 +314,7 @@
         var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
         
         bgSlider.onChange(updateBgOpacity);
-         window.requestAnimationFrame(animate);
+        window.requestAnimationFrame(animate);
 
     };
 
@@ -356,7 +358,10 @@
     function show(elem) {
         elem.style.opacity = 0;
         elem.style.display = 'block';
+        elem.targetOpacity = 1;
+        animatingElements.push(elem);
         
+        /*
         var timer = setInterval(function() {
             if (elem.style.opacity >= 1) {
                 elem.style.opacity = 1;
@@ -366,11 +371,15 @@
 
             elem.style.opacity = parseFloat(elem.style.opacity) + 0.07;
         }, 1000 / 60);
+        */
     }
 
     function hide(elem) {
         elem.style.opacity = 1;
+        elem.targetOpacity = 0;
+        animatingElements.push(elem);
         
+        /*
         var timer = setInterval(function() {
             if (elem.style.opacity <= 0) {
                 elem.style.opacity = 0;
@@ -381,6 +390,7 @@
 
             elem.style.opacity = parseFloat(elem.style.opacity) - 0.07;
         }, 1000 / 60);
+        */
     }
 
     function showAboutOverlay() {
@@ -511,7 +521,20 @@
             xPos = (1-myGui.motionSmooth) * xPos + myGui.motionSmooth * xPosTarget;
             yPos = (1-myGui.motionSmooth) * yPos + myGui.motionSmooth * yPosTarget;
         }
-        
+
+        for (var i = animatingElements.length-1; i >= 0; i--) {
+            var elem = animatingElements[i];
+            var opacity = Utils.lerp(elem.style.opacity, elem.targetOpacity, 0.18);
+            
+            elem.style.opacity = opacity;
+
+            if (Math.abs(elem.style.opacity - elem.targetOpacity) <= 0.01) {
+                if (elem.targetOpacity == 0) {
+                    elem.style.display = 'none';
+                }
+                animatingElements.splice(i, 1);
+            }
+        }
         
         document.getElementById('landing-container').style.backgroundPositionX = xPos + '%';
         document.getElementById('landing-container').style.backgroundPositionY = yPos + '%';
@@ -519,10 +542,6 @@
         window.requestAnimationFrame(animate);
   
     }
-
-   
-
-
 
     function updateBackgroundSize() {
         if (window.innerHeight > window.innerWidth)

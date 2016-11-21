@@ -388,6 +388,7 @@
         this.pulseSpeed = 10;
         this.pulseOpacityLow = 0.2;
         this.pulseOpacityHigh = 0.9;
+        this.pulseWaitTime = 1;
 
         this.scaleSize = 0.22;
         this.scaleSpeed = 0.021;
@@ -424,6 +425,7 @@
         f2.add(myGui, 'pulseOpacityLow', 0, 1);
         f2.add(myGui, 'pulseOpacityHigh', 0, 1);
         f2.add(myGui, 'pulseSpeed', 1, 20);
+        f2.add(myGui, 'pulseWaitTime', 0, 3);
 
         var f3 = gui.addFolder('scale/translate');
         f3.add(myGui, 'scaleSize', 0.2, 0.5);
@@ -466,6 +468,8 @@
     var metadataTargetOpacity = 0;
     var drawingAlpha = 1.0;
     var drawingAlphaTarget = 1.0;
+    var pulseComplete = false;
+    var pulseTimer;
 
     function returnPathForCircle(simpleArray){
         canvasPoints = [];
@@ -817,6 +821,9 @@
         linePulseCounter = 0;
         textureHasLoaded = false;
         metadataTargetOpacity = 0;
+        pulseComplete = false;
+        clearTimeout(pulseTimer);
+        pulseTimer = setTimeout(function() { pulseComplete = true; }, myGui.pulseWaitTime * 1000);
         
         pts = [];
         pts.push(moveData.data.global.x);
@@ -1273,7 +1280,7 @@
                 if (lastSprite.texture.baseTexture &&
                     lastSprite.texture.baseTexture.hasLoaded) {
 
-                    if (!textureHasLoaded) {
+                    if (!textureHasLoaded && pulseComplete) {
                         console.log('Texture just finished loading!');
                         textureHasLoaded = true;
                         updateMetadata(matchedMetadata);
