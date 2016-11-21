@@ -161,6 +161,7 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
 
     var p1x, p1y, p2x, p2y;
 
+    if (myGui.lineShadow === true){
     for (i = 1; i < length; i++) {
 
         var alpha2 = (i-1) / length;
@@ -176,11 +177,11 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
         var dist = Math.sqrt(dx*dx + dy*dy);
         dx /= dist;
         dy /= dist;
-        dx*=30.0 * Math.pow(alpha2, 2.0);
-        dy*=30.0 * Math.pow(alpha2, 2.0);
+        dx*=myGui.shadowWidth * Math.pow(alpha2, 2.0);
+        dy*=myGui.shadowWidth * Math.pow(alpha2, 2.0);
 
-        alpha2 *= 0.4;
-        alpha3 *= 0.4;
+        alpha2 *= myGui.shadowAlpha;
+        alpha3 *= myGui.shadowAlpha;
         verts.push(p1x  , p1y );
         verts.push(0.0,0.0,0.0, alpha2);
        
@@ -204,6 +205,7 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
            
         }
     }
+    }
 
 
     for (i = 1; i < length; i++) {
@@ -221,8 +223,8 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
         var dist = Math.sqrt(dx*dx + dy*dy);
         dx /= dist;
         dy /= dist;
-        dx*=2.0 * Math.pow(alpha2, 1.2);
-        dy*=2.0 * Math.pow(alpha2, 1.2);
+        dx*=myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower);
+        dy*=myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower);
 
         alpha2 *= 1.0;
         alpha3 *= 1.0;
@@ -468,10 +470,11 @@ function fadeOut( elem, ms )
     var Gui = function() {
       this.lineColor = 0xffffff;
       this.lineOpacity = 0.7;
-      this.lineWidth = 1;
-      this.lineShadow = false;
-      this.shadowDistance = 3;
-      this.shadowBlur = 4;
+      this.lineWidth = 2;
+      this.lineShadow = true;
+      this.shadowWidth = 30;
+      this.lineFadePower = 1.3;
+      this.shadowAlpha = 0.4;
       this.dragSpeed = 0.674;
       this.velSmoothRate = 0.8;
       this.angleSmoothRate = 0.095;
@@ -488,6 +491,9 @@ function fadeOut( elem, ms )
       this.pzVelSmoothUpRate = 0.99;
       this.pzMaxVel = 1.0;
       this.pzMinVel = 0.0;
+
+      this.bTint = true;
+      this.tintAmount = 0.8;
 
     };
 
@@ -559,9 +565,10 @@ function fadeOut( elem, ms )
         gui.addColor(myGui, 'lineColor');
         gui.add(myGui, 'lineOpacity', 0, 1);
         gui.add(myGui, 'lineWidth', 1, 10);
-        var shadowToggle = gui.add(myGui, 'lineShadow');
-        gui.add(myGui, 'shadowDistance', 0, 10);
-        gui.add(myGui, 'shadowBlur', 0, 10);
+        gui.add(myGui, 'lineFadePower', 0.9, 10.0);
+        gui.add(myGui, 'lineShadow');
+        gui.add(myGui, 'shadowWidth', 0, 100);
+        gui.add(myGui, 'shadowAlpha', 0, 1);
         gui.add(myGui, 'dragSpeed', 0.1, 5);
         gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
         gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
@@ -577,11 +584,14 @@ function fadeOut( elem, ms )
         gui.add(myGui, 'pzMaxVel', 0, 30);
         gui.add(myGui, 'pzMinVel', 0, 30);
 
+        gui.add(myGui, 'bTint');
+        gui.add(myGui, 'tintAmount', 0, 1);
+
 
 
         gui.remember(myGui);
 
-        shadowToggle.onFinishChange(updateLineShadow);
+        //shadowToggle.onFinishChange(updateLineShadow);
     };
     //-------------------------------------------
        
@@ -784,9 +794,9 @@ var dimensions = getDimensions();
 
     var bgContainer = new PIXI.Container();
 
-    function updateLineShadow(val) {
-        drawing.filters = val ? [ dropShadowFilter ] : null;
-    }
+    // function updateLineShadow(val) {
+    //     drawing.filters = val ? [ dropShadowFilter ] : null;
+    // }
 
     bgContainer.addChild(blurSprite);
     overalContainer.addChild(bgContainer);
@@ -1598,10 +1608,15 @@ var dimensions = getDimensions();
                 iwp[i].sprite1.alpha = iwp[i].alpha;
 
                 
-            
-                var pct2 = i / iwp.length;
-                iwp[i].sprite1.tint = PIXI.utils.rgb2hex([pct2*0.3 + 0.7, pct2*0.3 + 0.7, pct2*0.3 + 0.7]);
-                
+                if (myGui.bTint == true){
+                    var pct2 = i / iwp.length;
+                    var amt = myGui.tintAmount;
+                    var one_m_amt = 1.0 - amt;
+                    iwp[i].sprite1.tint = PIXI.utils.rgb2hex([pct2*amt+ one_m_amt, pct2*amt + one_m_amt, pct2*amt + one_m_amt]);
+                } else {
+                    iwp[i].sprite1.tint = PIXI.utils.rgb2hex([1,1,1]);
+                }
+               
                 
                 var w = renderer.view.width;
                 
