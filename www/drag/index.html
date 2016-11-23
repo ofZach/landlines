@@ -485,13 +485,7 @@ function fadeOut( elem, ms )
       this.maxZoom = 0.55;
       this.explode = function() { ; };
 
-      this.proportionalZoom = false;
-
-      this.pzVelSmoothDownRate = 0.99;
-      this.pzVelSmoothUpRate = 0.99;
-      this.pzMaxVel = 1.0;
-      this.pzMinVel = 0.0;
-
+     
       this.bTint = true;
       this.tintAmount = 0.8;
 
@@ -562,30 +556,30 @@ function fadeOut( elem, ms )
         myGui = new Gui();
         var gui = new dat.GUI({load:guiSettings});
 
-        gui.addColor(myGui, 'lineColor');
-        gui.add(myGui, 'lineOpacity', 0, 1);
-        gui.add(myGui, 'lineWidth', 1, 10);
-        gui.add(myGui, 'lineFadePower', 0.9, 10.0);
-        gui.add(myGui, 'lineShadow');
-        gui.add(myGui, 'shadowWidth', 0, 100);
-        gui.add(myGui, 'shadowAlpha', 0, 1);
-        gui.add(myGui, 'dragSpeed', 0.1, 5);
-        gui.add(myGui, 'velSmoothRate', 0.0, 1.0);
-        gui.add(myGui, 'angleSmoothRate', 0.0, 1.0);
-        gui.add(myGui, 'scale', 0.0, 10.0);
-        gui.add(myGui, 'centerSmoothRate', 0.0, 1.0);
-        gui.add(myGui, 'maxZoom', 0.0, 4.0);
-        gui.add(myGui, 'variableSizes');
-        gui.add(myGui, 'reverseSwipe');
 
-        gui.add(myGui, 'proportionalZoom');
-        gui.add(myGui, 'pzVelSmoothUpRate', 0.8, 1.0);
-        gui.add(myGui, 'pzVelSmoothDownRate', 0.8, 1.0);
-        gui.add(myGui, 'pzMaxVel', 0, 30);
-        gui.add(myGui, 'pzMinVel', 0, 30);
+        var f1 = gui.addFolder('line');
 
-        gui.add(myGui, 'bTint');
-        gui.add(myGui, 'tintAmount', 0, 1);
+        f1.addColor(myGui, 'lineColor');
+        f1.add(myGui, 'lineOpacity', 0, 1);
+        f1.add(myGui, 'lineWidth', 1, 10);
+        f1.add(myGui, 'lineFadePower', 0.9, 10.0);
+        f1.add(myGui, 'lineShadow');
+        f1.add(myGui, 'shadowWidth', 0, 100);
+        f1.add(myGui, 'shadowAlpha', 0, 1);
+
+        var f2 = gui.addFolder('animation');
+        f2.add(myGui, 'dragSpeed', 0.1, 5);
+        f2.add(myGui, 'velSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'angleSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'scale', 0.0, 10.0);
+        f2.add(myGui, 'centerSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'maxZoom', 0.0, 4.0);
+        f2.add(myGui, 'variableSizes');
+        f2.add(myGui, 'reverseSwipe');
+
+        var f3 = gui.addFolder('shading');
+        f3.add(myGui, 'bTint');
+        f3.add(myGui, 'tintAmount', 0, 1);
 
 
 
@@ -1556,13 +1550,7 @@ var dimensions = getDimensions();
 
                     var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
 
-                    if (myGui.proportionalZoom == true){
-                        // xjx
-                        var pctVel = (pzVelSmooth - myGui.pzMinVel) / (myGui.pzMaxVel - myGui.pzMinVel);
-                        if (pctVel < 0) pctVel = 0;
-                        if (pctVel > 1) pctVel = 1;
-                        scale = (myGui.scale * pctVel + myGui.maxZoom * (1-pctVel)) * (w / 1000.0);
-                    }
+                    
                     
                     //var scale = myGui.scale * (1-velStopEnergy) + 3.0 * velStopEnergy;
 
@@ -1629,13 +1617,7 @@ var dimensions = getDimensions();
 
                 var scale = myGui.scale * (1-velStopEnergy) * (w / 1000.0) + myGui.maxZoom * velStopEnergy * (w / 1000.0);
 
-                if (myGui.proportionalZoom == true){
-                    // xjx
-                    var pctVel = (pzVelSmooth - myGui.pzMinVel) / (myGui.pzMaxVel - myGui.pzMinVel);
-                    if (pctVel < 0) pctVel = 0;
-                    if (pctVel > 1) pctVel = 1;
-                    scale = (myGui.scale * pctVel + myGui.maxZoom * (1-pctVel)) * (w / 1000.0);
-                }
+                
 
 
                 var startPt = new Point( pts[iwp[i].startIndex].x - smoothPt.x,  pts[iwp[i].startIndex].y - smoothPt.y).clone().rotate((0) * (180.0/Math.PI)).multiplyNum(scale).addX(renderer.view.width*0.5).addY(renderer.view.height*0.5);
