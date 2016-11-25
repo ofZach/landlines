@@ -135,14 +135,21 @@
         left: 0;
         padding-left: 1em;
         padding-bottom: 1em;
-           
+        width: 250px;
+    }
+    @media (max-width: 400px) {
+        #chrome-experiment {
+            padding-bottom: 14px;
+            width: 170px;
+        }
     }
 
     #privacy-terms {
         position: absolute;
         bottom: 0px;
         right: 0px;
-        padding: 0 1em 1em 0;
+        /*padding: 0 1em 1em 0;*/
+        padding: 0 16px 16px 0;
         font-size: 9pt;
         letter-spacing: 1pt;
         text-transform: uppercase;
@@ -254,7 +261,7 @@
     <a href="javascript:void(0)"><img id="overlay-open" src="img/question-mark@2x.png" width="25"></img></a>
 
     <a href="https://www.chromeexperiments.com/" target="ce">
-        <img id="chrome-experiment" src="img/CE_badge@2x.png" width="250"></img>
+        <img id="chrome-experiment" src="img/CE_badge@2x.png"></img>
     </a>
 
     <div id="about-overlay">
