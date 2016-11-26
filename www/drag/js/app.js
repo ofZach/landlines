@@ -1326,8 +1326,8 @@ function animate() {
             blurSprite.width = renderer.view.height * (aspectImage);
         }
 
-        //blurSprite.width *= 1.5;
-        //blurSprite.height *= 1.5
+        blurSprite.width *= 1.05;
+        blurSprite.height *= 1.05
     }
 
 
