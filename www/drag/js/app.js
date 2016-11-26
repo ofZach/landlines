@@ -33,6 +33,8 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
     var g = color[1] * alpha;
     var b = color[2] * alpha;
 
+    var wth = 1.0 / drawScaleAmt;
+    console.log(wth);
     var p1x, p1y, p2x, p2y;
 
     if (myGui.lineShadow === true) {
@@ -51,8 +53,8 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
             var dist = Math.sqrt(dx * dx + dy * dy);
             dx /= dist;
             dy /= dist;
-            dx *= myGui.shadowWidth * Math.pow(alpha2, 2.0);
-            dy *= myGui.shadowWidth * Math.pow(alpha2, 2.0);
+            dx *= myGui.shadowWidth * Math.pow(alpha2, 2.0) * wth;
+            dy *= myGui.shadowWidth * Math.pow(alpha2, 2.0) * wth;
 
             alpha2 *= myGui.shadowAlpha;
             alpha3 *= myGui.shadowAlpha;
@@ -97,8 +99,8 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
         var dist = Math.sqrt(dx * dx + dy * dy);
         dx /= dist;
         dy /= dist;
-        dx *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower);
-        dy *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower);
+        dx *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower) * wth;
+        dy *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower) * wth;
 
         alpha2 *= 1.0;
         alpha3 *= 1.0;
