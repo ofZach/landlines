@@ -606,6 +606,7 @@ var bgAlpha = 0.0;
 var lastFilename;
 var pzVelSmooth = 0.0;
 var drawScaleAmt = 1.0;
+var firstDragEvent = true;
 
 
 var texTest = PIXI.Sprite.fromImage("../img/01-uv-texture.png", true);
@@ -914,10 +915,23 @@ stage.mousemove = stage.touchmove = function(moveData) {
             diffy *= -1;
         }
 
+
+
+        //angleSmooth =
+
         //console.log(moveData.data.global.x + " " + moveData.data.global.y + " " + diffx + " " + diffy);
         velThisFrame = Math.sqrt(diffx * diffx + diffy * diffy);
         lastDiff.x = diffx;
         lastDiff.y = diffy;
+
+
+        if (firstDragEvent) {
+            var angleDiff = Math.atan2(-lastDiff.y, -lastDiff.x);
+            angleSmooth = angleDiff;
+            firstDragEvent = false;
+            myAngle = angleSmooth;
+        }
+
         //console.log(len);
         lastMouseX = moveData.data.global.x;
         lastMouseY = moveData.data.global.y;
@@ -1225,6 +1239,10 @@ function animate() {
 
     }
 
+    if (firstDragEvent) {
+        return;
+    }
+
 
     //console.log("at start loaded " + loadedCache.length );
 
@@ -1252,7 +1270,6 @@ function animate() {
 
     //console.log(velSmooth);
     var angleDiff = Math.atan2(-lastDiff.y, -lastDiff.x);
-
     var diffAngle = angleDiff - angleSmooth;
     while (diffAngle < -Math.PI) diffAngle += (2 * Math.PI);
     while (diffAngle > Math.PI) diffAngle -= (2 * Math.PI);
@@ -1340,9 +1357,33 @@ function animate() {
 
             if (pts.length < 200) {
 
+                //console.log("hi ! ??");
 
-                addLineFromCache(Math.floor(getRandomArbitrary(0, loadedCache.length)));
-                makeLoadedCache();
+                var target = angleSmooth;
+                var angleToFind = target - myAngle;
+                var minDist = 10000000;
+                var minIndex = -1;
+                for (var i = 0; i < loadedCache.length; i++) {
+                    var index = loadedCache[i].index;
+                    var dist = Math.abs(dataobj[index].angleChange - angleToFind);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minIndex = i;
+                    }
+                }
+                if (minIndex != -1 && Math.random() > 0.1) {
+                    addLineFromCache(minIndex);
+                    makeLoadedCache();
+                } else {
+                    addLineFromCache(Math.floor(getRandomArbitrary(0, loadedCache.length)));
+                    makeLoadedCache();
+                }
+
+                //console.log(" bye ! ??");
+
+                // <!-- this is an option -->
+                //addLineFromCache(Math.floor(getRandomArbitrary(0, loadedCache.length)));
+                //makeLoadedCache();
 
             } else {
 
