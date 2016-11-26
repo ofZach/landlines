@@ -34,7 +34,7 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
     var b = color[2] * alpha;
 
     var wth = 1.0 / drawScaleAmt;
-    console.log(wth);
+    //console.log(wth);
     var p1x, p1y, p2x, p2y;
 
     if (myGui.lineShadow === true) {
