@@ -19,7 +19,7 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
 
     if (points.length === 0) return;
 
-    
+
     var verts = webGLData.points;
     //var indices = webGLData.indices;
     var length = points.length / 2;
@@ -725,14 +725,25 @@ function sortByAngle(dataToSortOn) {
 
 function loadBgImage(fileToLoad) {
 
-    console.log("loading " + fileToLoad);
+    //console.log("bg " + iwp[iwp.length - 1].origAngle);
+    //console.log("loading " + fileToLoad);
     bgContainer.removeChild(blurSprite);
     blurSprite.texture.destroy(true);
     blurSprite.destroy();
     blurSprite = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/blur/' + fileToLoad, true);
     bgContainer.addChild(blurSprite);
 
+    var angle = 3.14 + (iwp[iwp.length - 1].curAngle - iwp[iwp.length - 1].origAngle);
+    while (angle < -Math.PI) {
+        angle += 2 * Math.PI;
+    }
+    while (angle > Math.PI) {
+        angle -= 2 * Math.PI;
+    }
+    var newAngle = Math.round(angle / (Math.PI * 0.5)) * (Math.PI * 0.5)
 
+    blurSprite.rotation = newAngle; //3.14 + (iwp[iwp.length - 1].curAngle - iwp[iwp.length - 1].origAngle);
+    //iwp[iwp.length - 1].origAngle;
 }
 
 
@@ -834,16 +845,15 @@ function loadRandomIntoCache(useBins) {
 
 
 
-
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 var firstTouch = true;
 stage.mousedown = stage.touchstart = function(moveData) {
 
-    
+
     if (loadingVisible === true) return;
 
-    
+
     if (bInstructionGifCanFade === true) {
         bInstructionGifCanFade = false;
         fadeOut(document.getElementById('instruction'), 10);
@@ -873,10 +883,10 @@ stage.mouseout = function(moveData) {
 
 stage.mousemove = stage.touchmove = function(moveData) {
 
-    
+
     if (loadingVisible === true) return;
 
-    
+
 
     if (bAmDrawing === true) {
 
@@ -1315,6 +1325,9 @@ function animate() {
             blurSprite.height = renderer.view.height;
             blurSprite.width = renderer.view.height * (aspectImage);
         }
+
+        //blurSprite.width *= 1.5;
+        //blurSprite.height *= 1.5
     }
 
 
@@ -1484,7 +1497,6 @@ function animate() {
             var dist = startPt.getDistance(endPt);
             var scale = dist / iwp[i].origLength;
             iwp[i].curAngle = curAngle;
-
 
             //console.log(i);
             //console.log(iwp[i]);
