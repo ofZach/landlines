@@ -831,6 +831,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         this.shadowWidth = 10;
         this.shadowAlpha = 0.4;
 
+        this.lineSpeedSplit = 10;
+
         this.pulseWidth = 2;
         this.pulseSpeed = 10;
         this.pulseOpacityLow = 0.2;
@@ -851,8 +853,11 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         this.metadata = 0.15;
 
         this.badMatchThreshold = 0.25;
-        this.goodMatchThreshold = 0.1;
-        this.matchBlendMode = false;
+
+        this.numMaxCuts = 5;
+        this.cutThreshold = 0.1;
+        this.cutPct = 0.2;
+        
         this.loadFromCloud = true;
     };
 
@@ -867,6 +872,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         //var shadowToggle = f1.add(myGui, 'lineShadow');
         f1.add(myGui, 'shadowWidth', 0, 100);
         f1.add(myGui, 'shadowAlpha', 0, 1);
+
+        f1.add(myGui, 'lineSpeedSplit', 1, 100);
 
         var f2 = gui.addFolder('pulse');
         f2.add(myGui, 'pulseWidth', 1, 10);
@@ -893,9 +900,12 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         var f4 = gui.addFolder('match');
         f4.add(myGui, 'badMatchThreshold', 0.0, 1.0);
-        f4.add(myGui, 'goodMatchThreshold', 0.0, 1.0);
-        f4.add(myGui, 'matchBlendMode', false);
-
+        
+        f4.add(myGui, 'numMaxCuts', 0, 20);
+        f4.add(myGui, 'cutThreshold', 0.0, 1.0);
+        f4.add(myGui, 'cutPct', 0.0, 1.0);
+        
+        
         // gui.add(myGui, 'loadFromCloud');
         
         gui.remember(myGui);
@@ -1325,48 +1335,59 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
                 }
              }
 
-            pts.push(moveData.data.global.x);
-            pts.push(moveData.data.global.y);
+            // add points
+            var x = moveData.data.global.x;
+            var y = moveData.data.global.y;
+            var lastX = pts[pts.length-2];
+            var lastY = pts[pts.length-1];
+            var diffx = x - lastX;
+            var diffy = y - lastY;
+            var len = Math.sqrt(diffx*diffx + diffy*diffy);
+            if (len < myGui.lineSpeedSplit){
+                pts.push(moveData.data.global.x);
+                pts.push(moveData.data.global.y);
 
-            if (pts.length > 60*2){
-                pts.shift();
-                pts.shift();
-            } 
+                if (pts.length > 60*2){
+                    pts.shift();
+                    pts.shift();
+                } 
+            } else {
+
+                var count = Math.round(len / myGui.lineSpeedSplit);
+                if (count < 1) count = 1;
+                for (var i = 0; i < count; i++){
+                    pts.push( lastX + (i+1) * (diffx / count));
+                    pts.push( lastY + (i+1) * (diffy / count));
+
+                    if (pts.length > 60*2){
+                        pts.shift();
+                        pts.shift();
+                    } 
+                }
+            }
+
+            
 
             updateGraphics = true;
         }
 
     };
 
-    stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
 
-
-        if (moveData.data.identifier !== undefined) {
-            if (touchID !== moveData.data.identifier){
-                return;
-            }
-         }
-             
-        // if we weren't drawing (gui, etc) return;
-         if (bAmDrawing === false){
-            return;
-        }
-
-
-        bAmDrawing = false;
-
-
-
-
+// ---------
+//
+    function getBestMatch(ptsToTest){
+        var obj = {};
+        
         // resample if we need to: 
         var ptsResampled = [];
 
-        if (pts.length != 120){
+        if (ptsToTest.length != 120){
             var xPts = [];
             var yPts = [];
-            for (var i = 0; i < pts.length/2; i++){
-                x = pts[i*2];
-                y = pts[i*2+1];
+            for (var i = 0; i < ptsToTest.length/2; i++){
+                x = ptsToTest[i*2];
+                y = ptsToTest[i*2+1];
                 xPts[i] = x;
                 yPts[i] = y;
             }
@@ -1381,8 +1402,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
                 ptsResampled[i*2+1] = newY;
             }
         } else {
-            for (var i = 0; i < pts.length; i++){
-                ptsResampled.push(pts[i]);
+            for (var i = 0; i < ptsToTest.length; i++){
+                ptsResampled.push(ptsToTest[i]);
             }
         }
 
@@ -1480,26 +1501,79 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         resultsB[0].i = whichOneB;
         resultsB[0].d = minB;
-        
-        console.log("done overwriting original results");
 
-    
         if (resultsB[0].d < resultsA[0].d){
-            results = resultsB;
+            
+            obj.result = resultsB;
+
+            obj.flip = true;
+            //results = resultsB;
             //pts.reverse();
             // reverse pair of two
-            console.log("FLIP");
+            //console.log("FLIP");
             for (j = 0; j < ptsResampled.length/2; j++){
                 ptsResampled[j*2] = ptsTemp2[j][0];
                 ptsResampled[j*2+1] = ptsTemp2[j][1];
             }      
 
         } else {
-            results = resultsA;
+            
+            obj.result = resultsA;
+            obj.flip = false;
+            
         }
 
-        console.log('results:', results[0]);
+        obj.ptsResampled = ptsResampled;
 
+        return obj;
+    }
+
+
+
+
+
+    stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(moveData) {
+
+
+        if (moveData.data.identifier !== undefined) {
+            if (touchID !== moveData.data.identifier){
+                return;
+            }
+         }
+             
+        // if we weren't drawing (gui, etc) return;
+         if (bAmDrawing === false){
+            return;
+        }
+
+
+        bAmDrawing = false;
+
+
+        var match = {} ;  //getBestMatch(pts);
+        
+        var countMatching = 0;
+        var ptsCopy = pts.slice(0);
+        var d = 1.0;
+
+        while (d > myGui.cutThreshold && countMatching < myGui.numMaxCuts){
+            console.log(ptsCopy);
+            match = getBestMatch(ptsCopy);
+            d = match.result[0].d;
+            console.log("attempt " + countMatching + " res "  + d);
+            countMatching++;
+            var len = ptsCopy.length/2;
+            var toDel = Math.round(len *myGui.cutPct);
+            if (len > 5){
+                ptsCopy.splice(0, toDel*2);
+            } else {
+                countMatching = 5;
+            }
+            
+        }
+
+        results = match.result;
+        var ptsResampled = match.ptsResampled;
 
         var ptsScaled = ptsResampled.slice();
         var scaleMe = scale = 250.0 / drawnCircle.r;
@@ -1533,17 +1607,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         if (results[0].d > myGui.badMatchThreshold){
             drawingAlphaTarget = 0.0;                       // fade out weird stuff 
-        } else if (results[0].d < myGui.goodMatchThreshold){
-            drawingAlphaTarget = 1.0;   
-        } else {
-            // bad 0.25
-            // good 0.05
-            var diff = myGui.badMatchThreshold - myGui.goodMatchThreshold;
-            var pctThrough = (results[0].d - myGui.goodMatchThreshold) / diff;
-            drawingAlphaTarget = 1.0 - pctThrough;
-        }
-        console.log(drawingAlphaTarget + " line alpha");
-
+        } 
         // Pull ID from info obj, which actually stores IDs starting from 0
         var id = infoobj[results[0].i][0];
         console.log("loading metadata for id " + id);
@@ -1988,21 +2052,13 @@ var counter = 0;
         renderTexture.render(drawing);
         offscreen.alpha = drawingAlpha * pulseOpacity;
 
-     //    if (myGui !== undefined ){
-
-     //    if ( true) {
-     //        //console.log("hi");
-     //        if (drawingAlpha < 0.95){
-
-     //         offscreen.blendMode = PIXI.BLEND_MODES.ADD;
-     //     } else {
-     //         offscreen.blendMode = PIXI.BLEND_MODES.NORMAL;
-     //     }
-     // } else {
-     //    offscreen.blendMode = PIXI.BLEND_MODES.NORMAL;
-     // }
-        
-     //    }
+       
+        if (drawingAlpha < 0.95){
+             offscreen.blendMode = PIXI.BLEND_MODES.ADD;
+        } else {
+            offscreen.blendMode = PIXI.BLEND_MODES.NORMAL;
+        }
+   
         
        
 
