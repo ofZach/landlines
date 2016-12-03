@@ -859,6 +859,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         this.cutPct = 0.2;
         
         this.loadFromCloud = true;
+
+        this.imageResolution = 2;
     };
 
     window.onload = function() {
@@ -906,6 +908,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         f4.add(myGui, 'cutPct', 0.0, 1.0);
         
         
+        var f5 = gui.addFolder('resolution');
+        f5.add(myGui, 'imageResolution', 0, 2).step(1);
         // gui.add(myGui, 'loadFromCloud');
         
         gui.remember(myGui);
@@ -1126,6 +1130,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
     var updateGraphics = false;
     var sprites = [];
     var backgroundImages = [];
+    var resolutionScale = 1.0;
+
 
     // Create the Renderer
     function getDimensions() {
@@ -1633,16 +1639,41 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         var random = Math.floor(Math.random()*1000);
 
         // Create a new Texture and Sprite from the matched image
-        if (myGui.loadFromCloud)
-            var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/';
-        else
-            var url = '/';
+        var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+        
+        if (myGui.imageResolution === 0){
+             if (myGui.loadFromCloud)
+                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/';
+             else
+                    url = '/';  
+
+            resolutionScale = 1800 / 900; 
+        } else if (myGui.imageResolution === 1){
+            //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/3.jpg
+             if (myGui.loadFromCloud)
+                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/';
+             else
+                    url = '/';  
+
+            resolutionScale = 1800 / 1260; 
+        } else {
+            if (myGui.loadFromCloud)
+                url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+            else
+                url = '/';  
+
+            resolutionScale = 1.0; 
+        }
+
+
+//http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
+       
         
         PIXI.loader.reset();
 
         console.log("loading num : "  + infoobj[results[0].i][0]);
 
-        var texture = PIXI.Texture.fromImage(url + 'full/' + infoobj[results[0].i][0] + '.jpg');
+        var texture = PIXI.Texture.fromImage(url + '' + infoobj[results[0].i][0] + '.jpg');
         var sprite = new PIXI.Sprite(texture);
         sprite.alpha = 0;
 
@@ -1666,6 +1697,10 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         sprite.rotation = angleMatch;
         sprite.scale.x = drawnCircle.r / infoobj[results[0].i][3];
         sprite.scale.y = drawnCircle.r / infoobj[results[0].i][3];
+
+        sprite.scale.x *= resolutionScale;
+        sprite.scale.y *= resolutionScale;
+
 
         xPosOrig = infoobj[results[0].i][1];
         yPosOrig = infoobj[results[0].i][2];
@@ -1886,14 +1921,14 @@ var counter = 0;
                 ///var targetR = renderer.view.height * myGui.scaleSize;
                 if (sprites.length > 0){
                     var goToScale = sprites[sprites.length - 1].originalScale * (targetR / drawnCircle.r);
-                    if (goToScale > myGui.maxImageScale){
+                    if (goToScale > myGui.maxImageScale*resolutionScale){
                          
                          // 1.0 = A * (B / C); // solve for B
                          // 1.0/A = (B/C);
                          // B = (1.0/A) * C;
                          // omg algebra
 
-                         targetR = (myGui.maxImageScale / sprites[sprites.length - 1].originalScale) * drawnCircle.r;
+                         targetR = (myGui.maxImageScale*resolutionScale / sprites[sprites.length - 1].originalScale) * drawnCircle.r;
                     }
                 }
                 
