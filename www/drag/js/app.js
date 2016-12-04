@@ -356,7 +356,7 @@
             this.explode = function() {;
             };
 
-            this.imageResolution = 0;
+            this.imageResolution = 1;
             this.resScale = 1.0;
 
             this.bTint = true;
