@@ -356,7 +356,8 @@
             this.explode = function() {;
             };
 
-            this.imageResolution = 1;
+            this.imageResolution = 0;
+            this.resScale = 1.0;
 
             this.bTint = true;
             this.tintAmount = 0.8;
@@ -458,6 +459,8 @@
             var f4 = gui.addFolder('resolution');
             f4.add(myGui, 'imageResolution', 0, 1).step(1);
 
+            f4.add(myGui, 'resScale', 0, 10);
+
 
 
             gui.remember(myGui);
@@ -488,6 +491,7 @@
             this.curAngle = 0;
             this.midAngle = 0;
             this.midDistance = 0;
+            this.lineScale = 1.0;
 
         }
 
@@ -1004,6 +1008,8 @@
             imageWithPtsTemp.midAngle = Math.atan2(diffy, diffx);
             imageWithPtsTemp.midDistance = Math.sqrt(diffx * diffx + diffy * diffy);
 
+            imageWithPtsTemp.lineScale = len / 2876.0;
+
             //console.log("sprite " + lineToAddFromCache + " width "  + imageWithPtsTemp.sprite1.width);
 
 
@@ -1448,8 +1454,6 @@
 
                     var scale = myGui.scale * (1 - velStopEnergy) * (1.0 / drawScaleAmt) + myGui.maxZoom * velStopEnergy * (1.0 / drawScaleAmt);
 
-
-
                     var startPt = new Point(pts[iwp[i].startIndex].x - smoothPt.x, pts[iwp[i].startIndex].y - smoothPt.y).clone().rotate((0) * (180.0 / Math.PI)).multiplyNum(scale).addX(renderer.view.width * 0.5).addY(renderer.view.height * 0.5);
                     var endPt = new Point(pts[iwp[i].endIndex].x - smoothPt.x, pts[iwp[i].endIndex].y - smoothPt.y).clone().rotate((0) * (180.0 / Math.PI)).multiplyNum(scale).addX(renderer.view.width * 0.5).addY(renderer.view.height * 0.5);
                     var curAngle = Math.atan2(endPt.y - startPt.y, endPt.x - startPt.x);
@@ -1472,9 +1476,22 @@
                     // iwp[i].sprite1.position.x = i * 25; //startPt.x;
                     // iwp[i].sprite1.position.y = 400; //startPt.y;
 
+                    if (resolutionScaleFactor > 0.9) {
+                        iwp[i].sprite1.scale.x = scale * 4.0;
+                        iwp[i].sprite1.scale.y = scale * 4.0;
+                    } else {
+                        iwp[i].sprite1.scale.x = scale * 5.333;
+                        iwp[i].sprite1.scale.y = scale * 5.333;
+                    }
 
-                    iwp[i].sprite1.scale.x = scale * 4.0 * (1.0 / resolutionScaleFactor);
-                    iwp[i].sprite1.scale.y = scale * 4.0 * (1.0 / resolutionScaleFactor);
+                    //(1.0 / resolutionScaleFactor);
+
+                    // if (resolutionScaleFactor != 1.0) {
+                    //     iwp[i].sprite1.scale.x *= myGui.resScale * (1.0 / iwp[i].lineScale);
+                    //     iwp[i].sprite1.scale.y *= myGui.resScale * (1.0 / iwp[i].lineScale);
+
+                    // }
+
 
                     iwp[i].sprite1.rotation = 3.14 + (curAngle - iwp[i].origAngle);
                     iwp[i].sprite1.position.x = startPt.x;
