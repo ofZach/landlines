@@ -356,6 +356,7 @@
             this.explode = function() {;
             };
 
+            this.imageResolution = 1;
 
             this.bTint = true;
             this.tintAmount = 0.8;
@@ -454,6 +455,9 @@
             f3.add(myGui, 'bTint');
             f3.add(myGui, 'tintAmount', 0, 1);
 
+            var f4 = gui.addFolder('resolution');
+            f4.add(myGui, 'imageResolution', 0, 1).step(1);
+
 
 
             gui.remember(myGui);
@@ -529,6 +533,7 @@
         var velStopEnergy = 0;
 
         var nBins = 10;
+        var resolutionScaleFactor = 1.0;
         //var noChange = [];
 
 
@@ -798,8 +803,20 @@
             //console.log('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
             //imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
             //imageWithPtsTemp.sprite1 = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/imgsQuarterRes/' + dataobj[goodOne]['fileName'], true);
-            imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
-            iwpCache.push(imageWithPtsTemp);
+
+            //http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/1147.jpg
+
+
+            if (myGui.imageResolution == 0) {
+                imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/' + dataobj[goodOne]['fileName']);
+                iwpCache.push(imageWithPtsTemp);
+                resolutionScaleFactor = 0.75;
+            } else {
+                imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+                iwpCache.push(imageWithPtsTemp);
+                resolutionScaleFactor = 1.0;
+            }
+
             ///100069.jpg
 
             //imageWithPtsTemp.sprite1 = new PIXI.Sprite(imageWithPtsTemp.texture );
@@ -1456,8 +1473,8 @@
                     // iwp[i].sprite1.position.y = 400; //startPt.y;
 
 
-                    iwp[i].sprite1.scale.x = scale * 4.0;
-                    iwp[i].sprite1.scale.y = scale * 4.0;
+                    iwp[i].sprite1.scale.x = scale * 4.0 * (1.0 / resolutionScaleFactor);
+                    iwp[i].sprite1.scale.y = scale * 4.0 * (1.0 / resolutionScaleFactor);
 
                     iwp[i].sprite1.rotation = 3.14 + (curAngle - iwp[i].origAngle);
                     iwp[i].sprite1.position.x = startPt.x;
