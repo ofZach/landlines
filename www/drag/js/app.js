@@ -694,7 +694,12 @@
             bgContainer.removeChild(blurSprite);
             blurSprite.texture.destroy(true);
             blurSprite.destroy();
-            blurSprite = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/blur/' + fileToLoad, true);
+
+            //http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/1423.jpg
+            blurSprite = PIXI.Sprite.fromImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/' + fileToLoad, true);
+
+            //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+
             bgContainer.addChild(blurSprite);
 
             var angle = 3.14 + (iwp[iwp.length - 1].curAngle - iwp[iwp.length - 1].origAngle);
@@ -793,7 +798,7 @@
             //console.log('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
             //imageWithPtsTemp.texture = PIXI.Texture.fromImage('imgsQuarterRes/' + dataobj[goodOne]['fileName']);
             //imageWithPtsTemp.sprite1 = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/imgsQuarterRes/' + dataobj[goodOne]['fileName'], true);
-            imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v1/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+            imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
             iwpCache.push(imageWithPtsTemp);
             ///100069.jpg
 

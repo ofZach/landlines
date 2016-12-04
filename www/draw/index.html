@@ -1722,7 +1722,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         // Update background image
         PIXI.loader.reset();
-        url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v2/';
+        //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+        url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
         var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
