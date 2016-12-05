@@ -725,10 +725,10 @@ function loadBgImage(fileToLoad) {
     blurSprite.texture.destroy(true);
     blurSprite.destroy();
 
-    //http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/1423.jpg
-    blurSprite = PIXI.Sprite.fromImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/' + fileToLoad, true);
+    //https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/1423.jpg
+    blurSprite = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/' + fileToLoad, true);
 
-    //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+    //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
 
     bgContainer.addChild(blurSprite);
 
@@ -833,11 +833,11 @@ function loadRandomIntoCache(useBins) {
 
 
     if (isMobile) {
-        imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/' + dataobj[goodOne]['fileName']);
+        imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/' + dataobj[goodOne]['fileName']);
         iwpCache.push(imageWithPtsTemp);
         //resolutionScaleFactor = 0.75;
     } else {
-        imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+        imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
         iwpCache.push(imageWithPtsTemp);
         //resolutionScaleFactor = 1.0;
     }

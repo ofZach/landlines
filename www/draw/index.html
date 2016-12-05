@@ -1652,20 +1652,20 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         var random = Math.floor(Math.random()*1000);
 
         // Create a new Texture and Sprite from the matched image
-        var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+        var url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
         
         if (isMobile){
              if (myGui.loadFromCloud)
-                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/';
+                    url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/';
              else
                     url = '/';  
 
             resolutionScale = 1800 / 900; 
         } else {
             /*else if (myGui.imageResolution === 1){ */
-            //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/3.jpg
+            //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/3.jpg
              if (myGui.loadFromCloud)
-                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/';
+                    url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/';
              else
                     url = '/';  
 
@@ -1674,7 +1674,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         /*else {
             if (myGui.loadFromCloud)
-                url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+                url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
             else
                 url = '/';  
 
@@ -1682,7 +1682,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         }*/
 
 
-//http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
+//https://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
        
         
         PIXI.loader.reset();
@@ -1738,8 +1738,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         // Update background image
         PIXI.loader.reset();
-        //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
-        url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
+        //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+        url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
         var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
