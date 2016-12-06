@@ -834,8 +834,6 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
       }
     };
         
-        
-    var myGui;
     var Gui = function() {
         this.lineColor = 0xe8f700;
         this.lineOpacity = 0.75;
@@ -875,59 +873,64 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
        // this.imageResolution = 2;
     };
+    var myGui = new Gui();
+
+    var isDevMode = (window.location.hash.indexOf('dev') == -1) ? false : true;
 
     window.onload = function() {
-        myGui = new Gui();
 
-        var gui = new dat.GUI();
-        var f1 = gui.addFolder('line');
-        f1.addColor(myGui, 'lineColor');
-        f1.add(myGui, 'lineOpacity', 0, 1);
-        f1.add(myGui, 'lineWidth', 1, 10);
-        //var shadowToggle = f1.add(myGui, 'lineShadow');
-        f1.add(myGui, 'shadowWidth', 0, 100);
-        f1.add(myGui, 'shadowAlpha', 0, 1);
+        if (isDevMode) {
+            var gui = new dat.GUI();
+            var f1 = gui.addFolder('line');
+            f1.addColor(myGui, 'lineColor');
+            f1.add(myGui, 'lineOpacity', 0, 1);
+            f1.add(myGui, 'lineWidth', 1, 10);
+            //var shadowToggle = f1.add(myGui, 'lineShadow');
+            f1.add(myGui, 'shadowWidth', 0, 100);
+            f1.add(myGui, 'shadowAlpha', 0, 1);
 
-        f1.add(myGui, 'lineSpeedSplit', 1, 100);
+            f1.add(myGui, 'lineSpeedSplit', 1, 100);
 
-        var f2 = gui.addFolder('pulse');
-        f2.add(myGui, 'pulseWidth', 1, 10);
-        f2.add(myGui, 'pulseOpacityLow', 0, 1);
-        f2.add(myGui, 'pulseOpacityHigh', 0, 1);
-        f2.add(myGui, 'pulseSpeed', 1, 20);
-        f2.add(myGui, 'pulseWaitTime', 0, 3);
+            var f2 = gui.addFolder('pulse');
+            f2.add(myGui, 'pulseWidth', 1, 10);
+            f2.add(myGui, 'pulseOpacityLow', 0, 1);
+            f2.add(myGui, 'pulseOpacityHigh', 0, 1);
+            f2.add(myGui, 'pulseSpeed', 1, 20);
+            f2.add(myGui, 'pulseWaitTime', 0, 3);
 
-        var f3 = gui.addFolder('scale/translate');
-        f3.add(myGui, 'scaleSize', 0.2, 0.5);
-        f3.add(myGui, 'scaleSpeed', 0, 0.5);
-        f3.add(myGui, 'translateSpeed', 0, 0.5);
-        f3.add(myGui, 'showEnclosingCircle');
-        f3.add(myGui, 'maxImageScale', 0.01, 4.01);
-        
-        var f4 = gui.addFolder('fade');
-        f4.add(myGui, 'imgFadeInSpeed', 0, 0.2);
-        f4.add(myGui, 'imgFadeOutSpeed', 0, 0.2);
-        f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
-        f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
-        f4.add(myGui, 'bgOpacity', 0, 1);
-        f4.add(myGui, 'metadata', 0, 1);
+            var f3 = gui.addFolder('scale/translate');
+            f3.add(myGui, 'scaleSize', 0.2, 0.5);
+            f3.add(myGui, 'scaleSpeed', 0, 0.5);
+            f3.add(myGui, 'translateSpeed', 0, 0.5);
+            f3.add(myGui, 'showEnclosingCircle');
+            f3.add(myGui, 'maxImageScale', 0.01, 4.01);
+            
+            var f4 = gui.addFolder('fade');
+            f4.add(myGui, 'imgFadeInSpeed', 0, 0.2);
+            f4.add(myGui, 'imgFadeOutSpeed', 0, 0.2);
+            f4.add(myGui, 'bgFadeInSpeed', 0, 0.2);
+            f4.add(myGui, 'bgFadeOutSpeed', 0, 0.2);
+            f4.add(myGui, 'bgOpacity', 0, 1);
+            f4.add(myGui, 'metadata', 0, 1);
 
 
-        var f4 = gui.addFolder('match');
-        f4.add(myGui, 'badMatchThreshold', 0.0, 1.0);
-        
-        f4.add(myGui, 'numMaxCuts', 1, 20);
-        f4.add(myGui, 'cutThreshold', 0.0, 1.0);
-        f4.add(myGui, 'cutPct', 0.0, 1.0);
-        
-        
-        //var f5 = gui.addFolder('resolution');
-        //f5.add(myGui, 'imageResolution', 0, 2).step(1);
-        // gui.add(myGui, 'loadFromCloud');
-        
-        gui.remember(myGui);
+            var f4 = gui.addFolder('match');
+            f4.add(myGui, 'badMatchThreshold', 0.0, 1.0);
+            
+            f4.add(myGui, 'numMaxCuts', 1, 20);
+            f4.add(myGui, 'cutThreshold', 0.0, 1.0);
+            f4.add(myGui, 'cutPct', 0.0, 1.0);
+            
+            
+            //var f5 = gui.addFolder('resolution');
+            //f5.add(myGui, 'imageResolution', 0, 2).step(1);
+            // gui.add(myGui, 'loadFromCloud');
+            
+            gui.remember(myGui);
 
-        //shadowToggle.onFinishChange(updateLineShadow);
+            //shadowToggle.onFinishChange(updateLineShadow);
+        }
+
     };
 
 
@@ -1655,20 +1658,20 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         var random = Math.floor(Math.random()*1000);
 
         // Create a new Texture and Sprite from the matched image
-        var url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+        var url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
         
         if (isMobile){
              if (myGui.loadFromCloud)
-                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/';
+                    url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/';
              else
                     url = '/';  
 
             resolutionScale = 1800 / 900; 
         } else {
             /*else if (myGui.imageResolution === 1){ */
-            //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/3.jpg
+            //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/3.jpg
              if (myGui.loadFromCloud)
-                    url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/';
+                    url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/1260/';
              else
                     url = '/';  
 
@@ -1677,7 +1680,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         /*else {
             if (myGui.loadFromCloud)
-                url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
+                url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
             else
                 url = '/';  
 
@@ -1685,7 +1688,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         }*/
 
 
-//http://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
+//https://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
        
         
         PIXI.loader.reset();
@@ -1741,8 +1744,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         // Update background image
         PIXI.loader.reset();
-        //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
-        url = 'http://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
+        //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+        url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
         var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
         bg.alpha = 0;
         // TODO Properly scale the background image to cover the background while maintaing
@@ -1778,16 +1781,21 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
     }; 
 
 
-var stats = new Stats();
-stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
+if (isDevMode) {
+    var stats = new Stats();
+    stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( stats.dom );
+}
 
 var counter = 0;
     //------------------------------------------------------------------------------------------------
 
     animate();
     //requestAnimationFrame(animate);
- stats.begin();
+    
+    if (isDevMode) {
+        stats.begin();
+    }
     //console.log(sprite1.texture);
 
     var timef = 0;
@@ -2119,7 +2127,9 @@ var counter = 0;
 
         renderer.render(stage);
 
-        stats.end();
+        if (isDevMode) {
+            stats.end();
+        }
 
         requestAnimationFrame( animate );
 

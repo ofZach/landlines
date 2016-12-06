@@ -372,7 +372,9 @@ var Gui = function() {
     this.tintAmount = 0.8;
 
 };
+var myGui = new Gui();
 
+var isDevMode = (window.location.hash.indexOf('dev') == -1) ? false : true;
 
 var guiSettings = {
     "preset": "Default",
@@ -432,49 +434,50 @@ var guiSettings = {
 };
 
 
-var myGui;
 
 window.onload = function() {
-    myGui = new Gui();
-    var gui = new dat.GUI({
-        load: guiSettings
-    });
+
+    if (isDevMode) {
+        var gui = new dat.GUI({
+            load: guiSettings
+        });
 
 
-    var f1 = gui.addFolder('line');
+        var f1 = gui.addFolder('line');
 
-    f1.addColor(myGui, 'lineColor');
-    f1.add(myGui, 'lineOpacity', 0, 1);
-    f1.add(myGui, 'lineWidth', 1, 10);
-    f1.add(myGui, 'lineFadePower', 0.9, 10.0);
-    f1.add(myGui, 'lineShadow');
-    f1.add(myGui, 'shadowWidth', 0, 100);
-    f1.add(myGui, 'shadowAlpha', 0, 1);
+        f1.addColor(myGui, 'lineColor');
+        f1.add(myGui, 'lineOpacity', 0, 1);
+        f1.add(myGui, 'lineWidth', 1, 10);
+        f1.add(myGui, 'lineFadePower', 0.9, 10.0);
+        f1.add(myGui, 'lineShadow');
+        f1.add(myGui, 'shadowWidth', 0, 100);
+        f1.add(myGui, 'shadowAlpha', 0, 1);
 
-    var f2 = gui.addFolder('animation');
-    f2.add(myGui, 'dragSpeed', 0.1, 5);
-    f2.add(myGui, 'velSmoothRate', 0.0, 1.0);
-    f2.add(myGui, 'angleSmoothRate', 0.0, 1.0);
-    f2.add(myGui, 'scale', 0.0, 10.0);
-    f2.add(myGui, 'centerSmoothRate', 0.0, 1.0);
-    f2.add(myGui, 'maxZoom', 0.0, 4.0);
-    f2.add(myGui, 'variableSizes');
-    f2.add(myGui, 'reverseSwipe');
+        var f2 = gui.addFolder('animation');
+        f2.add(myGui, 'dragSpeed', 0.1, 5);
+        f2.add(myGui, 'velSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'angleSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'scale', 0.0, 10.0);
+        f2.add(myGui, 'centerSmoothRate', 0.0, 1.0);
+        f2.add(myGui, 'maxZoom', 0.0, 4.0);
+        f2.add(myGui, 'variableSizes');
+        f2.add(myGui, 'reverseSwipe');
 
-    var f3 = gui.addFolder('shading');
-    f3.add(myGui, 'bTint');
-    f3.add(myGui, 'tintAmount', 0, 1);
+        var f3 = gui.addFolder('shading');
+        f3.add(myGui, 'bTint');
+        f3.add(myGui, 'tintAmount', 0, 1);
 
-    // var f4 = gui.addFolder('resolution');
-    // f4.add(myGui, 'imageResolution', 0, 1).step(1);
+        // var f4 = gui.addFolder('resolution');
+        // f4.add(myGui, 'imageResolution', 0, 1).step(1);
 
-    // f4.add(myGui, 'resScale', 0, 10);
+        // f4.add(myGui, 'resScale', 0, 10);
 
 
 
-    gui.remember(myGui);
+        gui.remember(myGui);
 
-    gui.close();
+        gui.close();
+    }
 
     //shadowToggle.onFinishChange(updateLineShadow);
 };
@@ -725,10 +728,10 @@ function loadBgImage(fileToLoad) {
     blurSprite.texture.destroy(true);
     blurSprite.destroy();
 
-    //http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/1423.jpg
-    blurSprite = PIXI.Sprite.fromImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/' + fileToLoad, true);
+    //https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/1423.jpg
+    blurSprite = PIXI.Sprite.fromImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/blur/' + fileToLoad, true);
 
-    //http://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
+    //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/blurredImages/2.jpg
 
     bgContainer.addChild(blurSprite);
 
@@ -833,11 +836,11 @@ function loadRandomIntoCache(useBins) {
 
 
     if (isMobile) {
-        imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/' + dataobj[goodOne]['fileName']);
+        imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes75/' + dataobj[goodOne]['fileName']);
         iwpCache.push(imageWithPtsTemp);
         //resolutionScaleFactor = 0.75;
     } else {
-        imageWithPtsTemp.loadImage('http://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
+        imageWithPtsTemp.loadImage('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/imgsQuarterRes/' + dataobj[goodOne]['fileName']);
         iwpCache.push(imageWithPtsTemp);
         //resolutionScaleFactor = 1.0;
     }

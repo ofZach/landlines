@@ -296,7 +296,6 @@
     var activeApp = '';
 
     var gui;
-    var myGui;
     var animatingElements = [];
 
     var Gui = function() {
@@ -307,20 +306,28 @@
         this.accelGammaDiv = 5;
         this.accelBetaDiv = 3;
     };
+    var myGui = new Gui();
+
+    // if user has #dev has, enable dev mode
+    var isDevMode = (window.location.hash.indexOf('dev') == -1) ? false : true;
 
     window.onload = function() {
-        myGui = new Gui();
-        gui = new dat.GUI();
         
-        var bgSlider = gui.add(myGui, 'bgOverlay', 0, 1);
-        var motionSmoothSlider = gui.add(myGui, 'motionSmooth', 0, 1);
-        var mouseXScaleSlider = gui.add(myGui, 'mouseXScale', 0, 100);
-        var mouseYScaleSlider = gui.add(myGui, 'mouseYScale', 0, 100);
+        if (isDevMode) {
 
-        var accelGammaDivSlider = gui.add(myGui, 'accelGammaDiv', 0.01, 10.0);
-        var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
+            gui = new dat.GUI();
+            
+            var bgSlider = gui.add(myGui, 'bgOverlay', 0, 1);
+            var motionSmoothSlider = gui.add(myGui, 'motionSmooth', 0, 1);
+            var mouseXScaleSlider = gui.add(myGui, 'mouseXScale', 0, 100);
+            var mouseYScaleSlider = gui.add(myGui, 'mouseYScale', 0, 100);
+
+            var accelGammaDivSlider = gui.add(myGui, 'accelGammaDiv', 0.01, 10.0);
+            var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
+       
+            bgSlider.onChange(updateBgOpacity);
+        }
         
-        bgSlider.onChange(updateBgOpacity);
         window.requestAnimationFrame(animate);
 
     };
@@ -440,7 +447,7 @@
         hide(swipe);
         show(draw);
         swipe.src = '';
-        setTimeout(function(){ draw.src = '/draw'; }, 250);
+        setTimeout(function(){ draw.src = '/draw' + window.location.hash; }, 250);
 
         draw.onload = function() {
             draw.style.visibility = 'visible';
@@ -463,7 +470,7 @@
         hide(draw);
         show(swipe);
         draw.src = '';
-        setTimeout(function(){ swipe.src = '/drag'; }, 250);
+        setTimeout(function(){ swipe.src = '/drag' + window.location.hash; }, 250);
 
         draw.onload = function() {
             swipe.style.visibility = 'visible';
