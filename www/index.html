@@ -51,6 +51,13 @@
         margin-top: 0;
         margin-bottom: 5px;
     }
+
+    #error {
+        font-size: 20pt;
+        font-weight: 700;
+    }
+
+
     #desc {
         margin-top: 0;
         margin-bottom: 50px;
@@ -239,6 +246,8 @@
             <p id="desc">Start with a line, let the planet complete the picture.</p>
             <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
             <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
+            <p id="video"></p>
+            <p id="error"></p>
         </div>
 
     </div>
@@ -311,6 +320,9 @@
     // if user has #dev has, enable dev mode
     var isDevMode = (window.location.hash.indexOf('dev') == -1) ? false : true;
 
+    // if url had #webglError, let's change the display
+    var isWebglErrorMode = (window.location.hash.indexOf('webglError') == -1) ? false : true;
+
     window.onload = function() {
         
         if (isDevMode) {
@@ -326,6 +338,18 @@
             var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
        
             bgSlider.onChange(updateBgOpacity);
+        }
+
+        if (isWebglErrorMode){
+            document.getElementById('button-draw').style.display = 'none';
+            document.getElementById('button-swipe').style.display = 'none';
+
+            document.getElementById('video').innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/cufd7XnG4A8" frameborder="0" allowfullscreen></iframe>';
+
+            document.getElementById('error').innerHTML = 'Sorry this experience requires WebGL.<br>Please try again using <a href="https://www.google.com/chrome/">Google Chrome</a>';
+
+
+
         }
         
         window.requestAnimationFrame(animate);
