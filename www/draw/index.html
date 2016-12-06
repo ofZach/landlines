@@ -1190,6 +1190,9 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 
         // offscreen.destroy();
         renderTexture.resize(w,h, true);
+
+         stage.hitArea = new PIXI.Rectangle(0, 0, w,h);
+
         // offscreen = new PIXI.Sprite(renderTexture);
 
     }
