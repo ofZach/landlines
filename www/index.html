@@ -53,8 +53,31 @@
     }
 
     #error {
-        font-size: 20pt;
-        font-weight: 700;
+        font-size: 12pt;
+        color: #E22;
+        background-color: #000;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-top: -28px;
+        display:none;
+    }
+    #error a {
+        color: #E22;
+        text-decoration: underline;
+    }
+    #video_container {
+        width: 100%;
+        position: relative;
+        display:none;
+    }
+    #video {
+        margin-left: 50%;
+        left: -240px;
+        position: relative;
+        width: 480px;
     }
 
 
@@ -83,6 +106,7 @@
         margin: 0 auto;
         padding-top: 10px;
         margin-bottom: 10px;
+        visibility:hidden;
     }
     .app-button:last-child {
         margin-bottom: 50px;
@@ -246,8 +270,8 @@
             <p id="desc">Start with a line, let the planet complete the picture.</p>
             <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
             <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
-            <p id="video"></p>
             <p id="error"></p>
+            <div id="video_container"><div id="video"></div></div>
         </div>
 
     </div>
@@ -323,6 +347,16 @@
     // if url had #webglError, let's change the display
     var isWebglErrorMode = (window.location.hash.indexOf('webglError') == -1) ? false : true;
 
+    // Do check to see if WebGL is supported
+    var canvas = document.createElement("canvas");
+    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    // Report the result.
+    if (gl && gl instanceof WebGLRenderingContext) {;
+    } else {
+        isWebglErrorMode = false;
+    }
+
+
     window.onload = function() {
         
         if (isDevMode) {
@@ -338,18 +372,22 @@
             var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
        
             bgSlider.onChange(updateBgOpacity);
+
         }
 
         if (isWebglErrorMode){
             document.getElementById('button-draw').style.display = 'none';
             document.getElementById('button-swipe').style.display = 'none';
 
-            document.getElementById('video').innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/cufd7XnG4A8" frameborder="0" allowfullscreen></iframe>';
+            document.getElementById('video').innerHTML = '<iframe width="480" height="270" src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>';
 
             document.getElementById('error').innerHTML = 'Sorry this experience requires WebGL.<br>Please try again using <a href="https://www.google.com/chrome/">Google Chrome</a>';
 
-
-
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('video_container').style.display = 'block';
+        } else {
+            document.getElementById('button-draw').style.visibility = 'visible';
+            document.getElementById('button-swipe').style.visibility = 'visible';
         }
         
         window.requestAnimationFrame(animate);
