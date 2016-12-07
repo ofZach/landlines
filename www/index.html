@@ -484,6 +484,7 @@
     }
 
     function showAboutOverlay() {
+        ga('send', 'event', 'About', 'about', '');
         show(document.getElementById('about-overlay'));
         document.getElementById('overlay-close').style.display = 'block';
     }
