@@ -236,7 +236,7 @@
         padding-top: 10px;
     }
 
-    #draw-container, #swipe-container {
+    #draw-container, #drag-container {
         display: none;
         visibility: hidden;
         position: absolute;
@@ -269,7 +269,7 @@
             <p id="header">Land Lines</p>
             <p id="desc">Start with a line, let the planet complete the picture.</p>
             <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
-            <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
+            <a class="app-button" href="javascript:void(0)" id="button-drag">Drag</a>
             <p id="error"></p>
             <div id="video_container"><div id="video"></div></div>
         </div>
@@ -277,13 +277,13 @@
     </div>
 
     <iframe id="draw-container"></iframe>
-    <iframe id="swipe-container"></iframe>
+    <iframe id="drag-container"></iframe>
 
     <!-- <div id="gradient-top"></div>
     <div id="gradient-bottom"></div> -->
 
     <div id="nav">
-        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
+        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-drag">Drag</a>
     </div>
 
     <div id="privacy-terms">
@@ -391,7 +391,7 @@
 
         if (isWebglErrorMode){
             document.getElementById('button-draw').style.display = 'none';
-            document.getElementById('button-swipe').style.display = 'none';
+            document.getElementById('button-drag').style.display = 'none';
 
             document.getElementById('video').innerHTML = '<iframe width="480" height="270" src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>';
 
@@ -401,7 +401,7 @@
             document.getElementById('video_container').style.display = 'block';
         } else {
             document.getElementById('button-draw').style.visibility = 'visible';
-            document.getElementById('button-swipe').style.visibility = 'visible';
+            document.getElementById('button-drag').style.visibility = 'visible';
         }
         
         window.requestAnimationFrame(animate);
@@ -519,11 +519,11 @@
         loadApp();
 
         var draw = document.getElementById('draw-container');
-        var swipe = document.getElementById('swipe-container');
+        var drag = document.getElementById('drag-container');
         
-        hide(swipe);
+        hide(drag);
         show(draw);
-        swipe.src = '';
+        drag.src = '';
         setTimeout(function(){ draw.src = '/draw' + window.location.hash; }, 250);
 
         draw.onload = function() {
@@ -531,30 +531,30 @@
         }
 
         document.getElementById('nav-draw').className = 'active';
-        document.getElementById('nav-swipe').className = 'inactive';
+        document.getElementById('nav-drag').className = 'inactive';
     }
 
-    function loadAppSwipe() {
+    function loadAppDrag() {
         // Skip if this app is already active
-        if (activeApp == 'swipe') return;
-        activeApp = 'swipe';
+        if (activeApp == 'drag') return;
+        activeApp = 'drag';
 
         loadApp();
         
         var draw = document.getElementById('draw-container');
-        var swipe = document.getElementById('swipe-container');
+        var drag = document.getElementById('drag-container');
         
         hide(draw);
-        show(swipe);
+        show(drag);
         draw.src = '';
-        setTimeout(function(){ swipe.src = '/drag' + window.location.hash; }, 250);
+        setTimeout(function(){ drag.src = '/drag' + window.location.hash; }, 250);
 
         draw.onload = function() {
-            swipe.style.visibility = 'visible';
+            drag.style.visibility = 'visible';
         }
 
         document.getElementById('nav-draw').className = 'inactive';
-        document.getElementById('nav-swipe').className = 'active';
+        document.getElementById('nav-drag').className = 'active';
     }
 
     // Layout / background image stuff
@@ -647,9 +647,9 @@
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
 
     document.getElementById('button-draw').onclick = loadAppDraw;
-    document.getElementById('button-swipe').onclick = loadAppSwipe;
+    document.getElementById('button-drag').onclick = loadAppDrag;
     document.getElementById('nav-draw').onclick = loadAppDraw;
-    document.getElementById('nav-swipe').onclick = loadAppSwipe;
+    document.getElementById('nav-drag').onclick = loadAppDrag;
 
     // document.getElementById('app').onmousemove = updateBackgroundMouse;
     document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
