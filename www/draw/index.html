@@ -332,6 +332,7 @@ PIXI.GraphicsRenderer.prototype.buildLine = function(graphicsData, webGLData) {
     }
 };
 
+
 PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLData) {
 
     var i = 0;
@@ -457,7 +458,9 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
     }
 
 
+
     for (i = 1; i < length; i++) {
+
 
         var alpha2 = 1.0; //(i - 1) / length;
         var alpha3 = 1.0; //i / length;

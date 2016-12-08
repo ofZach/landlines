@@ -126,8 +126,13 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
         dx *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower) * wth;
         dy *= myGui.lineWidth * Math.pow(alpha2, myGui.lineFadePower) * wth;
 
-        alpha2 *= 1.0;
-        alpha3 *= 1.0;
+        if (myGui.bFadeLine) {
+            alpha2 *= 1.0 * ((1.0 - velStopEnergy) * 0.5 + 0.5);
+            alpha3 *= 1.0 * ((1.0 - velStopEnergy) * 0.5 + 0.5);
+        } else {
+            alpha2 *= 1.0;
+            alpha3 *= 1.0;
+        }
 
         if (i == 1) {
             verts.push(p1x, p1y);
@@ -349,7 +354,7 @@ readTextFile('metadata-converted.json', function(code, data) {
 var Gui = function() {
     this.lineColor = 0xffffff;
     this.lineOpacity = 0.7;
-    this.lineWidth = 3;
+    this.lineWidth = 2;
     this.lineShadow = true;
     this.shadowWidth = 5;
     this.lineFadePower = 7.0;
@@ -358,6 +363,8 @@ var Gui = function() {
     this.velSmoothRate = 0.8;
     this.angleSmoothRate = 0.505;
     this.centerSmoothRate = 0.95;
+    this.bgOpacity = 0.92;
+
     this.scale = 0.7385;
     this.variableSizes = true;
     this.reverseSwipe = true;
@@ -370,6 +377,7 @@ var Gui = function() {
 
     this.bTint = true;
     this.tintAmount = 0.8;
+    this.bFadeLine = true;
 
 };
 var myGui = new Gui();
@@ -463,9 +471,12 @@ window.onload = function() {
         f2.add(myGui, 'variableSizes');
         f2.add(myGui, 'reverseSwipe');
 
-        var f3 = gui.addFolder('shading');
+        var f3 = gui.addFolder('look');
         f3.add(myGui, 'bTint');
         f3.add(myGui, 'tintAmount', 0, 1);
+        f3.add(myGui, 'bgOpacity', 0, 1);
+        f3.add(myGui, 'bFadeLine');
+
 
         // var f4 = gui.addFolder('resolution');
         // f4.add(myGui, 'imageResolution', 0, 1).step(1);
@@ -1257,7 +1268,7 @@ function animate() {
     }
 
     if (bBgShowing == true) {
-        bgAlpha = bgAlpha * 0.99 + 0.01 * 1.0;
+        bgAlpha = bgAlpha * 0.99 + 0.01 * myGui.bgOpacity;
     } else {
         bgAlpha = bgAlpha * 0.97 + 0.02 * 0.0;
     }
@@ -1407,6 +1418,9 @@ function animate() {
         }
 
         //velStopEnergy = 0.0;
+
+        //console.log(velStopEnergy);
+
 
         if (ptsSmooth.length > 0) {
 
