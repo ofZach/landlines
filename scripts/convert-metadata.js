@@ -11,16 +11,26 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package app
+var fs = require('fs');
+var jsonFile = process.argv[2];
 
-import (
-	"net/http"
-)
-
-
-func init() {
-	www := http.FileServer(http.Dir("www"))
-	
-	http.Handle("/", www)
+// Input file
+if (jsonFile == undefined) {
+	console.error('Please specify a JSON file to parse!');
+	process.exit(1);
+}
+if (!fs.existsSync(jsonFile)) {
+	console.error('Specified file does not exist!', jsonFile);
+	process.exit(2);
 }
 
+var output = {};
+var data = require('./' + jsonFile);
+for (var i = 0; i < data.length; i++) {
+	var id = data[i].id;
+	delete data[i].id;
+	output[id] = data[i];
+	
+}
+
+fs.writeFileSync('metadata-converted.json', JSON.stringify(output));

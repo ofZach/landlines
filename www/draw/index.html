@@ -54,11 +54,6 @@
             color: white;
             font-weight: 700;
             letter-spacing: 0.5pt;
-            text-decoration: none;
-        }
-        #info a:hover {
-            color: white;
-            text-decoration: underline;
         }
         #info-attribution {
             text-transform: none;
@@ -112,14 +107,14 @@
     </div>
 
   
-    <script src="js/vptree.js"></script>
+    <script src="js/third_party/vptree.js"></script>
     <script src="js/dataInfo.js"></script>       <!-- heavy ! -->
-    <script src="/js/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
+    <script src="/js/third_party/Smooth-0.1.7.js"></script>  <!-- smoothy dmoney -->
     <script src="js/Polyline.js"></script>  <!-- smoothy dmoney -->
     <script src="js/Utils.js"></script>  <!-- smoothy dmoney -->
-    <script src="js/smallestEnclosingCircle.js"></script>  <!-- circle -->
-    <script src="/js/dat.gui.min.js"></script>
-    <script src="/js/pixi.min.js"></script>
+    <script src="js/third_party/smallestEnclosingCircle.js"></script>  <!-- circle -->
+    <script src="/js/third_party/dat.gui.min.js"></script>
+    <script src="/js/third_party/pixi.min.js"></script>
     
     <script>
 
@@ -134,18 +129,32 @@ window.mobilecheck = function() {
 
 
 
+    /*
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    * 
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    * 
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
 
-        var canvas = document.createElement("canvas");
-        // Get WebGLRenderingContext from canvas element.
-        var gl = canvas.getContext("webgl") ||
-            canvas.getContext("experimental-webgl");
-        // Report the result.
-        if (gl && gl instanceof WebGLRenderingContext) {;
-        } else {
-            
-            document.getElementById("progress").innerHTML = "This app requires</br>webGL" 
-            //window.location.href = "http://www.google.com";
-        }
+
+    var canvas = document.createElement("canvas");
+    // Get WebGLRenderingContext from canvas element.
+    var gl = canvas.getContext("webgl") ||
+        canvas.getContext("experimental-webgl");
+    // Report the result.
+    if (gl && gl instanceof WebGLRenderingContext) {;
+    } else {
+        
+        document.getElementById("progress").innerHTML = "This app requires</br>webGL" 
+        //window.location.href = "http://www.google.com";
+    }
 
 
     var Stats = function () {

@@ -53,8 +53,31 @@
     }
 
     #error {
-        font-size: 20pt;
-        font-weight: 700;
+        font-size: 12pt;
+        color: #E22;
+        background-color: #000;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-top: -28px;
+        display:none;
+    }
+    #error a {
+        color: #E22;
+        text-decoration: underline;
+    }
+    #video_container {
+        width: 100%;
+        position: relative;
+        display:none;
+    }
+    #video {
+        margin-left: 50%;
+        left: -240px;
+        position: relative;
+        width: 480px;
     }
 
 
@@ -83,6 +106,7 @@
         margin: 0 auto;
         padding-top: 10px;
         margin-bottom: 10px;
+        visibility:hidden;
     }
     .app-button:last-child {
         margin-bottom: 50px;
@@ -212,7 +236,7 @@
         padding-top: 10px;
     }
 
-    #draw-container, #drag-container {
+    #draw-container, #swipe-container {
         display: none;
         visibility: hidden;
         position: absolute;
@@ -245,21 +269,21 @@
             <p id="header">Land Lines</p>
             <p id="desc">Start with a line, let the planet complete the picture.</p>
             <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
-            <a class="app-button" href="javascript:void(0)" id="button-drag">Drag</a>
-            <p id="video"></p>
+            <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
             <p id="error"></p>
+            <div id="video_container"><div id="video"></div></div>
         </div>
 
     </div>
 
     <iframe id="draw-container"></iframe>
-    <iframe id="drag-container"></iframe>
+    <iframe id="swipe-container"></iframe>
 
     <!-- <div id="gradient-top"></div>
     <div id="gradient-bottom"></div> -->
 
     <div id="nav">
-        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-drag">Drag</a>
+        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
     </div>
 
     <div id="privacy-terms">
@@ -298,10 +322,24 @@
     </div>
     <a href="javascript:void(0)"><img id="overlay-close" src="img/close@2x.png" width="25"></img></a>
 
-    <script src="/js/dat.gui.min.js"></script>
+    <script src="/js/third_party/dat.gui.min.js"></script>
     <script src="/draw/js/Utils.js"></script>
     <script>
 
+    /*
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    * 
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    * 
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
+    
     var activeApp = '';
 
     var gui;
@@ -323,6 +361,16 @@
     // if url had #webglError, let's change the display
     var isWebglErrorMode = (window.location.hash.indexOf('webglError') == -1) ? false : true;
 
+    // Do check to see if WebGL is supported
+    var canvas = document.createElement("canvas");
+    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    // Report the result.
+    if (gl && gl instanceof WebGLRenderingContext) {;
+    } else {
+        isWebglErrorMode = false;
+    }
+
+
     window.onload = function() {
         
         if (isDevMode) {
@@ -338,18 +386,22 @@
             var accelBetaDivSlider = gui.add(myGui, 'accelBetaDiv', 0.01, 10.0);
        
             bgSlider.onChange(updateBgOpacity);
+
         }
 
         if (isWebglErrorMode){
             document.getElementById('button-draw').style.display = 'none';
-            document.getElementById('button-drag').style.display = 'none';
+            document.getElementById('button-swipe').style.display = 'none';
 
-            document.getElementById('video').innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/cufd7XnG4A8" frameborder="0" allowfullscreen></iframe>';
+            document.getElementById('video').innerHTML = '<iframe width="480" height="270" src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>';
 
             document.getElementById('error').innerHTML = 'Sorry this experience requires WebGL.<br>Please try again using <a href="https://www.google.com/chrome/">Google Chrome</a>';
 
-
-
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('video_container').style.display = 'block';
+        } else {
+            document.getElementById('button-draw').style.visibility = 'visible';
+            document.getElementById('button-swipe').style.visibility = 'visible';
         }
         
         window.requestAnimationFrame(animate);
@@ -432,6 +484,7 @@
     }
 
     function showAboutOverlay() {
+        ga('send', 'event', 'About', 'about', '');
         show(document.getElementById('about-overlay'));
         document.getElementById('overlay-close').style.display = 'block';
     }
@@ -466,11 +519,11 @@
         loadApp();
 
         var draw = document.getElementById('draw-container');
-        var drag = document.getElementById('drag-container');
+        var swipe = document.getElementById('swipe-container');
         
-        hide(drag);
+        hide(swipe);
         show(draw);
-        drag.src = '';
+        swipe.src = '';
         setTimeout(function(){ draw.src = '/draw' + window.location.hash; }, 250);
 
         draw.onload = function() {
@@ -478,30 +531,30 @@
         }
 
         document.getElementById('nav-draw').className = 'active';
-        document.getElementById('nav-drag').className = 'inactive';
+        document.getElementById('nav-swipe').className = 'inactive';
     }
 
-    function loadAppDrag() {
+    function loadAppSwipe() {
         // Skip if this app is already active
-        if (activeApp == 'drag') return;
-        activeApp = 'drag';
+        if (activeApp == 'swipe') return;
+        activeApp = 'swipe';
 
         loadApp();
         
         var draw = document.getElementById('draw-container');
-        var drag = document.getElementById('drag-container');
+        var swipe = document.getElementById('swipe-container');
         
         hide(draw);
-        show(drag);
+        show(swipe);
         draw.src = '';
-        setTimeout(function(){ drag.src = '/drag' + window.location.hash; }, 250);
+        setTimeout(function(){ swipe.src = '/drag' + window.location.hash; }, 250);
 
         draw.onload = function() {
-            drag.style.visibility = 'visible';
+            swipe.style.visibility = 'visible';
         }
 
         document.getElementById('nav-draw').className = 'inactive';
-        document.getElementById('nav-drag').className = 'active';
+        document.getElementById('nav-swipe').className = 'active';
     }
 
     // Layout / background image stuff
@@ -594,9 +647,9 @@
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
 
     document.getElementById('button-draw').onclick = loadAppDraw;
-    document.getElementById('button-drag').onclick = loadAppDrag;
+    document.getElementById('button-swipe').onclick = loadAppSwipe;
     document.getElementById('nav-draw').onclick = loadAppDraw;
-    document.getElementById('nav-drag').onclick = loadAppDrag;
+    document.getElementById('nav-swipe').onclick = loadAppSwipe;
 
     // document.getElementById('app').onmousemove = updateBackgroundMouse;
     document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
