@@ -681,7 +681,7 @@
             // if the apps or about page aren't on screen
             if (document.getElementById('about-overlay').style.display === 'none' &&
                 document.getElementById('draw-container').style.display === 'none' &&
-                document.getElementById('swipe-container').style.display === 'none'
+                document.getElementById('drag-container').style.display === 'none'
                 ){
 
                 var context = canvas.getContext('2d');
@@ -768,7 +768,7 @@
 
     document.getElementById('about-overlay').style.display = 'none';
     document.getElementById('draw-container').style.display = 'none';
-    document.getElementById('swipe-container').style.display = 'none';
+    document.getElementById('drag-container').style.display = 'none';
 
     document.getElementById('overlay-open').onclick = showAboutOverlay;
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
