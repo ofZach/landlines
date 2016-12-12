@@ -550,6 +550,9 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, (webGLData.indices.length - 4) * 2);
             renderer.stencilManager.popStencil(graphics, webGLData, renderer);
         } else {
+
+
+           
             webGLData = webGL.data[i];
             shader = renderer.shaderManager.primitiveShader;
             renderer.shaderManager.setShader(shader); //activatePrimitiveShader();
@@ -573,10 +576,15 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             // }
 
             if (webGLData.drawNativeLine) {
+                
+                if (webGLData.points.length == 0) return;
+
+
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, webGLData.points.length / 6);
             } else {
                 // set the index buffer!
+                console.log("hi");
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, webGLData.indexBuffer);
                 gl.drawElements(gl.TRIANGLE_STRIP, webGLData.indices.length, gl.UNSIGNED_SHORT, 0);
             }
@@ -1076,7 +1084,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         var weight = 0;
         for (var i = 0; i < a.length/2; i++){
             var pct = i / (a.length/2);
-            var scalar = 1.0+ (1.0 - Math.sin(pct * Math.PI))*10000.0;
+            var scalar = 1.0+ (1.0 - Math.sin(pct * Math.PI))*1.0;
             distance +=    scalar * Math.sqrt((b[i*2] - a[i*2])*(b[i*2] - a[i*2]) +  (b[i*2+1] - a[i*2+1])*(b[i*2+1] - a[i*2+1])); 
             weight += scalar;
         }
@@ -1583,8 +1591,13 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             return;
         }
 
-
         bAmDrawing = false;
+
+        if (pts.length < 10){
+            return;
+        }
+
+        
 
 
         var match = {} ;  //getBestMatch(pts);
@@ -1891,13 +1904,17 @@ var counter = 0;
                 console.log("un matched");
                 drawing.lineStyle(1.0, myGui.lineColor, myGui.lineOpacity);
 
-                for (var i = 0; i < pts.length/2; i++){
+                if (pts.length >= 4){
+                    for (var i = 0; i < pts.length/2; i++){
                     if (i == 0){
                         drawing.moveTo(pts[0], pts[1]);
                     } else {
                         drawing.lineTo(pts[i*2], pts[i*2+1]);
                     }
+                    }
+                    console.log("draw");   
                 }
+               
 
                 // Fade out old images to halfway
                 for (var i = 0; i < sprites.length; i++) {
@@ -1990,6 +2007,7 @@ var counter = 0;
                 circleOffsetY = animatingCircle.y - drawnCircle.y;
                 circleScaleRatio = animatingCircle.r / drawnCircle.r;
 
+                if (pts.length >= 4)
                 for (var i = 0; i < pts.length/2; i++){
 
                     // this is how we could scale and change the offset of the line.  zooming in to center seems good
@@ -2124,7 +2142,10 @@ var counter = 0;
         //offscreen.rotation = Math.random(-1,1);
         //console.log(drawingAlpha);
         renderTexture.clear();
+        
         renderTexture.render(drawing);
+
+
         offscreen.alpha = drawingAlpha * pulseOpacity;
 
        

@@ -39,6 +39,7 @@
         height: 100%;
         background-position: center;
         background-size: cover;
+        -webkit-transform: translateZ(0);
     }
 
     #header {
@@ -80,6 +81,18 @@
         width: 480px;
     }
 
+    #bg{
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        top: 0px;
+        position: fixed;
+        //background-image: url("http://a4.mzstatic.com/eu/r30/Purple3/v4/3d/57/31/3d573127-31d5-e4a9-9f8e-986c4616d467/icon175x175.jpeg");
+        -webkit-transform: translateZ(-3);
+        pointer-events: none;
+        will-change: transform; // creates a new paint layer
+        z-index: -10;
+    }
 
     #desc {
         margin-top: 0;
@@ -263,7 +276,10 @@
 
 <body>
 
+   
+    <canvas id="bg">Your browser doesn't support canvas</canvas>
     <div id="landing-container">
+       
 
         <div id="app">
             <p id="header">Land Lines</p>
@@ -410,6 +426,9 @@
 
     updateBackgroundSize();
 
+
+    var imageObj = new Image();
+
     // Load a random background image
     // Store the backgrounds in localStorag as they're used, and use those values
     // to filter out the bgList to only use new ones
@@ -442,8 +461,16 @@
     var bgFile = 'url("/img/landing/' + filteredList[bgIndex] + '.jpg")';
     usedBGs.push(filteredList[bgIndex]);
     localStorage.setItem('usedBGs', usedBGs.join(','));
+    
+
+    var canvas = document.getElementById('bg');
+    var context = canvas.getContext('2d');
+    imageObj.onload = function() {
+        context.drawImage(imageObj, 0, 0);
+    };
+    imageObj.src = "/img/landing/" + filteredList[bgIndex] + ".jpg";
     // document.getElementById('app').style.backgroundImage = bgFile;
-    document.getElementById('landing-container').style.backgroundImage = bgFile;
+    //document.getElementById('bg').style.backgroundImage = bgFile;
 
     function show(elem) {
         elem.style.opacity = 0;
@@ -502,6 +529,7 @@
         // hide(document.getElementById('gradient-top'));
         // hide(document.getElementById('gradient-bottom'));
         hide(document.getElementById('landing-container'));
+        hide(document.getElementById('bg'));
         hide(document.getElementById('chrome-experiment'));
         hide(document.getElementById('privacy-terms'));
 
@@ -605,8 +633,23 @@
 
     }
 
+    //var container
+    var lastX = 0;
+    var lastY = 0;
+
+    var lastTime = 0;
+
     function animate(timestamp) {
-        //console.log("animate " + timestamp);
+
+        //
+
+
+       // console.log(document.getElementById('bg'));
+       
+
+        //console.log("animate " + 1000.0 / (timestamp-lastTime));
+
+        lastTime = timestamp;
         //console.log(this.style);
         if (myGui !== 'undefined'){
             xPos = (1-myGui.motionSmooth) * xPos + myGui.motionSmooth * xPosTarget;
@@ -627,21 +670,103 @@
             }
         }
         
-        document.getElementById('landing-container').style.backgroundPositionX = xPos + '%';
-        document.getElementById('landing-container').style.backgroundPositionY = yPos + '%';
         
+        var canvas = document.getElementById('bg');
+
+        // if the BG hasn't faded out
+        if (canvas.style.display !== 'none'){
+
+            // if the apps or about page aren't on screen
+            if (document.getElementById('about-overlay').style.display === 'none' &&
+                document.getElementById('draw-container').style.display === 'none' &&
+                document.getElementById('swipe-container').style.display === 'none'
+                ){
+
+                var context = canvas.getContext('2d');
+                // adjust canvas size if need be (is )
+                // if (context.canvas.width !== window.innerWidth ||
+                //     context.canvas.height !== window.innerHeight){
+                //      //console.log("resize");
+                //      context.canvas.width  = window.innerWidth;
+                //      context.canvas.height = window.innerHeight;
+                // }
+                var scalew =  context.canvas.width / imageObj.width;
+                var scaleh = context.canvas.height / imageObj.height ;
+                var maxScale = Math.max(scalew, scaleh);
+
+               
+                var midX = context.canvas.width * (1.0 - (xPos/100));
+                var midY = context.canvas.height * (1.0 - (yPos/100));;
+
+                //console.log("midY " + midY  +  " " + midY/(context.canvas.height*0.5));
+
+                var yscale = 1.0 + Math.abs(1.0 - midY/(context.canvas.height*0.5));
+                var xscale = 1.0 + Math.abs(1.0 - midX/(context.canvas.width*0.5));
+                var scale = Math.max(Math.max(yscale, xscale), 1.25);
+                var w = maxScale * imageObj.width * scale;
+                var h = maxScale * imageObj.height * scale;
+                
+
+
+                context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+                //console.log(xPos + " " + yPos);
+            }
+            
+        }
+
         window.requestAnimationFrame(animate);
   
     }
 
     function updateBackgroundSize() {
-        if (window.innerHeight > window.innerWidth)
-            // document.getElementById('app').style.backgroundSize = 'auto 150%'
-        document.getElementById('landing-container').style.backgroundSize = 'auto 150%'
-        else
-            // document.getElementById('app').style.backgroundSize = '150%'
-        document.getElementById('landing-container').style.backgroundSize = '150%'
+
+
+       
+        var canvas = document.getElementById('bg');       
+        var context = canvas.getContext('2d');
+
+
+
+         if (context.canvas.width !== window.innerWidth ||
+            context.canvas.height !== window.innerHeight){
+             //console.log("resize");
+             context.canvas.width  = window.innerWidth;
+             context.canvas.height = window.innerHeight;
+        }
+
+        console.log(imageObj);
+        console.log(typeof(imageObj));
+        
+        if (typeof(imageObj) !== 'undefined'){
+            if (imageObj.width !== 'undefined'){
+
+                var scalew =  context.canvas.width / imageObj.width;
+                var scaleh = context.canvas.height / imageObj.height ;
+                var maxScale = Math.max(scalew, scaleh);
+
+                var w = maxScale * imageObj.width * 1.07;
+                var h = maxScale * imageObj.height * 1.07;
+                var midX = context.canvas.width * (1.0 - (xPos/100));
+                var midY = context.canvas.height * (1.0 - (yPos/100));;
+                
+                
+                context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+            }
+        }
+
+      
+
+        // if (window.innerHeight > window.innerWidth)
+        //     // document.getElementById('app').style.backgroundSize = 'auto 150%'
+        // document.getElementById('bg').style.backgroundSize = 'auto 150%'
+        // else
+        //     // document.getElementById('app').style.backgroundSize = '150%'
+        // document.getElementById('bg').style.backgroundSize = '150%'
     }
+
+    document.getElementById('about-overlay').style.display = 'none';
+    document.getElementById('draw-container').style.display = 'none';
+    document.getElementById('swipe-container').style.display = 'none';
 
     document.getElementById('overlay-open').onclick = showAboutOverlay;
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
