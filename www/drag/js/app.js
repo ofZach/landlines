@@ -1,16 +1,16 @@
 /*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-* 
-*     http://www.apache.org/licenses/LICENSE-2.0
-* 
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 window.mobilecheck = function() {
     var check = false;
@@ -370,19 +370,19 @@ var Gui = function() {
     this.lineOpacity = 0.7;
     this.lineWidth = 2;
     this.lineShadow = true;
-    this.shadowWidth = 5;
-    this.lineFadePower = 7.0;
-    this.shadowAlpha = 0.27;
-    this.dragSpeed = 0.674;
-    this.velSmoothRate = 0.8;
+    this.shadowWidth = 8.2;
+    this.lineFadePower = 5.0;
+    this.shadowAlpha = 0.53;
+    this.dragSpeed = 0.90;
+    this.velSmoothRate = 0.9;
     this.angleSmoothRate = 0.505;
     this.centerSmoothRate = 0.95;
-    this.bgOpacity = 0.92;
+    this.bgOpacity = 0.63;
 
     this.scale = 0.7385;
     this.variableSizes = true;
     this.reverseSwipe = true;
-    this.maxZoom = 0.55;
+    this.maxZoom = 0.41;
     this.explode = function() {;
     };
 
@@ -390,7 +390,7 @@ var Gui = function() {
     //this.resScale = 1.0;
 
     this.bTint = true;
-    this.tintAmount = 0.8;
+    this.tintAmount = 0.1;
     this.bFadeLine = true;
 
 };
@@ -1022,7 +1022,7 @@ function addLineFromCache(lineToAddFromCache) {
 
     var scaleMe = 1.0;
     if (myGui.variableSizes === true) {
-        scaleMe = 1.0 + (Math.random() - 0.5);
+        scaleMe = 0.75 + (Math.random() * 0.5);
     }
 
     for (var i = 0; i < dataobj[lineToAdd]['angleDiffs'].length; i++) {

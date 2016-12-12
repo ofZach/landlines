@@ -859,9 +859,8 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         this.lineOpacity = 0.75;
         this.lineWidth = 2;
         //this.lineShadow = false;
-        this.shadowWidth = 10;
-        this.shadowAlpha = 0.4;
-
+        this.shadowWidth = 11;
+        this.shadowAlpha = 0.6;
         this.lineSpeedSplit = 10;
 
         this.pulseWidth = 2;
@@ -874,13 +873,13 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         this.scaleSpeed = 0.021;
         this.translateSpeed = 0.01;
         this.showEnclosingCircle = false;
-        this.maxImageScale = 1.01;
+        this.maxImageScale = 1.3;
 
-        this.imgFadeInSpeed = 0.01;
+        this.imgFadeInSpeed = 0.04;
         this.imgFadeOutSpeed = 0.01;
         this.bgFadeInSpeed = 0.01;
         this.bgFadeOutSpeed = 0.01;
-        this.bgOpacity = 0.75;
+        this.bgOpacity = 0.46;
         this.metadata = 0.15;
 
         this.badMatchThreshold = 0.25;
@@ -1084,7 +1083,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
         var weight = 0;
         for (var i = 0; i < a.length/2; i++){
             var pct = i / (a.length/2);
-            var scalar = 1.0+ (1.0 - Math.sin(pct * Math.PI))*1.0;
+            var scalar = 1.0+ (1.0 - Math.sin(pct * Math.PI))*100.0;
             distance +=    scalar * Math.sqrt((b[i*2] - a[i*2])*(b[i*2] - a[i*2]) +  (b[i*2+1] - a[i*2+1])*(b[i*2+1] - a[i*2+1])); 
             weight += scalar;
         }
@@ -1901,7 +1900,7 @@ var counter = 0;
             //dropShadowFilter.distance = myGui.shadowDistance;
 
             if (!matched){
-                console.log("un matched");
+                //console.log("un matched");
                 drawing.lineStyle(1.0, myGui.lineColor, myGui.lineOpacity);
 
                 if (pts.length >= 4){
@@ -1912,7 +1911,7 @@ var counter = 0;
                         drawing.lineTo(pts[i*2], pts[i*2+1]);
                     }
                     }
-                    console.log("draw");   
+                    //console.log("draw");   
                 }
                
 
