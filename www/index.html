@@ -32,14 +32,26 @@
         text-decoration: none;
     }
 
+
+/*#nav-drag:after{
+    //background-color:#fff;
+    //content:"";
+    padding: 50px;  
+    position: absolute;
+    left: -25px;
+    top: -25px;
+} */
+
+
     #landing-container {
+
+        position: absolute;
         display: table;
-        table-layout: fixed;
+        //table-layout: fixed;
         width: 100%;
         height: 100%;
-        background-position: center;
-        background-size: cover;
-        -webkit-transform: translateZ(0);
+
+        z-index: 0;
     }
 
     #header {
@@ -86,12 +98,12 @@
         right: 0px;
         bottom: 0px;
         top: 0px;
-        position: fixed;
+        position: absolute;
         //background-image: url("http://a4.mzstatic.com/eu/r30/Purple3/v4/3d/57/31/3d573127-31d5-e4a9-9f8e-986c4616d467/icon175x175.jpeg");
         -webkit-transform: translateZ(-3);
         pointer-events: none;
         will-change: transform; // creates a new paint layer
-        z-index: -10;
+        z-index: -40;
     }
 
     #desc {
@@ -299,7 +311,7 @@
     <div id="gradient-bottom"></div> -->
 
     <div id="nav">
-        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-drag">Drag</a>
+        <a href="javascript:void(0)" id="nav-draw" class="bigger" >Draw</a> | <a href="javascript:void(0)" id="nav-drag" >Drag</a>
     </div>
 
     <div id="privacy-terms">
