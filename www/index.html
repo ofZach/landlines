@@ -629,8 +629,8 @@
         // elem.style.backgroundPositionY = (50 + (e.beta/2)) + '%';
 
         if (myGui !== 'undefined'){
-            xPosTarget = (50 + (e.gamma/myGui.accelGammaDiv));
-            yPosTarget = (50 + (e.beta/myGui.accelBetaDiv));
+            xPosTarget = (50 + 2*(e.gamma/myGui.accelGammaDiv));
+            yPosTarget = (50 + -(e.beta/myGui.accelBetaDiv));
         }
 
     }
