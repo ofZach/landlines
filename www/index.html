@@ -249,7 +249,7 @@
         padding-top: 10px;
     }
 
-    #draw-container, #swipe-container {
+    #draw-container, #drag-container {
         display: none;
         visibility: hidden;
         position: absolute;
@@ -285,7 +285,7 @@
             <p id="header">Land Lines</p>
             <p id="desc">Start with a line, let the planet complete the picture.</p>
             <a class="app-button" href="javascript:void(0)" id="button-draw">Draw</a>
-            <a class="app-button" href="javascript:void(0)" id="button-swipe">Swipe</a>
+            <a class="app-button" href="javascript:void(0)" id="button-drag">Drag</a>
             <p id="error"></p>
             <div id="video_container"><div id="video"></div></div>
         </div>
@@ -293,13 +293,13 @@
     </div>
 
     <iframe id="draw-container"></iframe>
-    <iframe id="swipe-container"></iframe>
+    <iframe id="drag-container"></iframe>
 
     <!-- <div id="gradient-top"></div>
     <div id="gradient-bottom"></div> -->
 
     <div id="nav">
-        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-swipe">Swipe</a>
+        <a href="javascript:void(0)" id="nav-draw">Draw</a> | <a href="javascript:void(0)" id="nav-drag">Drag</a>
     </div>
 
     <div id="privacy-terms">
@@ -317,22 +317,24 @@
         <div id="about-overlay-content">
 
             <div class="about-heading"><span>About</span></div>
-            <p>Land Lines is an experiment that lets anyone explore incredible satellite images from Google Maps. This project is collaborations between artist Zach Lieberman and some friends from Google. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+            <p>Satellite images provide a wealth of visual data from which we can visualize in interesting ways. Land Lines is an experiment that lets you explore real satellite imagery through commonly used mobile gestures–drawing and dragging. “Draw” finds satellite images that match each line you draw. “Drag” creates a line of connected rivers, coastlines, and roads that moves in the direction of where you drag. The result is a unique and unexpected approach to exploring our planet.</p>
+
+            <p><i>Land Lines</i> was made in collaboration by Zach Lieberman and the Data Arts Team. Learn more about how the project was created in this technical case study or browse the open-source code on GitHub.</p>
 
             <div class="about-heading"><span>Technology</span></div>
-            <p>Land Lines is a a lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+            <p>This project was made possible by the following:</p>
+
+            <div class="about-tech">Line Detection</div>
+            <p>We used a combination of <a href="http://opencv.org/" target="links">OpenCV</a> <a href="http://docs.opencv.org/3.1.0/d0/da5/tutorial_ximgproc_prediction.html" target="links">Structured Forests</a> and <a href="http://imagej.net/Ridge_Detection" target="links">ImageJ’s Ridge Detection</a> to analyze and identify dominant visual lines in the initial dataset of 50,000+ images. This helped cull down the original dataset to just a few thousand of the most interesting images.</p>
+
+            <div class="about-tech">Fast Data Lookup</div>
+            <p>For the draw application, we stored the resulting line data in a <a href="https://github.com/fpirsch/vptree.js" target="links">vantage point tree</a>. This data structure made it fast and easy to find matches among the entire dataset in real time client side.</p>
 
             <div class="about-tech">WebGL</div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+            <p>We used <a href="http://www.pixijs.com/" target="links">Pixi.js</a>, an open source library built upon the WebGL API, to rapidly draw and redraw 2D WebGL graphics without hindering performance. </p>
 
-            <div class="about-tech">App Engine</div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
-
-            <div class="about-tech">Technology</div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
-
-            <div class="about-tech">Technology</div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do elusmod tempor incididunt ut labore et dolore magma aliqua.</p>
+            <div class="about-tech">Google Cloud Storage</div>
+            <p>All images are stored as WebM files on <a href="https://cloud.google.com/storage/https://cloud.google.com/storage/" target="links">Google Cloud Storage</a> for big, fast storage location, meaning images are served quickly to users worldwide. </p>
 
         </div>
     </div>
@@ -407,7 +409,7 @@
 
         if (isWebglErrorMode){
             document.getElementById('button-draw').style.display = 'none';
-            document.getElementById('button-swipe').style.display = 'none';
+            document.getElementById('button-drag').style.display = 'none';
 
             document.getElementById('video').innerHTML = '<iframe width="480" height="270" src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>';
 
@@ -417,7 +419,7 @@
             document.getElementById('video_container').style.display = 'block';
         } else {
             document.getElementById('button-draw').style.visibility = 'visible';
-            document.getElementById('button-swipe').style.visibility = 'visible';
+            document.getElementById('button-drag').style.visibility = 'visible';
         }
         
         window.requestAnimationFrame(animate);
@@ -547,11 +549,11 @@
         loadApp();
 
         var draw = document.getElementById('draw-container');
-        var swipe = document.getElementById('swipe-container');
+        var drag = document.getElementById('drag-container');
         
-        hide(swipe);
+        hide(drag);
         show(draw);
-        swipe.src = '';
+        drag.src = '';
         setTimeout(function(){ draw.src = '/draw' + window.location.hash; }, 250);
 
         draw.onload = function() {
@@ -559,30 +561,30 @@
         }
 
         document.getElementById('nav-draw').className = 'active';
-        document.getElementById('nav-swipe').className = 'inactive';
+        document.getElementById('nav-drag').className = 'inactive';
     }
 
-    function loadAppSwipe() {
+    function loadAppDrag() {
         // Skip if this app is already active
-        if (activeApp == 'swipe') return;
-        activeApp = 'swipe';
+        if (activeApp == 'drag') return;
+        activeApp = 'drag';
 
         loadApp();
         
         var draw = document.getElementById('draw-container');
-        var swipe = document.getElementById('swipe-container');
+        var drag = document.getElementById('drag-container');
         
         hide(draw);
-        show(swipe);
+        show(drag);
         draw.src = '';
-        setTimeout(function(){ swipe.src = '/drag' + window.location.hash; }, 250);
+        setTimeout(function(){ drag.src = '/drag' + window.location.hash; }, 250);
 
         draw.onload = function() {
-            swipe.style.visibility = 'visible';
+            drag.style.visibility = 'visible';
         }
 
         document.getElementById('nav-draw').className = 'inactive';
-        document.getElementById('nav-swipe').className = 'active';
+        document.getElementById('nav-drag').className = 'active';
     }
 
     // Layout / background image stuff
@@ -772,9 +774,9 @@
     document.getElementById('overlay-close').onclick = hideAboutOverlay;
 
     document.getElementById('button-draw').onclick = loadAppDraw;
-    document.getElementById('button-swipe').onclick = loadAppSwipe;
+    document.getElementById('button-drag').onclick = loadAppDrag;
     document.getElementById('nav-draw').onclick = loadAppDraw;
-    document.getElementById('nav-swipe').onclick = loadAppSwipe;
+    document.getElementById('nav-drag').onclick = loadAppDrag;
 
     // document.getElementById('app').onmousemove = updateBackgroundMouse;
     document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
