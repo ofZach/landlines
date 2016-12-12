@@ -382,7 +382,7 @@ var Gui = function() {
     this.scale = 0.7385;
     this.variableSizes = true;
     this.reverseSwipe = true;
-    this.maxZoom = 0.41;
+    this.maxZoom = 0.55;
     this.explode = function() {;
     };
 
