@@ -58,12 +58,14 @@
      #nav-draw {
         z-index: 5;
         padding-bottom:20px !important;
+        margin-top: -20px;
         
     }
 
      #nav-drag {
         z-index: 5;
         padding-bottom:20px !important;
+        margin-top: -20px;
 
     }
 
@@ -114,7 +116,6 @@
         top: 0px;
         position: absolute;
         //background-image: url("http://a4.mzstatic.com/eu/r30/Purple3/v4/3d/57/31/3d573127-31d5-e4a9-9f8e-986c4616d467/icon175x175.jpeg");
-        -webkit-transform: translateZ(-3);
         pointer-events: none;
         will-change: transform; // creates a new paint layer
         z-index: -40;
@@ -182,6 +183,10 @@
         border-bottom: 1px solid;
     }
 
+
+
+
+
     /*#gradient-top, #gradient-bottom {
         position: absolute;
         width: 100%;
@@ -230,11 +235,13 @@
         top: 0px;
         right: 0px;
         color: white;
-        padding-right: 1em;
-        padding-top: 1em;
+        padding: 1em;
+        //padding-top: 1em;
+
     }
     #overlay-close {
         display: none;
+        padding: 1em;
     }
 
     #about-overlay {
