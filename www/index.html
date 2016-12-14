@@ -124,19 +124,20 @@
     }
 
     #error {
-        font-size: 12pt;
-        color: #E22;
-        background-color: #000;
-        max-width: 480px;
+        font-size: 16pt;
+        color: #f9ff49;
+       /* background-color: #000;*/
+       /* max-width: 480px;*/
         margin-left: auto;
         margin-right: auto;
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: 0px;
+        padding-bottom: 0px;
         margin-top: -28px;
+        margin-bottom: -28px;
         display:none;
     }
     #error a {
-        color: #E22;
+        color: #f9ff49;
         text-decoration: underline;
     }
     #video_container {
@@ -145,10 +146,14 @@
         display:none;
     }
     #video {
-        margin-left: 50%;
+/*        margin-left: 50%;
         left: -240px;
         position: relative;
-        width: 480px;
+        width: 480px;*/
+        width: 60%;
+        min-width: 300px ;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     #bg{
@@ -419,7 +424,7 @@
     <div id="about-overlay">
         <div id="about-overlay-content">
 
-            <div class="about-video"><iframe src="https://www.youtube.com/embed/cufd7XnG4A8" frameborder="0" allowfullscreen></iframe></div>
+            <div class="about-video"><iframe src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe></div>
 
             <div class="about-heading"><span>About</span></div>
             <p>Satellite images provide a wealth of visual data from which we can visualize in interesting ways. Land Lines is an experiment that lets you explore real satellite imagery through commonly used mobile gestures–drawing and dragging. “Draw” finds satellite images that match each line you draw. “Drag” creates a line of connected rivers, coastlines, and roads that moves in the direction of where you drag. The result is a unique and unexpected approach to exploring our planet.</p>
@@ -518,9 +523,9 @@
             document.getElementById('button-draw').style.display = 'none';
             document.getElementById('button-drag').style.display = 'none';
 
-            document.getElementById('video').innerHTML = '<iframe width="480" height="270" src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>';
+            document.getElementById('video').innerHTML = ' <div class="about-video"><iframe src="https://www.youtube.com/embed/cufd7XnG4A8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe></div>';
 
-            document.getElementById('error').innerHTML = 'Sorry this experience requires WebGL.<br>Please try again using <a href="https://www.google.com/chrome/">Google Chrome</a>';
+            document.getElementById('error').innerHTML = 'This experience requires WebGL.<BR>Please try again using a WebGL enabled browser, such as <a href="https://www.google.com/chrome/">Google Chrome</a>';
 
             document.getElementById('error').style.display = 'block';
             document.getElementById('video_container').style.display = 'block';
