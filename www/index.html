@@ -34,15 +34,60 @@
     }
 
 
-/*#nav-drag:after{
-    //background-color:#fff;
-    //content:"";
-    padding: 50px;  
-    position: absolute;
-    left: -25px;
-    top: -25px;
-} */
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        /*background:#f9f9f9;*/
+    }
 
+    li {
+        float: left;
+        padding-left:2px;
+        /*padding:5px 5px 10px 5px;*/
+    }
+
+    li a {
+       /* background-color:#ff9900;*/
+        display: block;
+        color: white;
+        text-align: center;
+        padding:10px;
+        text-decoration: none;
+    }
+
+    li a div {
+        /*background-color:#ff0099;*/
+        padding: 10px;
+    }
+
+    li a .inactive  {
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        border-color: rgba(255, 255, 255, 0);
+        border-bottom: none;
+    }
+
+    li a .active  {
+        border-bottom: 1px solid;
+    }
+
+    li a .inactive:hover  {
+        color: rgba(255, 255, 255, 1.0);
+    }
+
+    input,
+    textarea,
+    button,
+    select,
+    a {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+
+    /* Change the link color to #111 (black) on hover */
+    /*li a .active:hover {
+        background-color: #9900ff;
+    }*/
 
     #landing-container {
 
@@ -151,38 +196,34 @@
 
     #nav {
         display: none;
-        position: absolute;
+        /*position: absolute;
         top: 15px;
-        left: 10px;
+        left: 10px;*/
         font-size: 15pt;
         font-weight: bold;
         letter-spacing: 0.75pt;
     }
     #nav a {
-        margin-left: 5px;
+        /*margin-left: 5px;
         margin-right: 5px;
         cursor: default;
         text-decoration: none;
-        padding-bottom: 4px;
+        padding-bottom: 4px;*/
     }
     #nav a:hover {
-        color: white;
+        /*color: white;
         border-color: white;
-        border-bottom: 1px solid;
+        border-bottom: 1px solid;*/
     }
     #nav .inactive {
-        color: rgba(255, 255, 255, 0.7);
+        /*color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
         border-color: rgba(255, 255, 255, 0);
-        border-bottom: none;
+        border-bottom: none;*/
     }
     #nav .active {
-        border-bottom: 1px solid;
+        /*border-bottom: 1px solid;*/
     }
-
-
-
-
 
     /*#gradient-top, #gradient-bottom {
         position: absolute;
@@ -329,7 +370,11 @@
     <div id="gradient-bottom"></div> -->
 
     <div id="nav">
-        <a href="javascript:void(0)" id="nav-draw" class="bigger" >Draw</a> | <a href="javascript:void(0)" id="nav-drag" >Drag</a>
+        <ul>
+            <li><a href="javascript:void(0)" id="nav-draw"><div id="nav-draw-inner">Draw</div></a></li>
+            <li><a href="javascript:void(0)" id="nav-drag"><div id="nav-drag-inner">Drag</div></a></li>
+        </ul>
+        <!-- <a href="javascript:void(0)" id="nav-draw" class="bigger" >Draw</a> | <a href="javascript:void(0)" id="nav-drag" >Drag</a> -->
     </div>
 
     <div id="privacy-terms">
@@ -590,6 +635,8 @@
             draw.style.visibility = 'visible';
         }
 
+        document.getElementById('nav-draw-inner').className = 'active';
+        document.getElementById('nav-drag-inner').className = 'inactive';
         document.getElementById('nav-draw').className = 'active';
         document.getElementById('nav-drag').className = 'inactive';
     }
@@ -613,6 +660,8 @@
             drag.style.visibility = 'visible';
         }
 
+        document.getElementById('nav-draw-inner').className = 'inactive';
+        document.getElementById('nav-drag-inner').className = 'active';
         document.getElementById('nav-draw').className = 'inactive';
         document.getElementById('nav-drag').className = 'active';
     }
