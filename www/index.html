@@ -256,15 +256,38 @@
     #about-overlay-content {
         width: 60%;
         margin: 0 auto;
+        color: #c9c9c9;
         font-size: 10pt;
         letter-spacing: 0.5pt;
         line-height: 2.3;
+    }
+    #about-overlay-content a {
+        color: white;
+        text-decoration: underline;
     }
     #about-overlay-content p {
         margin: 8px 0;
         font-family: 'Roboto', sans-serif;
     }
+    .about-video {
+        position: relative;
+        margin-top: 50px;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+    }
+    .about-video iframe,
+    .about-video object,
+    .about-video embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
     .about-heading {
+        color: white;
         font-size: 14pt;
         letter-spacing: 1pt;
         text-transform: uppercase;
@@ -346,6 +369,8 @@
     <div id="about-overlay">
         <div id="about-overlay-content">
 
+            <div class="about-video"><iframe src="https://www.youtube.com/embed/cufd7XnG4A8" frameborder="0" allowfullscreen></iframe></div>
+
             <div class="about-heading"><span>About</span></div>
             <p>Satellite images provide a wealth of visual data from which we can visualize in interesting ways. Land Lines is an experiment that lets you explore real satellite imagery through commonly used mobile gestures–drawing and dragging. “Draw” finds satellite images that match each line you draw. “Drag” creates a line of connected rivers, coastlines, and roads that moves in the direction of where you drag. The result is a unique and unexpected approach to exploring our planet.</p>
 
@@ -365,6 +390,8 @@
 
             <div class="about-tech">Google Cloud Storage</div>
             <p>All images are stored as WebM files on <a href="https://cloud.google.com/storage/https://cloud.google.com/storage/" target="links">Google Cloud Storage</a> for big, fast storage location, meaning images are served quickly to users worldwide. </p>
+
+            <p>Made by <a href="http://thesystemis.com/" target="links">Zach Lieberman</a>, <a href="http://mattfelsen.com/" target="links">Matt Felsen</a>, and the Data Arts Team. Special thanks to <a href="http://localprojects.net/" target="links">Local Projects</a>.</p>
 
         </div>
     </div>
@@ -753,13 +780,13 @@
     function updateBackgroundSize() {
 
 
-       
+
         var canvas = document.getElementById('bg');       
         var context = canvas.getContext('2d');
 
 
 
-         if (context.canvas.width !== window.innerWidth ||
+        if (context.canvas.width !== window.innerWidth ||
             context.canvas.height !== window.innerHeight){
              //console.log("resize");
              context.canvas.width  = window.innerWidth;
