@@ -1,27 +1,20 @@
 # Land Lines
 
-## Development
+This is the source code for [Land Lines](http://lines.chromeexperiments.com). For more information about how the project came together, check out the [case study](https://developers.google.com/web/showcase/2016/land-lines).
 
-### Environment setup
 
-Install the [Go SDK for App Engine](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go)
+## To run the site locally
 
-### Running for Local testing
+You can run a simple python server to host the site
 
-To run the server locally, run the command:
+`pushd www; python -m SimpleHTTPServer; popd`
 
-`make dev`
+which you can reach at `http://localhost:8000/`
 
-This will start a local server on `localhost:8080`
 
-### Deployment
 
-To deploy to our master server on App Engine ([zach-navigator.appspot.com](zach-navigator.appspot.com)), run the command:
+## Deployment to App Engine
 
-`make deploy`
-
-To deploy a specific version, run the command
-
-`make deploy-[versionName]`
-
-For example, running the command `make deploy-jeff2` would create a new server version that could be accessed at jeff2-dot-zach-navigator.appspot.com
+1. Install the [Go SDK for App Engine](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go)
+2. Update Makefile with your AppID
+3. run the command: `make deploy`
