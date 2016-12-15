@@ -23,6 +23,8 @@ window.mobilecheck = function() {
  */
 
 
+// check webgl : 
+
 var canvas = document.createElement("canvas");
 // Get WebGLRenderingContext from canvas element.
 var gl = canvas.getContext("webgl") ||
@@ -30,11 +32,12 @@ var gl = canvas.getContext("webgl") ||
 // Report the result.
 if (gl && gl instanceof WebGLRenderingContext) {;
 } else {
-
     document.getElementById("progress").innerHTML = "This app requires</br>webGL"
         //window.location.href = "http://www.google.com";
 }
 
+
+// this is for checking frame rate (stats.js)
 
 var Stats = function() {
 
@@ -213,7 +216,11 @@ Stats.Panel = function(name, fg, bg) {
 var isMobile = mobilecheck();
 
 //------------------------------------------------------------------------------------------------------
-// webgl line helper
+//  webgl line helper
+//
+//  this is because the pixi js line renderer needs <3 
+// 
+
 var utils = PIXI.utils;
 
 PIXI.GraphicsRenderer.prototype.buildPolygonLine = PIXI.GraphicsRenderer.prototype.buildLine;
@@ -236,11 +243,7 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
 
     if (points.length === 0) return;
 
-    //console.log("hi" + Math.random(0,1));
-
-
     var verts = webGLData.points;
-    //var indices = webGLData.indices;
     var length = points.length / 2;
     var indexCount = points.length;
     var indexStart = verts.length / 6;
@@ -252,8 +255,6 @@ PIXI.GraphicsRenderer.prototype.buildNativeLine = function(graphicsData, webGLDa
     var g = color[1] * alpha;
     var b = color[2] * alpha;
 
-    //var wth = 1.0 / drawScaleAmt;
-    //console.log(wth);
     var p1x, p1y, p2x, p2y;
 
     if (true) {
@@ -444,11 +445,6 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             shader = renderer.shaderManager.primitiveShader;
             renderer.shaderManager.setShader(shader); //activatePrimitiveShader();
 
-            // if (Math.random(0,1) > 0.99){
-            //     console.log(renderer);
-            // }
-            //renderer.bindTexture(texTest.texture, 0);
-            //gl.bindTexture(gl.TEXTURE_2D, texTest.texture.baseTexture._glTextures[gl.id]);
             gl.uniformMatrix3fv(shader.uniforms.translationMatrix._location, false, graphics.worldTransform.toArray(true));
             gl.uniformMatrix3fv(shader.uniforms.projectionMatrix._location, false, renderer.currentRenderTarget.projectionMatrix.toArray(true));
             gl.uniform3fv(shader.uniforms.tint._location, utils.hex2rgb(graphics.tint));
@@ -456,11 +452,7 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
             gl.bindBuffer(gl.ARRAY_BUFFER, webGLData.buffer);
             gl.vertexAttribPointer(shader.attributes.aVertexPosition, 2, gl.FLOAT, false, 4 * 6, 0);
             gl.vertexAttribPointer(shader.attributes.aColor, 4, gl.FLOAT, false, 4 * 6, 2 * 4);
-            //gl.vertexAttribPointer(shader.attributes.aTextureCoord, 2, gl.FLOAT, false, 4 * 8, 6*4);
 
-            // if (Math.random() > 0.99){
-            //     console.log(texTest.texture.baseTexture._glTextures[gl.id]);
-            // }
 
             if (webGLData.drawNativeLine) {
 
@@ -483,50 +475,35 @@ PIXI.GraphicsRenderer.prototype.render = function(graphics) {
 //------------------------------------------------------------------------------------------------------
 
 
+// this is for loading the data 
 
 var loadedJson = false;
 
-// Object.defineProperty(Array.prototype, 'chunkArray', {
-// value: function(chunkSize) {
-//     var array=this;
-//     return [].concat.apply([],
-//         array.map(function(elem,i) {
-//             return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
-//         })
-//     );
-// }
-// });
+// keep track of what we've requested and where it's at: 
 
 requestStatus = {};
 
 function updateProgress(evt) {
-    if (evt.lengthComputable) { //evt.loaded the bytes browser receive
-        //evt.total the total bytes seted by the header
-        //
+    if (evt.lengthComputable) {
+
         var percentComplete = (evt.loaded / evt.total);
-        // console.log("PROGRESS " + percentComplete);
-        // console.log(evt.srcElement.responseURL);
-        // console.log(requestStatus);
-        // console.log("??");
+
         // check each element for progess: 
         for (var key in requestStatus) {
             if (evt.srcElement.responseURL.includes(key)) {
-                //console.log("match!");
                 requestStatus[key] = percentComplete;
             }
-            //console.log(key);
-            //console.log(requestStatus[key]);
         }
 
     } else {
-        console.log("don't know length");
+        //console.log("don't know length");
     }
 }
 
 // Generic function to load a file asynchronously
 function readTextFile(file, callback) {
     loadedJson = false;
-    //console.log('Requesting file:', file);
+
     var rawFile = new XMLHttpRequest();
 
     requestStatus[file] = 0.0;
@@ -545,12 +522,14 @@ function readTextFile(file, callback) {
             }
 
 
-            console.log(rawFile);
+            //console.log(rawFile);
             callback(rawFile.status, rawFile.responseText);
         }
     }
     rawFile.send(null);
 }
+
+
 
 // Update DOM elements with new data
 function updateMetadata(data) {
@@ -559,10 +538,6 @@ function updateMetadata(data) {
     var attribution = data['attribution'] || '';
     var url = data['url'] || '';
 
-    // document.getElementById('info-line1').innerText = line1;
-    // document.getElementById('info-line2').innerText = line2;
-    // document.getElementById('info-line1').href = url;
-    // document.getElementById('info-line2').href = url;
     document.getElementById('info-link').innerHTML = line1 + "<br>" + line2;
     document.getElementById('info-link').href = url;
     document.getElementById('info-attribution').innerText = attribution;
@@ -570,22 +545,8 @@ function updateMetadata(data) {
     ga('send', 'event', 'Draw', 'draw', data['line-1'] + ' ' + data['line-2']);
 }
 
-// Callback from AJAX request to get metadata for matched line
-// function updateMetadataCallback(code, data) {
-//     if (code == 200) {
-//         matchedMetadata = JSON.parse(data);
-//     }
-// };
 
-
-
-//----------------------------------------------------------
-// vpTree creation 
-// from cached files: 
-
-// todo: completely remove dataObj
-// completely load polylines throught this
-// 
+// this is vp related 
 
 var vptrees = [];
 var polylines = [];
@@ -611,10 +572,7 @@ function parseLoadVPTree() {
         return;
     }
 
-
-    // otherwise let's do some work (accross frames) 
-
-    //console.log("doing some work! " +  dataParseCount + " of " + jsonData["polylines"].length);
+    // otherwise let's do some work (across frames) 
 
     var start = dataParseCount;
     var end = Math.min(jsonData["polylines"].length, dataParseCount + 50);
@@ -899,42 +857,6 @@ function returnNestedArray(simpleArray) {
 }
 
 
-// // make data obj non relative: 
-// console.log('Make data obj non relative:', 'starting...');
-
-// for (i = 0; i < dataobj.length; i++){
-//     var x = 0;
-//     var y = 0;
-//     for (j = 0; j < dataobj[i].length/2; j++){
-//          x += dataobj[i][j*2];                      // converted to be relative...
-//          y += dataobj[i][j*2+1];
-//          dataobj[i][j*2] = x;
-//          dataobj[i][j*2+1] = y; 
-//     }
-// }
-
-// console.log('Make data obj non relative:', 'finished.');
-
-
-// convert to Polyline :) 
-// var polylines = [];
-// for (i = 0; i < dataobj.length; i++){
-//     ptsTemp = [];
-//     var x = 0;
-//     var y = 0;
-//     for (j = 0; j < dataobj[i].length/2; j++){
-//         x = dataobj[i][j*2];                      // converted to be relative...
-//         y = dataobj[i][j*2+1];
-//         pt = [];
-//         pt[0] = x;
-//         pt[1] = y;
-//         ptsTemp.push(pt);
-//     }
-//     var p = createPolyline(ptsTemp);
-//     p.init(true);
-//     polylines.push(p);
-//     //console.log(p);
-// }
 
 function dist(a, b) {
     return Utils.cosDistance(a.vector, b.vector);
@@ -970,68 +892,6 @@ function distNormalizedLines(vector1, vector2) {
     return distance / weight;
 }
 
-//--------------------------------------------
-// split data obj 5 ways and make 5 vantage point trees. 
-// to test if checking against 5 is as good as checking one...
-//console.log("making a split to test multi vp trees");
-
-// var vptrees = [];
-// var polylinesSplit = [];
-// var amount = Math.ceil(dataobj.length / 5);
-// var dataObjChunked = dataobj.chunkArray(amount);
-// for (var i = 0; i < dataObjChunked.length; i++){
-
-//     var polylinesTemp = [];
-//     for (j = 0; j < dataObjChunked[i].length; j++){
-//         ptsTemp = [];
-//         var x = 0;
-//         var y = 0;
-//         for (k = 0; k < dataObjChunked[i][j].length/2; k++){
-//             x = dataObjChunked[i][j][k*2];                      // converted to be relative...
-//             y = dataObjChunked[i][j][k*2+1];
-//             pt = [];
-//             pt[0] = x;
-//             pt[1] = y;
-//             ptsTemp.push(pt);
-//         }
-//         var p = createPolyline(ptsTemp);
-//         p.init(true);
-//         polylinesTemp.push(p);
-//         //console.log(p);
-//     }
-//     polylinesSplit.push(polylinesTemp);
-//     vptrees.push(VPTreeFactory.build(polylinesSplit[i], dist));
-// }
-
-// this was used to export the data
-// for (var i = 0; i < dataObjChunked.length; i++){
-//      var objectForExport = {};
-//      objectForExport["polylines"] =  dataObjChunked[i];
-//      objectForExport["vpTree"] = vptrees[i].stringify();
-//      console.log(JSON.stringify(objectForExport));
-// }
-//  console.log(JSON.stringify(dataObjChunked[0]));
-//  console.log(JSON.stringify(polylinesSplit[0]));
-
-
-
-//console.log("done making a split to test multi vp trees " + vptrees.length);
-
-//--------------------------------------------
-
-// var vptree;
-// //vptree = VPTreeFactory.build(polylines, dist);
-
-// //var newType = {};
-
-
-// console.log('VPTreeFactory.load():', 'starting...');
-// vptree = VPTreeFactory.load(polylines,dist,vpTreeString );
-
-// //console.log(vptree.stringify());
-
-// console.log('VPTreeFactory.load():', 'finished.');
-//console.log(dataobj[0]);
 
 var drawing = false;
 var pts = [];
@@ -1107,90 +967,15 @@ document.body.addEventListener('touchmove', function(e) {
     e.preventDefault();
 });
 
-// resize things: 
 
-//     var scene = new PIXI.DisplayObjectContainer();
+// user drawing: 
 
-// /**
-//  * Add listeners for canvas scaling with window resizing and device rotation
-//  */
-// var resize = function () {
-//         window.addEventListener('resize', rendererResize);
-//         window.addEventListener('deviceOrientation', rendererResize);
-// };
-
-// /**
-//  * Calculate the current window size and set the canvas renderer size accordingly
-//  */
-// var rendererResize = function () {
-//     alert("hi");
-//     var width = window.innerWidth,
-//         height = window.innerHeight,
-//         targetScale;
-
-//     /**
-//      * Set the canvas size and display size
-//      * This way we can support retina graphics and make our game really crisp
-//      */
-//     canvas.width = width * window.devicePixelRatio;
-//     canvas.height = height * window.devicePixelRatio;
-//     canvas.style.width = width + 'px';
-//     canvas.style.height = height + 'px';
-
-//     /**
-//      * Resize the PIXI renderer
-//      * Let PIXI know that we changed the size of the viewport
-//      */
-//     renderer().resize(canvas.width, canvas.height);
-
-//     /**
-//      * Scale the canvas horizontally and vertically keeping in mind the screen estate we have
-//      * at our disposal. This keeps the relative game dimensions in place.
-//      */
-//      if (height / targetHeight < width / targetWidth) {
-//          scene.scale.x = scene.scale.y = height / targetHeight;
-//      } else {
-//          scene.scale.x = scene.scale.y = width / targetWidth;
-//      }
-
-//     /**
-//      * Some sugar
-//      * Set the x horizontal center point of the canvas after resizing.
-//      * This should be used for engines which calculate object position from anchor 0.5/0.5
-//      */
-//     scene.pivot.y = -(width * (1 / scene.scale.y) / 2) * window.devicePixelRatio;
-//     scene.pivot.x = -(width * (1 / scene.scale.x) / 2) * window.devicePixelRatio;
-
-//     /**
-//      * iOS likes to scroll when rotating - fix that 
-//      */
-//     window.scrollTo(0, 0);
-// };
-
-
-// // After the renderer and scene are initialized just call
-// resize();
-
-
-
-// Handle device orientation change
-// window.addEventListener("deviceorientation", function() {
-//     console.log('orientation change!', window.orientation);
-//     console.log('inner width:', window.innerWidth, 'inner height:', window.innerHeight);
-//     renderer.resize(window.innerWidth, window.innerHeight);
-//     stage.hitArea = new PIXI.Rectangle(window.innerWidth, window.innerHeight);
-// }, true);
-
-// Line drawn out by the user
-//var dropShadowFilter = new PIXI.filters.DropShadowFilter();
 var drawing = new PIXI.Graphics();
+
 //stage.addChild(drawing);
 drawing.position.x = 0;
 drawing.position.y = 0;
 
-// function updateLineShadow(val) {
-//     drawing.filters = val ? [ dropShadowFilter ] : null;
-// }
 
 var finishedLoading = false;
 
@@ -1205,7 +990,6 @@ var touchID;
 var firstTouch = true;
 stage.mousedown = stage.touchstart = function(moveData) {
 
-    console.log("mouseDown ");
     // Remove the instruction animation on first touch
     if (firstTouch) {
         firstTouch = false;
@@ -1224,7 +1008,6 @@ stage.mousedown = stage.touchstart = function(moveData) {
     }
 
 
-    //console.log(moveData.data.identifier);
     matched = false;
     bAmDrawing = true;
     linePulseCounter = 0;
@@ -1357,9 +1140,7 @@ function getBestMatch(ptsToTest) {
     p.init(true);
     p2.init(true);
     var resultsA; //= vptree.search(p, 1);
-    //console.log('resultsA:', resultsA[0]);
     var resultsB; // = vptree.search(p2, 1);
-    //console.log('resultsB:', resultsB[0]);
 
     if (vptrees.length == 0) {
         console.log("we are still loading data, returning");
@@ -1378,9 +1159,9 @@ function getBestMatch(ptsToTest) {
     for (var i = 0; i < vptrees.length; i++) {
 
         var multiResultsA = vptrees[i].search(p, 1);
-        console.log('multiResultsA:', multiResultsA[0]);
+        //console.log('multiResultsA:', multiResultsA[0]);
         var multiResultsB = vptrees[i].search(p2, 1);
-        console.log('multiResultsB:', multiResultsB[0]);
+        //console.log('multiResultsB:', multiResultsB[0]);
 
         if (i === 0) {
             resultsA = multiResultsA;
@@ -1413,11 +1194,6 @@ function getBestMatch(ptsToTest) {
     }
     whichOneB += minBindex;
 
-    console.log(minA + " " + minB + " " + whichOneA + " " + whichOneB);
-
-    console.log("overwriting original results");
-
-
     resultsA[0].i = whichOneA;
     resultsA[0].d = minA;
 
@@ -1429,10 +1205,7 @@ function getBestMatch(ptsToTest) {
         obj.result = resultsB;
 
         obj.flip = true;
-        //results = resultsB;
-        //pts.reverse();
-        // reverse pair of two
-        //console.log("FLIP");
+
         for (j = 0; j < ptsResampled.length / 2; j++) {
             ptsResampled[j * 2] = ptsTemp2[j][0];
             ptsResampled[j * 2 + 1] = ptsTemp2[j][1];
@@ -1481,10 +1254,10 @@ stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = 
     var d = 1.0;
 
     while (d > myGui.cutThreshold && countMatching < myGui.numMaxCuts) {
-        console.log(ptsCopy);
+        //console.log(ptsCopy);
         match = getBestMatch(ptsCopy);
         d = match.result[0].d;
-        console.log("attempt " + countMatching + " res " + d);
+        //console.log("attempt " + countMatching + " res " + d);
         countMatching++;
         var len = ptsCopy.length / 2;
         var toDel = Math.round(len * myGui.cutPct);
@@ -1527,32 +1300,25 @@ stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = 
 
     }
 
-    console.log("smallestDiff " + smallestDiff + " results d " + results[0].d);
+    //console.log("smallestDiff " + smallestDiff + " results d " + results[0].d);
 
     if (results[0].d > myGui.badMatchThreshold) {
         drawingAlphaTarget = 0.0; // fade out weird stuff 
     }
     // Pull ID from info obj, which actually stores IDs starting from 0
     var id = infoobj[results[0].i][0];
-    console.log("loading metadata for id " + id);
+    //console.log("loading metadata for id " + id);
     // Convert filename-based ID to "real" ID from spreadsheet
 
-    // older: 
-    // id = metadataIDList[id];
-    // console.log("metadataIDList length ! " + metadataIDList.length);
 
     id = metadataIDList[id].toString();
-    // readTextFile('metadata/' + id.substr(0,1) + '/' + id + '.json', updateMetadataCallback);
     matchedMetadata = metadata[id];
-
-
-    //console.log( "smallestDiff " + smallestDiff + " " + " bestAngle " + bestAngle );
 
     angleMatch = bestAngle;
     updateGraphics = true;
 
 
-    console.log('TextureCache:', PIXI.utils.TextureCache);
+    //console.log('TextureCache:', PIXI.utils.TextureCache);
 
     var random = Math.floor(Math.random() * 1000);
 
@@ -1577,40 +1343,23 @@ stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = 
         resolutionScale = 1800 / 1260;
     }
 
-    /*else {
-        if (myGui.loadFromCloud)
-            url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v1/full/';
-        else
-            url = '/';  
-
-        resolutionScale = 1.0; 
-    }*/
-
-
-    //https://storage.googleapis.com/navigator-media-usa/media/draw/v3/900/20.jpg
-
 
     PIXI.loader.reset();
 
-    console.log("loading num : " + infoobj[results[0].i][0]);
+    //console.log("loading num : " + infoobj[results[0].i][0]);
 
     var texture = PIXI.Texture.fromImage(url + '' + infoobj[results[0].i][0] + '.jpg');
     var sprite = new PIXI.Sprite(texture);
     sprite.alpha = 0;
 
     // Add the new Sprite to the stage
-    // Old Sprits will fade out, calculated in animate()
+    // Old Sprites will fade out, calculated in animate()
     sprites.push(sprite);
     stage.addChild(sprite);
 
     // Move drawn line on top of images
-    //stage.removeChild(drawing);
-    //stage.addChild(drawing);
-
-
     stage.removeChild(offscreen);
     stage.addChild(offscreen);
-
 
     // Positioning for matched image
     sprite.position.x = drawnCircle.x;
@@ -1647,10 +1396,8 @@ stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = 
     url = 'https://storage.googleapis.com/navigator-media-usa/media/draw/v3/';
     var bg = new PIXI.Sprite.fromImage(url + 'blurredImages/' + infoobj[results[0].i][0] + '.jpg');
     bg.alpha = 0;
-    // TODO Properly scale the background image to cover the background while maintaing
-    // its aspect ratio. For now just stretch to fill
-    // bg.width = renderer.view.width;
-    // bg.height = renderer.view.height;
+
+    // fill bg
 
     var aspectScreen = renderer.view.width / renderer.view.height;
     var aspectImage = 900 / 600;
@@ -1769,13 +1516,8 @@ function animate() {
         drawingAlpha = 0.98 * drawingAlpha + 0.02 * drawingAlphaTarget;
         //drawing.alpha = drawingAlpha;
 
-
-        //console.log(drawing);
-        //dropShadowFilter.blur = myGui.shadowBlur;
-        //dropShadowFilter.distance = myGui.shadowDistance;
-
         if (!matched) {
-            //console.log("un matched");
+
             drawing.lineStyle(1.0, myGui.lineColor, myGui.lineOpacity);
 
             if (pts.length >= 4) {
@@ -1786,7 +1528,7 @@ function animate() {
                         drawing.lineTo(pts[i * 2], pts[i * 2 + 1]);
                     }
                 }
-                //console.log("draw");   
+
             }
 
 
@@ -1812,7 +1554,7 @@ function animate() {
                 lastSprite.texture.baseTexture.hasLoaded) {
 
                 if (!textureHasLoaded && pulseComplete) {
-                    console.log('Texture just finished loading!');
+                    //console.log('Texture just finished loading!');
                     textureHasLoaded = true;
                     updateMetadata(matchedMetadata);
                     metadataTargetOpacity = 1;
@@ -2012,7 +1754,6 @@ function animate() {
     }
 
 
-    //offscreen.rotation = Math.random(-1,1);
     //console.log(drawingAlpha);
     renderTexture.clear();
 
