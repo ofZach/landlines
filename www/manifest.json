@@ -32,8 +32,8 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#425556",
-    "background_color": "#425556",
+    "theme_color": "#000000",
+    "background_color": "#000000",
     "start_url": "index.html",
     "display": "fullscreen", 
     "orientation": "portrait"
