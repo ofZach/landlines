@@ -45,11 +45,10 @@
 
     html, body {
         position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
         margin: 0;
         color: white;
     	background-color: black;
@@ -616,7 +615,8 @@
     var canvas = document.getElementById('bg');
     var context = canvas.getContext('2d');
     imageObj.onload = function() {
-        context.drawImage(imageObj, 0, 0);
+        
+        //context.drawImage(imageObj, 0, 0);
     };
     imageObj.src = "/img/landing/" + filteredList[bgIndex] + ".jpg";
     // document.getElementById('app').style.backgroundImage = bgFile;
@@ -790,8 +790,8 @@
     //var container
     var lastX = 0;
     var lastY = 0;
-
     var lastTime = 0;
+    var alpha = 0;
 
     function animate(timestamp) {
 
@@ -826,6 +826,7 @@
         
         
         var canvas = document.getElementById('bg');
+        
 
         // if the BG hasn't faded out
         if (canvas.style.display !== 'none'){
@@ -860,9 +861,18 @@
                 var w = maxScale * imageObj.width * scale;
                 var h = maxScale * imageObj.height * scale;
                 
+                alpha = 0.9 * alpha + 0.1 * 1.0;
 
-
-                context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+                if (alpha < 0.99){
+                    context.fillStyle="black";
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.globalAlpha = alpha;
+                    context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+                } else {
+                    context.globalAlpha = 1.0;
+                    context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+                }
+               
                 //console.log(xPos + " " + yPos);
             }
             
@@ -902,8 +912,10 @@
                 var midX = context.canvas.width * (1.0 - (xPos/100));
                 var midY = context.canvas.height * (1.0 - (yPos/100));;
                 
-                
-                context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
+                context.fillStyle="black";
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                //context.globalAlpha = 0.4;
+                //context.drawImage(imageObj, -w/2 + midX, -h/2+ midY,  w,h);
             }
         }
 
