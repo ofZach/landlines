@@ -44,7 +44,12 @@
     <style>
 
     html, body {
-        height: 100%;
+        position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    
         margin: 0;
         color: white;
     	background-color: black;
@@ -869,7 +874,9 @@
 
     function updateBackgroundSize() {
 
-
+        // twitter ios fix
+        // http://stackoverflow.com/questions/27379581/web-page-not-getting-100-height-in-twitter-app-on-ios-8
+        document.querySelector("html").style.height = window.innerHeight + "px" 
 
         var canvas = document.getElementById('bg');       
         var context = canvas.getContext('2d');
@@ -882,9 +889,6 @@
              context.canvas.width  = window.innerWidth;
              context.canvas.height = window.innerHeight;
         }
-
-        console.log(imageObj);
-        console.log(typeof(imageObj));
         
         if (typeof(imageObj) !== 'undefined'){
             if (imageObj.width !== 'undefined'){
