@@ -319,7 +319,7 @@ function readTextFile(file, callback) {
 }
 
 //usage:
-readTextFile("dataobj.json", function(code, data) {
+readTextFile("https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/drag/dataobj.json", function(code, data) {
 
     dataobj = JSON.parse(data);
 
@@ -358,7 +358,7 @@ function updateMetadata(data) {
 
 // Load metadata
 var metadata = {};
-readTextFile('metadata-converted.json', function(code, data) {
+readTextFile('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/drag/metadata-converted.json', function(code, data) {
     metadata = JSON.parse(data);
 });
 
