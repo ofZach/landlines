@@ -553,7 +553,8 @@ var polylines = [];
 var polylineCount = [];
 
 function loadNextTree() {
-    readTextFile('data/' + vpTreeToLoad + '.json', loadVPTree);
+
+    readTextFile('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/draw/data/' + vpTreeToLoad + '.json', loadVPTree);
 }
 
 Array.prototype.append = function(array) {
@@ -628,7 +629,7 @@ function loadVPTree(code, data) {
 }
 
 var vpTreeToLoad = 0;
-readTextFile('data/' + vpTreeToLoad + '.json', loadVPTree);
+readTextFile('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/draw/data/' + vpTreeToLoad + '.json', loadVPTree);
 
 //----------------------------------------------------------
 
@@ -638,10 +639,10 @@ readTextFile('data/' + vpTreeToLoad + '.json', loadVPTree);
 // from 0 - 1521 instead of using the id as the filename
 var metadata = {};
 var metadataIDList = [];
-readTextFile('metadata-id-list.json', function(code, data) {
+readTextFile('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/draw/metadata-id-list.json', function(code, data) {
     metadataIDList = JSON.parse(data);
 });
-readTextFile('metadata-converted.json', function(code, data) {
+readTextFile('https://storage.googleapis.com/navigator-media-usa/media/connected_line/v2/site/www/draw/metadata-converted.json', function(code, data) {
     metadata = JSON.parse(data);
 });
 
