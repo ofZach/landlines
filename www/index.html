@@ -230,10 +230,13 @@
 
     #nav {
         display: none;
-        /*position: absolute;
-        top: 15px;
-        left: 10px;*/
-        font-size: 15pt;
+
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        margin-left:-84px;
+
+        font-size: 21pt;
         font-weight: bold;
         letter-spacing: 0.75pt;
     }
@@ -296,6 +299,7 @@
     }
 
     #privacy-terms {
+        display:none;
         position: absolute;
         bottom: 0px;
         right: 0px;
@@ -308,8 +312,8 @@
 
     #overlay-open, #overlay-close {
         position: absolute;
-        top: 0px;
-        right: 0px;
+        bottom: 20px;
+        right: 30px;
         color: white;
         padding: 1em;
         //padding-top: 1em;
@@ -942,7 +946,7 @@
     document.getElementById('nav-drag').onclick = loadAppDrag;
 
     // document.getElementById('app').onmousemove = updateBackgroundMouse;
-    document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
+    //document.getElementById('landing-container').onmousemove = updateBackgroundMouse;
     window.addEventListener('resize', updateBackgroundSize, false);
     window.addEventListener('deviceorientation', updateBackgroundAccel, false);
     </script>
