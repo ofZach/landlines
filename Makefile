@@ -15,19 +15,19 @@ CURRENT_DIR=$(shell pwd)
 # Dependencies
 ###
 
-GOAPP_CMD = $(shell sh -c "which goapp || echo 'missing-goapp'")
+GCLOUD_CMD = $(shell sh -c "which gcloud || echo 'missing-gcloud'")
 
 missing-%:
 	$(error missing $*. please install)
 
-deps: $(GOAPP_CMD)
+deps: $(GCLOUD_CMD)
 
 ###
 # Development
 ###
 
-dev: deps $(GOAPP_CMD)
-	$(GOAPP_CMD) serve -host 0.0.0.0
+dev: deps $(GCLOUD_CMD)
+	$(GCLOUD_CMD) serve -host 0.0.0.0
 
 ###
 # AppEngine Deploy
@@ -36,8 +36,8 @@ dev: deps $(GOAPP_CMD)
 deploy: deploy-master
 
 # Deploy to AppEngine with version = %
-deploy-%: $(GOAPP_CMD) build
-	$(GOAPP_CMD) deploy -version $* -application $(APPID) $(APPYAML)
+deploy-%: $(GCLOUD_CMD) build
+	gcloud app deploy --version $* --no-promote --project $(APPID)
 	@echo "deployed to http://$*-dot-$(APPID).appspot.com/"
 
 # Deploy to AppEngine, with version = current git revision
