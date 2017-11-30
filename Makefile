@@ -16,6 +16,7 @@ CURRENT_DIR=$(shell pwd)
 ###
 
 GCLOUD_CMD = $(shell sh -c "which gcloud || echo 'missing-gcloud'")
+DEVAPP_CMD = $(shell sh -c "which dev_appserver.py || echo 'missing-dev_appserver.py'")
 
 missing-%:
 	$(error missing $*. please install)
@@ -26,8 +27,8 @@ deps: $(GCLOUD_CMD)
 # Development
 ###
 
-dev: deps $(GCLOUD_CMD)
-	$(GCLOUD_CMD) serve -host 0.0.0.0
+dev: deps $(DEVAPP_CMD)
+	$(DEVAPP_CMD) --host 0.0.0.0 .
 
 ###
 # AppEngine Deploy
